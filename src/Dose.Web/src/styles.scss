@@ -1,0 +1,99 @@
+/* Dose design tokens — derived from the approved identity reference (docs/assets/ux-identity-reference.png).
+   See docs/brand.md. Change colors here, not in components. */
+:root {
+  --dose-primary: #0061fa;
+  --dose-primary-600: #0052d6;
+  --dose-primary-50: #eaf2ff;
+  --dose-navy: #0b1f6b;
+  --dose-accent: #ffc30a;
+  --dose-success: #07b24c;
+  --dose-success-50: #e8f8ee;
+  --dose-whatsapp: #128c4a;
+
+  --dose-bg: #f5f8ff;
+  --dose-surface: #ffffff;
+  --dose-border: #dbe5f7;
+  --dose-text: #0f1b3d;
+  --dose-text-muted: #5b6785;
+
+  --dose-radius-sm: 10px;
+  --dose-radius: 16px;
+  --dose-radius-lg: 24px;
+  --dose-shadow: 0 6px 24px rgb(16 47 120 / 0.08);
+  --dose-font: 'Cairo', system-ui, 'Segoe UI', Tahoma, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--dose-bg);
+  color: var(--dose-text);
+  font-family: var(--dose-font);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--dose-primary);
+}
+
+.dose-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--dose-radius-sm);
+  font: 700 1rem var(--dose-font);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--dose-accent);
+    outline-offset: 2px;
+  }
+
+  &--primary {
+    background: var(--dose-primary);
+    color: #fff;
+
+    &:hover {
+      background: var(--dose-primary-600);
+    }
+  }
+
+  &--ghost {
+    background: var(--dose-primary-50);
+    color: var(--dose-primary);
+  }
+
+  &--whatsapp {
+    background: var(--dose-whatsapp);
+    color: #fff;
+  }
+
+  &[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.dose-card {
+  background: var(--dose-surface);
+  border: 1px solid var(--dose-border);
+  border-radius: var(--dose-radius);
+  box-shadow: var(--dose-shadow);
+}

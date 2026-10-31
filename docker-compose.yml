@@ -1,0 +1,15 @@
+# Local development dependencies only. Not for production.
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: dose-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DOSE_SQL_SA_PASSWORD:?set DOSE_SQL_SA_PASSWORD in .env}
+    ports:
+      - "1433:1433"
+    volumes:
+      - dose-sql-data:/var/opt/mssql
+
+volumes:
+  dose-sql-data:

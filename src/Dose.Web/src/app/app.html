@@ -1,0 +1,22 @@
+<header class="bar">
+  <div class="bar__inner">
+    <a class="home-link" routerLink="/"><dose-logo /></a>
+    <nav aria-label="روابط رئيسية">
+      <a routerLink="/open-groups">جلسات جماعية</a>
+      <a routerLink="/request-session">اطلب جلسة</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>
+
+<footer class="foot">
+  <div class="foot__inner">
+    <p>Dose دروس — معاك في كل خطوة.</p>
+    @if (publicSettings.whatsAppLink(); as link) {
+      <a class="dose-btn dose-btn--whatsapp" [href]="link" target="_blank" rel="noopener">تواصل معانا على واتساب</a>
+    }
+  </div>
+</footer>
