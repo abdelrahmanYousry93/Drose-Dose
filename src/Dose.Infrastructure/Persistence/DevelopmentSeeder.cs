@@ -94,7 +94,7 @@ public static class DevelopmentSeeder
             Name = "SAMPLE — درس واحد جماعي (كل المراحل)", ServiceTypeId = oneLesson.Id, Mode = SessionMode.Group,
             EffectiveFromUtc = nowUtc.AddDays(-1), Policy = PricingPolicy.TargetTierWithTopUp,
         };
-        var groupVersion = new PricingPlanVersion { PlanId = groupPlan.Id, VersionNo = 1, PrivatePrice = 150m };
+        var groupVersion = new PricingPlanVersion { PlanId = groupPlan.Id, VersionNo = 1, PrivatePrice = 150m, IsLocked = true };
         var tierSmall = new PricingTier { VersionId = groupVersion.Id, NameAr = "جروب صغير (2–4)", MinParticipants = 2, MaxParticipants = 4, PricePerStudent = 120m, SortOrder = 1 };
         var tierMedium = new PricingTier { VersionId = groupVersion.Id, NameAr = "جروب متوسط (5–9)", MinParticipants = 5, MaxParticipants = 9, PricePerStudent = 100m, SortOrder = 2 };
         var tierLarge = new PricingTier { VersionId = groupVersion.Id, NameAr = "جروب كبير (10–15)", MinParticipants = 10, MaxParticipants = 15, PricePerStudent = 80m, SortOrder = 3 };
@@ -106,7 +106,7 @@ public static class DevelopmentSeeder
             Name = "SAMPLE — درس واحد خاص (كل المراحل)", ServiceTypeId = oneLesson.Id, Mode = SessionMode.Private,
             EffectiveFromUtc = nowUtc.AddDays(-1),
         };
-        var privateVersion = new PricingPlanVersion { PlanId = privatePlan.Id, VersionNo = 1, PrivatePrice = 150m };
+        var privateVersion = new PricingPlanVersion { PlanId = privatePlan.Id, VersionNo = 1, PrivatePrice = 150m, IsLocked = true };
         privatePlan.Versions.Add(privateVersion);
         db.PricingPlans.AddRange(groupPlan, privatePlan);
 

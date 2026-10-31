@@ -69,7 +69,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         var service = await db.ServiceTypes.FirstAsync(s => s.Code == "one_lesson");
         var teacher = await db.Teachers.FirstAsync();
         var plan = await db.PricingPlans.Include(p => p.Versions).ThenInclude(v => v.Tiers)
-            .FirstAsync(p => p.Mode == mode);
+            .FirstAsync(p => p.Mode == mode && p.Name.StartsWith("SAMPLE"));
         var version = plan.Versions.Single();
         PricingTier? tier = mode == SessionMode.Group ? version.Tiers.Single(t => t.NameAr == tierName) : null;
 

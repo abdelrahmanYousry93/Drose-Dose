@@ -69,18 +69,18 @@ public static class TierRules
         var ordered = tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants).ToList();
         foreach (var t in ordered)
         {
-            if (t.MinParticipants < 1) errors.Add($"Tier '{t.NameAr}': minimum must be at least 1.");
-            if (t.MaxParticipants < t.MinParticipants) errors.Add($"Tier '{t.NameAr}': maximum is below minimum.");
-            if (t.PricePerStudent <= 0) errors.Add($"Tier '{t.NameAr}': price must be positive.");
+            if (t.MinParticipants < 1) errors.Add($"الشريحة '{t.NameAr}': أقل عدد لازم يكون 1 على الأقل.");
+            if (t.MaxParticipants < t.MinParticipants) errors.Add($"الشريحة '{t.NameAr}': أكبر عدد أقل من أقل عدد.");
+            if (t.PricePerStudent <= 0) errors.Add($"الشريحة '{t.NameAr}': السعر لازم يكون أكبر من صفر.");
         }
         for (var i = 1; i < ordered.Count; i++)
         {
             var prev = ordered[i - 1];
             var cur = ordered[i];
             if (cur.MinParticipants <= prev.MaxParticipants)
-                errors.Add($"Tiers '{prev.NameAr}' and '{cur.NameAr}' overlap.");
+                errors.Add($"الشريحتين '{prev.NameAr}' و'{cur.NameAr}' متداخلين.");
             else if (cur.MinParticipants > prev.MaxParticipants + 1)
-                errors.Add($"Gap between tiers '{prev.NameAr}' and '{cur.NameAr}' ({prev.MaxParticipants + 1}–{cur.MinParticipants - 1} participants).");
+                errors.Add($"فيه فجوة بين '{prev.NameAr}' و'{cur.NameAr}' (من {prev.MaxParticipants + 1} لـ {cur.MinParticipants - 1} طلاب).");
         }
         return errors;
     }
@@ -103,7 +103,7 @@ public static class GroupPricing
     {
         var tiers = version.Tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants).ToList();
         if (tiers.Count == 0)
-            throw new DomainException(PricingErrors.InvalidTiers, "Group pricing requires at least one tier.");
+            throw new DomainException(PricingErrors.InvalidTiers, "التسعير الجماعي محتاج شريحة واحدة على الأقل.");
 
         var match = tiers.FirstOrDefault(t => count >= t.MinParticipants && count <= t.MaxParticipants);
         if (match is not null) return match.PricePerStudent;

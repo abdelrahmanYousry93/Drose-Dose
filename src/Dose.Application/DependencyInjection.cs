@@ -18,6 +18,9 @@ public static class DependencyInjection
         services.AddScoped<SessionQueries>();
         services.AddScoped<BookingService>();
         services.AddScoped<PaymentReviewService>();
+        services.AddScoped<AdminCatalogService>();
+        services.AddScoped<AdminPricingService>();
+        services.AddScoped<AdminSessionService>();
         return services;
     }
 }

@@ -1,3 +1,4 @@
+using Dose.Application.Administration;
 using Dose.Domain.Bookings;
 using Dose.Domain.Common;
 using Dose.Domain.Pricing;
@@ -16,15 +17,18 @@ public sealed class DomainExceptionHandler(IProblemDetailsService problems, ILog
         var status = ex.Code switch
         {
             BookingErrors.NotFound or BookingErrors.SessionNotFound or "payment.proof_not_found" or "payment.method_not_found"
+                or AdminErrors.NotFound
                 => StatusCodes.Status404NotFound,
+            AdminErrors.Conflict => StatusCodes.Status409Conflict,
+            PricingErrors.NotConfigured or PricingErrors.Ambiguous => StatusCodes.Status422UnprocessableEntity,
             BookingErrors.SessionFull or BookingErrors.SessionClosed or BookingErrors.Duplicate or BookingErrors.Expired
                 or BookingErrors.InvalidState or BookingErrors.PriceChanged or BookingErrors.JoinNotAvailable
                 => StatusCodes.Status409Conflict,
-            PricingErrors.NotConfigured or PricingErrors.Ambiguous or PricingErrors.TierNotFound or "payment.file_missing"
+            PricingErrors.TierNotFound or "payment.file_missing"
                 => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status400BadRequest,
         };
-        if (status >= 500) log.LogError(ex, "Configuration error {Code}", ex.Code);
+        if (status >= 500 || status == 422) log.LogWarning(ex, "Configuration error {Code}", ex.Code);
 
         http.Response.StatusCode = status;
         return await problems.TryWriteAsync(new ProblemDetailsContext

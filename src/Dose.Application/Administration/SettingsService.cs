@@ -15,6 +15,7 @@ public static class SettingKeys
     public const string JoinOpensMinutesBeforeStart = "session.join_opens_minutes_before_start";
     public const string TierDecisionHoursBeforeStart = "group.tier_decision_hours_before_start";
     public const string MaxProofFileSizeKb = "payment.max_proof_file_size_kb";
+    public const string PrivateBookingDeadlineHours = "session.private_booking_deadline_hours";
 
     public static readonly IReadOnlyDictionary<string, (string Default, string DescriptionAr)> Definitions =
         new Dictionary<string, (string, string)>
@@ -25,6 +26,7 @@ public static class SettingKeys
             [JoinOpensMinutesBeforeStart] = ("15", "زر دخول الجلسة يتفعّل قبل الميعاد بكام دقيقة"),
             [TierDecisionHoursBeforeStart] = ("24", "موعد حسم اكتمال الجروب قبل الجلسة (بالساعات)"),
             [MaxProofFileSizeKb] = ("5120", "أقصى حجم لصورة الإيصال (كيلوبايت)"),
+            [PrivateBookingDeadlineHours] = ("2", "آخر ميعاد لحجز الجلسة الفردية قبل بدايتها (بالساعات)"),
         };
 }
 
@@ -34,7 +36,8 @@ public sealed record BookingSettings(
     int ProofResubmitMinutes,
     int JoinOpensMinutesBeforeStart,
     int TierDecisionHoursBeforeStart,
-    int MaxProofFileSizeKb);
+    int MaxProofFileSizeKb,
+    int PrivateBookingDeadlineHours);
 
 public sealed class SettingsService(IDoseDbContext db, IClock clock)
 {
@@ -48,7 +51,8 @@ public sealed class SettingsService(IDoseDbContext db, IClock clock)
             I(SettingKeys.ProofResubmitMinutes),
             I(SettingKeys.JoinOpensMinutesBeforeStart),
             I(SettingKeys.TierDecisionHoursBeforeStart),
-            I(SettingKeys.MaxProofFileSizeKb));
+            I(SettingKeys.MaxProofFileSizeKb),
+            I(SettingKeys.PrivateBookingDeadlineHours));
     }
 
     public async Task<Dictionary<string, string>> GetAllAsync(CancellationToken ct)

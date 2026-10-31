@@ -80,6 +80,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapDoseEndpoints();
+app.MapAdminConfigEndpoints();
 app.Run();
 
 public partial class Program;
