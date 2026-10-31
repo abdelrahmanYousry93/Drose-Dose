@@ -3,7 +3,7 @@
 > Deliverable requested in spec section 21: (1) architecture assessment,
 > (2) ERD proposal, (3) unresolved decisions with recommended defaults,
 > (4) phased implementation plan.
-> Baseline: `docs/Dose_MVP_Specification.md` v1.1. Status: **awaiting approval**.
+> Baseline: `docs/Dose_MVP_Specification.md` v1.1. Status: **approved 2026-11-01** — Phase 1 implemented (see section 5).
 
 ---
 
@@ -235,9 +235,9 @@ All values below become `SystemSetting` / pricing data, so they can change witho
 | D4 | Group size options | 2–4, 5–9, 10–15 (spec example), max capacity 15 |
 | D5 | Tier decision deadline | 24 h before start; student response window 6 h; booking deadline = tier decision time |
 | D6 | No response to top-up request | Booking stays `TopUpPending`; admin decides; never auto-charge |
-| D7 | Seat hold / payment-proof deadline | Hold 15 min to submit details; 60 min after details to upload proof |
-| D8 | Cancellation & refunds | Full refund if student cancels ≥ 24 h before start; no refund after; full refund always when Dose cancels |
-| D9 | Booking lookup security | Secret link (random 128-bit token, stored hashed) sent with the booking reference; OTP later |
+| D7 | Seat hold / payment-proof deadline | **Approved: dynamic.** Admin-editable in Settings (defaults: hold 15 min, proof 60 min, resubmit 60 min, join opens 15 min before start) |
+| D8 | Cancellation & refunds | **Approved:** full refund if student cancels ≥ 24 h before start; no refund after; full refund always when Dose cancels |
+| D9 | Booking lookup security | **Approved:** secret link `/b/<token>` (256-bit random token, only its SHA-256 hash stored). The student opens the link on the Dose platform and joins the session from there; the Meet URL is never sent in messages and is revealed only to confirmed bookings inside the join window |
 | D10 | Refund method | Same method and number the student paid from; manual by admin, recorded as adjustment |
 | D11 | Teacher availability | Teachers submit, admin approves |
 | D12 | Data retention | Payment screenshots deleted 180 days after session completion; booking data kept for accounting |
@@ -289,3 +289,19 @@ meeting link management, attendance, manual WhatsApp message templates
 
 Rate limiting, security review, PWA, accessibility pass, Azure deployment
 (App Service + Azure SQL + Blob), setup/runbook docs.
+
+---
+
+## 5. Phase 1 — delivered
+
+| Area | What works |
+|---|---|
+| Catalog API | Stages → grades, study tracks, subjects per grade, service types, payment methods |
+| Sessions API | List with filters, open groups, details with teacher + group terms (target tier, worst case, max extra) |
+| Booking | Hold (seat locked per session) → details (guardian rule, terms, price re-check, duplicate-number index) → payment proof upload (image sniffing, size limit, private storage) |
+| Admin | Cookie login (Identity), payment review queue with screenshot, approve (idempotent, creates price snapshot, locks pricing version) / reject with reason, editable settings |
+| Secret link | `/b/<token>` page drives the whole journey; "Join" button calls the API for the Meet link only inside the join window |
+| Web | Arabic RTL screens: home selectors, sessions, open groups, details, booking steps, payment, confirmation, admin |
+| Tests | 65 passing: pricing/tier rules, phone normalization, tokens, file sniffing, and SQL Server integration tests incl. 25 concurrent holds on a 4-seat session and a 10-way last-seat race |
+
+Not yet (planned): session request form (Phase 3), tier-decision job & top-up flow (Phase 3), admin CRUD for catalog/pricing/sessions/teachers (Phase 2), teacher area (Phase 4), cancellation policy values as settings (Phase 3 — the policy text is currently fixed in the UI).

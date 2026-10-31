@@ -1,0 +1,177 @@
+<section class="page">
+  @if (error()) {
+    <div class="dose-card box center">
+      <h1 class="page-title">مش لاقيين الحجز ده</h1>
+      <p class="muted">{{ error() }}</p>
+      <a class="dose-btn dose-btn--ghost" routerLink="/">الرئيسية</a>
+    </div>
+  } @else if (!b()) {
+    <div class="skeleton"></div>
+  } @else {
+    @let v = b()!;
+    @let s = v.session;
+
+    <header class="head">
+      <div>
+        <span class="muted small">رقم الحجز</span>
+        <strong class="ref">{{ v.reference }}</strong>
+      </div>
+      <button class="dose-btn dose-btn--ghost small-btn" type="button" (click)="copyLink()">
+        {{ copied() ? 'اتنسخ ✓' : 'انسخ لينك الحجز' }}
+      </button>
+    </header>
+    <p class="alert alert--info small">اللينك ده خاص بيك ومنه هتدخل الجلسة. احفظه ومتبعتهوش لحد.</p>
+
+    @if (step() > 0) {
+      <ol class="steps" aria-label="خطوات الحجز">
+        <li [class.on]="step() >= 1">البيانات</li>
+        <li [class.on]="step() >= 2">الدفع</li>
+        <li [class.on]="step() >= 3">المراجعة</li>
+        <li [class.on]="step() >= 4">مؤكد</li>
+      </ol>
+    }
+
+    <div class="dose-card box">
+      <h1 class="title">{{ s.subjectNameAr }} — {{ s.scopeTitleAr }}</h1>
+      <ul class="info-list">
+        <li><span>الميعاد</span><span>{{ fmt.date(s.startUtc) }} — {{ fmt.time(s.startUtc) }}</span></li>
+        <li><span>المدة</span><span>{{ fmt.duration(s.durationMinutes) }}</span></li>
+        <li><span>النوع</span><span>{{ s.mode === 'Group' ? 'جماعية' : 'فردية' }}</span></li>
+        <li><span>المدرس</span><span>{{ v.teacher.displayNameAr }}</span></li>
+        <li><span>المبلغ</span><span class="price">{{ fmt.money(v.price, v.currency) }}</span></li>
+      </ul>
+    </div>
+
+    @if (actionError()) { <p class="alert alert--error" role="alert">{{ actionError() }}</p> }
+
+    @switch (v.status) {
+      @case ('PendingHold') {
+        <form class="dose-card box" (ngSubmit)="submitDetails()">
+          <div class="row">
+            <h2>بيانات الحجز</h2>
+            @if (deadline()) { <span class="badge badge--yellow">مكانك محجوز لمدة {{ deadline() }}</span> }
+          </div>
+          <dose-teacher-card [teacher]="v.teacher" />
+
+          <label class="field">
+            <span>اسم الطالب <span class="req">*</span></span>
+            <input name="studentName" [(ngModel)]="studentName" required maxlength="100" autocomplete="name" />
+          </label>
+          <label class="field">
+            <span>رقم واتساب <span class="req">*</span></span>
+            <input name="contactPhone" [(ngModel)]="contactPhone" required inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" autocomplete="tel" />
+            <span class="hint">هنبعتلك عليه تأكيد الحجز وأي تحديث.</span>
+          </label>
+
+          <label class="field">
+            <span>اسم ولي الأمر @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">(اختياري)</span> }</span>
+            <input name="guardianName" [(ngModel)]="guardianName" [required]="v.requiresGuardianContact" maxlength="100" />
+          </label>
+          <label class="field">
+            <span>رقم واتساب ولي الأمر @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">(اختياري)</span> }</span>
+            <input name="guardianPhone" [(ngModel)]="guardianPhone" [required]="v.requiresGuardianContact" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" />
+          </label>
+
+          @if (v.groupTerms; as g) {
+            <dose-group-terms [terms]="g" [price]="v.price" [currency]="v.currency" />
+            <label class="check">
+              <input type="checkbox" name="acceptTopUpTerms" [(ngModel)]="acceptTopUpTerms" />
+              <span>فاهم إن لو الجروب مكملش هتكلموني قبل الجلسة وأختار: أدفع الفرق، أو أنقل لميعاد تاني، أو أسترد فلوسي.</span>
+            </label>
+          }
+          <label class="check">
+            <input type="checkbox" name="acceptTerms" [(ngModel)]="acceptTerms" />
+            <span>موافق على شروط الحجز والإلغاء.</span>
+          </label>
+
+          <button class="dose-btn dose-btn--primary btn-block" type="submit" [disabled]="busy()">
+            {{ busy() ? 'جاري الحفظ…' : 'كمّل للدفع' }}
+          </button>
+        </form>
+      }
+
+      @case ('PendingPayment') {
+        <div class="dose-card box">
+          <div class="row">
+            <h2>ادفع وارفع صورة التحويل</h2>
+            @if (deadline()) { <span class="badge badge--yellow">فاضل {{ deadline() }}</span> }
+          </div>
+          @if (v.latestProofStatus === 'Rejected') {
+            <p class="alert alert--error">الإيصال السابق اترفض: {{ v.latestProofRejectionReason }}. ارفع صورة تانية.</p>
+          }
+          <p>حوّل <strong class="price">{{ fmt.money(v.price, v.currency) }}</strong> واكتب رقم الحجز <strong dir="ltr">{{ v.reference }}</strong> في الملاحظات لو ينفع.</p>
+
+          <div class="methods" role="radiogroup" aria-label="طريقة الدفع">
+            @for (m of methods(); track m.id) {
+              <label class="method" [class.on]="methodId === m.id">
+                <input type="radio" name="method" [value]="m.id" [(ngModel)]="methodId" />
+                <span class="m-name">{{ m.nameAr }}</span>
+                <span class="m-acc" dir="ltr">{{ m.receivingAccount }}</span>
+                @if (m.instructionsAr) { <span class="muted small">{{ m.instructionsAr }}</span> }
+              </label>
+            }
+          </div>
+
+          <label class="field">
+            <span>صورة التحويل <span class="req">*</span></span>
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFile($event)" />
+            <span class="hint">JPG أو PNG أو WebP.</span>
+          </label>
+          <label class="field">
+            <span>رقم العملية أو الرقم اللي حوّلت منه <span class="hint">(اختياري)</span></span>
+            <input name="senderReference" [(ngModel)]="senderReference" maxlength="100" dir="ltr" />
+          </label>
+
+          <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadProof()" [disabled]="busy()">
+            {{ busy() ? 'جاري الرفع…' : 'ارفع الإيصال' }}
+          </button>
+          @if (whatsAppLink(); as wa) {
+            <a class="dose-btn dose-btn--whatsapp btn-block" [href]="wa" target="_blank" rel="noopener">أو ابعت الإيصال على واتساب</a>
+          }
+        </div>
+      }
+
+      @case ('PaymentUnderReview') {
+        <div class="dose-card box center">
+          <span class="big">⏳</span>
+          <h2>استلمنا الإيصال وبنراجعه</h2>
+          <p class="muted">مكانك محجوز. أول ما نأكد الدفع الصفحة دي هتتحدث، وهنبعتلك على واتساب.</p>
+          <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">تحديث الحالة</button>
+        </div>
+      }
+
+      @case ('Confirmed') {
+        <div class="dose-card box center confirmed">
+          <span class="big ok">✓</span>
+          <h2>تم تأكيد حجزك!</h2>
+          @if (v.canJoinNow) {
+            <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="joinSession()">ادخل الجلسة دلوقتي</button>
+          } @else {
+            <p class="muted">زرار دخول الجلسة هيتفعّل {{ fmt.dateTime(v.joinOpensAtUtc) }}.</p>
+            <p class="muted small">افتح نفس اللينك ده في الميعاد.</p>
+            <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">تحديث</button>
+          }
+        </div>
+      }
+
+      @case ('Expired') {
+        <div class="dose-card box center">
+          <h2>مدة الحجز خلصت</h2>
+          <p class="muted">المقعد اتفك علشان البيانات أو الإيصال موصلوش في الوقت. تقدر تحجز تاني لو لسه فيه أماكن.</p>
+          <a class="dose-btn dose-btn--primary" [routerLink]="['/sessions', s.id]">ارجع للجلسة</a>
+        </div>
+      }
+
+      @default {
+        <div class="dose-card box center">
+          <h2>حالة الحجز: {{ v.status }}</h2>
+          <p class="muted">لو عندك أي سؤال كلّمنا على واتساب.</p>
+        </div>
+      }
+    }
+
+    @if (whatsAppLink(); as wa) {
+      <a class="support" [href]="wa" target="_blank" rel="noopener">محتاج مساعدة؟ كلّمنا على واتساب</a>
+    }
+  }
+</section>

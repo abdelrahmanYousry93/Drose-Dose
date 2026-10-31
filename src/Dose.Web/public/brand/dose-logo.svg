@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 72" role="img" aria-label="Dose دروس">
+  <!-- TEMPORARY Dose logo. Uses the Cairo font when installed; replace with outlined final logo. -->
+  <g transform="translate(0 4)">
+    <g transform="rotate(-38 32 38)">
+      <rect x="10" y="28" width="44" height="20" rx="10" fill="#0061FA"/>
+      <path d="M32 28h12a10 10 0 0 1 0 20H32z" fill="#FFC30A"/>
+      <rect x="15" y="32" width="10" height="4" rx="2" fill="#fff" opacity=".55"/>
+    </g>
+    <path d="M14 15 33 7l19 8-19 8z" fill="#0B1F6B"/>
+    <path d="M22 18.5v6c0 2.5 5 4.5 11 4.5s11-2 11-4.5v-6l-11 4.6z" fill="#0B1F6B"/>
+    <path d="M50 16v8.5" stroke="#0B1F6B" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="50" cy="26" r="2.2" fill="#FFC30A"/>
+  </g>
+  <text x="70" y="50" font-family="Cairo, 'Segoe UI', sans-serif" font-weight="800" font-size="42" fill="#0061FA">D<tspan fill="#FFC30A">o</tspan>se</text>
+  <text x="270" y="50" text-anchor="end" font-family="Cairo, 'Segoe UI', sans-serif" font-weight="800" font-size="30" fill="#0B1F6B">دروس</text>
+</svg>

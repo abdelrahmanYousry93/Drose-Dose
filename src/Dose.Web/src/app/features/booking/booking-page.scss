@@ -1,0 +1,42 @@
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.head div { display: grid; }
+.ref { font-size: 1.25rem; color: var(--dose-navy); direction: ltr; text-align: start; letter-spacing: 1px; }
+.small-btn { min-height: 40px; padding: 0 14px; font-size: 0.9rem; }
+
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.steps li {
+  counter-increment: step; text-align: center; font-size: 0.8rem; color: var(--dose-text-muted);
+  padding-top: 30px; position: relative; font-weight: 600;
+}
+.steps li::before {
+  content: counter(step); position: absolute; top: 0; inset-inline-start: 50%; transform: translateX(50%);
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--dose-border); color: var(--dose-text-muted); font-weight: 800;
+}
+.steps li.on { color: var(--dose-primary); }
+.steps li.on::before { background: var(--dose-primary); color: #fff; }
+
+.box { padding: 16px; display: grid; gap: 14px; }
+.box h2 { margin: 0; font-size: 1.12rem; color: var(--dose-navy); }
+.box p { margin: 0; }
+.title { margin: 0; font-size: 1.15rem; color: var(--dose-navy); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.center { text-align: center; justify-items: center; }
+.big { font-size: 2.4rem; line-height: 1; }
+.big.ok {
+  width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--dose-success); color: #fff; font-size: 2rem;
+}
+
+.methods { display: grid; gap: 10px; }
+.method {
+  display: grid; gap: 2px; padding: 12px 14px; border: 2px solid var(--dose-border);
+  border-radius: var(--dose-radius-sm); cursor: pointer; position: relative;
+}
+.method input { position: absolute; opacity: 0; }
+.method.on { border-color: var(--dose-primary); background: var(--dose-primary-50); }
+.method:focus-within { outline: 3px solid var(--dose-accent); outline-offset: 2px; }
+.m-name { font-weight: 800; }
+.m-acc { font-weight: 700; color: var(--dose-primary); text-align: start; }
+
+.support { text-align: center; font-weight: 600; color: var(--dose-whatsapp); }

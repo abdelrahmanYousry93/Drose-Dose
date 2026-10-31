@@ -15,6 +15,7 @@ instead of paying for monthly lessons.
 | API | ASP.NET Core, .NET 10 (LTS), modular monolith |
 | Data | SQL Server / Azure SQL, EF Core (from Phase 1) |
 | Jobs | Hangfire (from Phase 3) |
+| Auth | ASP.NET Core Identity, HTTP-only same-site cookie (admin/teacher); students use secret booking links |
 | Web | Angular 22, Arabic RTL, Cairo font (self-hosted) |
 
 ## Repository layout
@@ -44,10 +45,12 @@ docs/                   Spec, assessment, brand
 cp .env.example .env          # set DOSE_SQL_SA_PASSWORD
 docker compose up -d
 
-# 2. API  → http://localhost:5080
+# 2. API  → http://localhost:5080 (migrates + seeds SAMPLE data in Development)
+export ConnectionStrings__Dose="Server=localhost,1433;Database=Dose;User Id=sa;Password=<pwd>;TrustServerCertificate=True"
+export Seed__AdminEmail=admin@dose.local Seed__AdminPassword=<choose-a-password>
 dotnet run --project src/Dose.Api --launch-profile http
 
-# 3. Web  → http://localhost:4200
+# 3. Web  → http://localhost:4200 (proxies /api to :5080)
 cd src/Dose.Web
 npm install
 npm start
@@ -57,8 +60,22 @@ npm start
 
 ```bash
 dotnet build Dose.slnx
+# Integration tests need a SQL Server (each run creates and drops its own database)
+export DOSE_TEST_SQL="Server=localhost,1433;User Id=sa;Password=<pwd>;TrustServerCertificate=True"
+dotnet test --solution Dose.slnx
 cd src/Dose.Web && npm run build && npm test -- --watch=false
 ```
+
+New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s src/Dose.Api -o Persistence/Migrations`
+
+## Key URLs
+
+| URL | What |
+|---|---|
+| `/` | Home: choose grade, subject, track |
+| `/sessions`, `/open-groups` | Available sessions / open groups |
+| `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join |
+| `/admin` | Admin: payment review, settings |
 
 ## Configuration
 
@@ -72,8 +89,9 @@ never hard-coded.
 | `ConnectionStrings__Dose` | SQL Server connection |
 | `Public__WhatsAppBusinessNumber` | Dose WhatsApp number (E.164) for click-to-chat |
 | `Public__BusinessTimeZone` | Display time zone (default `Africa/Cairo`) |
-| `Cors__AllowedOrigins__0` | Allowed web origin |
+| `Seed__AdminEmail` / `Seed__AdminPassword` | Development-only initial admin |
+| `Storage__LocalRoot` | Private folder for payment screenshots (dev) |
 
 ## Status
 
-Phase 0 — repository scaffold and assessment, awaiting approval before Phase 1.
+Phase 1 delivered — see `docs/phase0-assessment.md` section 5. Next: Phase 2 (admin configuration).
