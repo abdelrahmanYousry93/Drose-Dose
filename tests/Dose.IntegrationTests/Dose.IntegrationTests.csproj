@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dose.Infrastructure\Dose.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Dose.Application\Dose.Application.csproj" />
+    <ProjectReference Include="..\..\src\Dose.Domain\Dose.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

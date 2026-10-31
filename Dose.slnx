@@ -6,4 +6,8 @@
     <Project Path="src/Dose.Domain/Dose.Domain.csproj" />
     <Project Path="src/Dose.Infrastructure/Dose.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dose.IntegrationTests/Dose.IntegrationTests.csproj" />
+    <Project Path="tests/Dose.UnitTests/Dose.UnitTests.csproj" />
+  </Folder>
 </Solution>
