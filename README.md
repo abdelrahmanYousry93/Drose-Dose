@@ -75,7 +75,7 @@ New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s sr
 | `/` | Home: choose grade, subject, track |
 | `/sessions`, `/open-groups` | Available sessions / open groups |
 | `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join |
-| `/admin` | Admin: payment review, settings |
+| `/admin` | Admin: payments, sessions, pricing, teachers, catalog, payment methods, settings |
 
 ## Configuration
 
@@ -94,4 +94,4 @@ never hard-coded.
 
 ## Status
 
-Phase 1 delivered — see `docs/phase0-assessment.md` section 5. Next: Phase 2 (admin configuration).
+Phase 2 delivered — see `docs/phase0-assessment.md` sections 5–6. Next: Phase 3 (session requests, group tier decision and top-up/refund workflow).

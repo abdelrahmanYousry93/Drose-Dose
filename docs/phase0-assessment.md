@@ -305,3 +305,17 @@ Rate limiting, security review, PWA, accessibility pass, Azure deployment
 | Tests | 65 passing: pricing/tier rules, phone normalization, tokens, file sniffing, and SQL Server integration tests incl. 25 concurrent holds on a 4-seat session and a 10-way last-seat race |
 
 Not yet (planned): session request form (Phase 3), tier-decision job & top-up flow (Phase 3), admin CRUD for catalog/pricing/sessions/teachers (Phase 2), teacher area (Phase 4), cancellation policy values as settings (Phase 3 — the policy text is currently fixed in the UI).
+
+## 6. Phase 2 — delivered
+
+| Area | What works |
+|---|---|
+| Catalog | Stages (guardian rule), grades (stage, pricing band, curriculum system, subjects taught), study tracks, pricing bands, subjects, chapters & lessons, service type names/descriptions. Deactivate instead of delete. |
+| Teachers | Name, photo URL, qualifications, bio, experience, published flag (a session can only be published with a published teacher) |
+| Payment methods | Name, code, receiving account, instructions, active flag |
+| Pricing | Plans by service type × mode × (band / track / subject) × dates; conflict detection; private price + group tiers with validation. A version used by any session is locked — saving creates a new version, existing sessions and bookings keep their prices |
+| Sessions | Create with live pricing preview and group-size choice; deadlines from settings; save as draft / publish; edit (only time, teacher, title and Meet link once bookings exist); cancel (unpaid bookings cancelled, paid ones → refund pending); bookings list; issue a new secret link and copy a ready WhatsApp message |
+| Audit | Every admin change is written to the audit log |
+| Tests | 70 passing (5 new admin integration tests) + browser walkthrough of the admin flow |
+
+Still planned: teacher photo upload (URL for now), session requests (Phase 3), tier-decision job and top-up/refund workflow (Phase 3), teacher area (Phase 4).

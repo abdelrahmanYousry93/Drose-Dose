@@ -54,11 +54,11 @@ type Row = Record<string, unknown> & { id?: string | null };
           @for (f of config().fields; track f.key) {
             @switch (f.type) {
               @case ('checkbox') {
-                <label class="check"><input type="checkbox" [name]="f.key" [(ngModel)]="row[f.key]" [disabled]="!!f.readonly" /><span>{{ f.label }}</span></label>
+                <label class="check"><input type="checkbox" [name]="f.key" [attr.name]="f.key" [(ngModel)]="row[f.key]" [disabled]="!!f.readonly" /><span>{{ f.label }}</span></label>
               }
               @case ('select') {
                 <label class="field"><span>{{ f.label }}</span>
-                  <select [name]="f.key" [(ngModel)]="row[f.key]" [disabled]="!!f.readonly">
+                  <select [name]="f.key" [attr.name]="f.key" [(ngModel)]="row[f.key]" [disabled]="!!f.readonly">
                     @if (f.nullable) { <option [ngValue]="null">{{ f.noneLabel ?? '— الكل —' }}</option> }
                     @for (o of f.options!(); track o.id) { <option [ngValue]="o.id">{{ o.nameAr }}</option> }
                   </select>
@@ -73,14 +73,14 @@ type Row = Record<string, unknown> & { id?: string | null };
                 </fieldset>
               }
               @case ('textarea') {
-                <label class="field wide"><span>{{ f.label }}</span><textarea [name]="f.key" [(ngModel)]="row[f.key]"></textarea></label>
+                <label class="field wide"><span>{{ f.label }}</span><textarea [name]="f.key" [attr.name]="f.key" [(ngModel)]="row[f.key]"></textarea></label>
               }
               @case ('number') {
-                <label class="field"><span>{{ f.label }}</span><input type="number" [name]="f.key" [(ngModel)]="row[f.key]" dir="ltr" /></label>
+                <label class="field"><span>{{ f.label }}</span><input type="number" [name]="f.key" [attr.name]="f.key" [(ngModel)]="row[f.key]" dir="ltr" /></label>
               }
               @default {
                 <label class="field"><span>{{ f.label }}</span>
-                  <input [name]="f.key" [(ngModel)]="row[f.key]" [attr.dir]="f.dir ?? null" [readonly]="!!f.readonly" />
+                  <input [name]="f.key" [attr.name]="f.key" [(ngModel)]="row[f.key]" [attr.dir]="f.dir ?? null" [readonly]="!!f.readonly" />
                   @if (f.hint) { <span class="hint">{{ f.hint }}</span> }
                 </label>
               }
@@ -153,6 +153,7 @@ export class EntityEditor {
         if (f.type === 'number') row[f.key] = row[f.key] === '' || row[f.key] == null ? (f.nullable ? null : 0) : Number(row[f.key]);
       const result = (await this.config().save(row)) as { id?: string } | undefined;
       if (!row.id && result?.id) row.id = result.id;
+      this.open.set(index);
       this.status.update((s) => ({ ...s, [index]: { ok: true, text: 'اتحفظ ✓' } }));
     } catch (e) {
       this.status.update((s) => ({ ...s, [index]: { ok: false, text: errorMessage(e) } }));
