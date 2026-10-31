@@ -10,6 +10,26 @@ export const adminRoutes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'payments' },
       { path: 'payments', component: AdminPayments, title: 'مراجعة المدفوعات — Dose' },
+      {
+        path: 'sessions', title: 'الجلسات — Dose',
+        loadComponent: () => import('./admin-sessions').then((m) => m.AdminSessions),
+      },
+      {
+        path: 'pricing', title: 'الأسعار — Dose',
+        loadComponent: () => import('./admin-pricing').then((m) => m.AdminPricing),
+      },
+      {
+        path: 'teachers', title: 'المدرسين — Dose',
+        loadComponent: () => import('./admin-config').then((m) => m.AdminTeachers),
+      },
+      {
+        path: 'catalog', title: 'الكتالوج — Dose',
+        loadComponent: () => import('./admin-config').then((m) => m.AdminCatalog),
+      },
+      {
+        path: 'payment-methods', title: 'طرق الدفع — Dose',
+        loadComponent: () => import('./admin-config').then((m) => m.AdminPaymentMethods),
+      },
       { path: 'settings', component: AdminSettings, title: 'الإعدادات — Dose' },
     ],
   },

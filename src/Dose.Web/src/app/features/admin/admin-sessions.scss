@@ -1,0 +1,31 @@
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.editor { padding: 16px; display: grid; gap: 14px; border: 2px solid var(--dose-primary); }
+.editor h2 { margin: 0; font-size: 1.15rem; color: var(--dose-navy); }
+.grid { display: grid; gap: 12px; }
+@media (min-width: 760px) {
+  .grid { grid-template-columns: 1fr 1fr 1fr; }
+  .wide { grid-column: 1 / -1; }
+}
+.mode { display: flex; gap: 20px; border: 1px solid var(--dose-border); border-radius: var(--dose-radius-sm); padding: 10px 14px; }
+.mode legend { font-weight: 600; padding: 0 6px; }
+.pricing { display: grid; gap: 8px; padding: 12px; border-radius: var(--dose-radius-sm); background: var(--dose-primary-50); }
+.label { font-weight: 600; }
+.tiers { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.tier { display: grid; gap: 2px; padding: 10px; border: 2px solid var(--dose-border); border-radius: var(--dose-radius-sm); background: var(--dose-surface); cursor: pointer; position: relative; }
+.tier input { position: absolute; opacity: 0; }
+.tier.on { border-color: var(--dose-primary); }
+.tier:focus-within { outline: 3px solid var(--dose-accent); }
+.price { color: var(--dose-primary); font-weight: 800; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters { display: flex; gap: 16px; align-items: center; }
+.filters select { min-height: 42px; padding: 0 10px; border: 1px solid var(--dose-border); border-radius: 8px; font: inherit; }
+.item { padding: 16px; display: grid; gap: 10px; }
+.item p { margin: 0; }
+.item.cancelled { opacity: .65; }
+.danger { background: #fdecea; color: #a52714; }
+.small-btn { min-height: 38px; padding: 0 12px; font-size: 0.88rem; }
+.bookings { display: grid; gap: 8px; border-top: 1px solid var(--dose-border); padding-top: 10px; }
+.booking { display: grid; gap: 6px; padding: 10px; border-radius: var(--dose-radius-sm); background: var(--dose-bg); }
+.link-box { display: grid; gap: 8px; padding: 12px; border-radius: var(--dose-radius-sm); background: var(--dose-success-50); }
+.link-box p { margin: 0; }
+.link-box textarea { min-height: 110px; padding: 8px; border: 1px solid var(--dose-border); border-radius: 8px; font: 0.9rem var(--dose-font); direction: rtl; }

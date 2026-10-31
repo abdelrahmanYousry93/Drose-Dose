@@ -61,15 +61,20 @@ export class AdminLogin {
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <nav class="admin-nav">
-      <a routerLink="/admin/payments" routerLinkActive="on">مراجعة المدفوعات</a>
+      <a routerLink="/admin/payments" routerLinkActive="on">المدفوعات</a>
+      <a routerLink="/admin/sessions" routerLinkActive="on">الجلسات</a>
+      <a routerLink="/admin/pricing" routerLinkActive="on">الأسعار</a>
+      <a routerLink="/admin/teachers" routerLinkActive="on">المدرسين</a>
+      <a routerLink="/admin/catalog" routerLinkActive="on">الكتالوج</a>
+      <a routerLink="/admin/payment-methods" routerLinkActive="on">طرق الدفع</a>
       <a routerLink="/admin/settings" routerLinkActive="on">الإعدادات</a>
       <button type="button" (click)="logout()">خروج</button>
     </nav>
     <router-outlet />
   `,
   styles: `
-    .admin-nav { display: flex; gap: 6px; margin-top: 16px; padding: 4px; border-radius: var(--dose-radius-sm); background: var(--dose-navy); }
-    .admin-nav a, .admin-nav button { flex: 1; text-align: center; padding: 10px; border-radius: 8px; color: #fff; text-decoration: none; font: 600 0.92rem var(--dose-font); background: none; border: 0; cursor: pointer; }
+    .admin-nav { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 16px; padding: 4px; border-radius: var(--dose-radius-sm); background: var(--dose-navy); }
+    .admin-nav a, .admin-nav button { flex: 1 0 auto; text-align: center; padding: 8px 10px; border-radius: 8px; color: #fff; text-decoration: none; font: 600 0.92rem var(--dose-font); background: none; border: 0; cursor: pointer; }
     .admin-nav a.on { background: var(--dose-primary); }
   `,
 })
