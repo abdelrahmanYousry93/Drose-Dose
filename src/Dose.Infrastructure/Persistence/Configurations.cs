@@ -192,6 +192,7 @@ internal sealed class PaymentProofConfig : IEntityTypeConfiguration<PaymentProof
         e.Property(x => x.SenderReference).HasMaxLength(100);
         e.HasOne(x => x.Booking).WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne(x => x.PaymentMethod).WithMany().HasForeignKey(x => x.PaymentMethodId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne(x => x.Adjustment).WithMany().HasForeignKey(x => x.AdjustmentId).OnDelete(DeleteBehavior.Restrict);
         e.HasIndex(x => new { x.Status, x.SubmittedAtUtc });
         e.HasIndex(x => x.SenderReference);
     }
@@ -213,5 +214,44 @@ internal sealed class AuditLogConfig : IEntityTypeConfiguration<AuditLog>
     {
         e.Property(x => x.DataJson).HasMaxLength(4000);
         e.HasIndex(x => new { x.Entity, x.EntityId });
+    }
+}
+
+internal sealed class FinancialAdjustmentConfig : IEntityTypeConfiguration<FinancialAdjustment>
+{
+    public void Configure(EntityTypeBuilder<FinancialAdjustment> e)
+    {
+        e.Property(x => x.Currency).HasMaxLength(3).IsFixedLength();
+        e.Property(x => x.Reason).HasMaxLength(500);
+        e.Property(x => x.ResolutionNote).HasMaxLength(500);
+        e.HasOne(x => x.Booking).WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
+        e.HasIndex(x => new { x.BookingId, x.Type, x.Status });
+        e.HasIndex(x => new { x.Type, x.Status });
+        e.ToTable(t => t.HasCheckConstraint("CK_Adjustment_Amount", "[Amount] >= 0"));
+    }
+}
+
+internal sealed class SessionRequestConfig : IEntityTypeConfiguration<SessionRequest>
+{
+    public void Configure(EntityTypeBuilder<SessionRequest> e)
+    {
+        e.Property(x => x.Reference).HasMaxLength(16);
+        e.HasIndex(x => x.Reference).IsUnique();
+        e.Property(x => x.StudentName).HasMaxLength(100);
+        e.Property(x => x.GuardianName).HasMaxLength(100);
+        e.Property(x => x.ContactPhoneE164).HasMaxLength(16);
+        e.Property(x => x.GuardianPhoneE164).HasMaxLength(16);
+        e.Property(x => x.ScopeText).HasMaxLength(1000);
+        e.Property(x => x.Notes).HasMaxLength(1000);
+        e.Property(x => x.AdminNotes).HasMaxLength(1000);
+        e.Property(x => x.PreferredDays).HasMaxLength(200);
+        e.Property(x => x.PreferredTimes).HasMaxLength(200);
+        e.HasOne<Grade>().WithMany().HasForeignKey(x => x.GradeId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne<StudyTrack>().WithMany().HasForeignKey(x => x.StudyTrackId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne<Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne<ServiceType>().WithMany().HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne<Session>().WithMany().HasForeignKey(x => x.FulfilledBySessionId).OnDelete(DeleteBehavior.Restrict);
+        e.HasIndex(x => new { x.Status, x.CreatedAtUtc });
+        e.HasIndex(x => x.ContactPhoneE164);
     }
 }

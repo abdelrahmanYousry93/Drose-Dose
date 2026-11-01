@@ -58,6 +58,10 @@ public sealed class Session : Entity
 
     public DateTime BookingDeadlineUtc { get; set; }
     public DateTime? TierDecisionAtUtc { get; set; }
+    /// <summary>Set once the tier decision ran for this group session (idempotency marker).</summary>
+    public DateTime? TierDecidedAtUtc { get; set; }
+    /// <summary>Confirmed participant count used at the tier decision.</summary>
+    public int? DecisionConfirmedCount { get; set; }
     public SessionStatus Status { get; set; } = SessionStatus.Draft;
 
     /// <summary>Meeting details are never returned by public endpoints.</summary>

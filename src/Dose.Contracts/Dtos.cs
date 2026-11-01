@@ -86,7 +86,17 @@ public sealed record BookingViewDto(
     string? LatestProofRejectionReason,
     bool CanJoinNow,
     DateTime? JoinOpensAtUtc,
-    string WhatsAppMessage);
+    string WhatsAppMessage,
+    TopUpViewDto? TopUp,
+    DateTime FullRefundUntilUtc,
+    bool CanCancel);
+
+public sealed record TopUpViewDto(
+    decimal Amount, string Currency, DateTime? RespondByUtc, string? Reason, string? Choice,
+    string? ProofStatus, string? ProofRejectionReason);
+
+public sealed record TopUpChoiceRequest(string Choice);
+public sealed record CancelBookingRequest(bool AcceptNoRefund);
 
 public sealed record JoinResponse(string MeetingUrl);
 
@@ -107,7 +117,8 @@ public sealed record PaymentProofAdminDto(
     string Channel,
     string Status,
     DateTime SubmittedAtUtc,
-    double AgeMinutes);
+    double AgeMinutes,
+    bool IsTopUp);
 
 public sealed record RejectPaymentRequest(string Reason);
 
@@ -115,3 +126,12 @@ public sealed record SettingDto(string Key, string Value, string? DescriptionAr)
 public sealed record UpdateSettingsRequest(IReadOnlyList<SettingDto> Settings);
 
 public sealed record PublicSettingsDto(string WhatsAppBusinessNumber, string BusinessTimeZone);
+
+// ---------- Session requests (public) ----------
+public sealed record GroupOptionDto(Guid Id, string NameAr, int MinParticipants, int MaxParticipants, decimal PricePerStudent);
+public sealed record PriceOptionsDto(string Currency, decimal? PrivatePrice, IReadOnlyList<GroupOptionDto> GroupOptions);
+public sealed record CreateSessionRequest(
+    string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone,
+    Guid GradeId, Guid StudyTrackId, Guid SubjectId, Guid ServiceTypeId, string ScopeText,
+    IReadOnlyList<string> PreferredDays, IReadOnlyList<string> PreferredTimes, string Mode, Guid? PreferredTierId, string? Notes);
+public sealed record CreateSessionRequestResponse(string Reference, string WhatsAppMessage);

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Dose.Application.Payments;
 
 /// <summary>Admin review of payment proofs. A booking is confirmed only here (spec 8.1).</summary>
-public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files)
+public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, Sessions.GroupDecisionService decisions)
 {
     public async Task<IReadOnlyList<PaymentProofAdminDto>> ListAsync(PaymentProofStatus? status, CancellationToken ct)
     {
@@ -24,13 +24,13 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
                 p.Id, p.Booking!.Reference, BookingStatus = p.Booking.Status,
                 StudentName = p.Booking.Student!.Name, p.Booking.Student.ContactPhoneE164, p.Booking.Student.GuardianPhoneE164,
                 p.Booking.Session!.ScopeTitleAr, p.Booking.Session.StartUtc,
-                MethodNameAr = p.PaymentMethod!.NameAr, p.Amount, p.Currency, p.SenderReference, p.Channel, p.Status, p.SubmittedAtUtc,
+                MethodNameAr = p.PaymentMethod!.NameAr, p.Amount, p.Currency, p.SenderReference, p.Channel, p.Status, p.SubmittedAtUtc, IsTopUp = p.AdjustmentId != null,
             })
             .ToListAsync(ct);
         return rows.Select(r => new PaymentProofAdminDto(
             r.Id, r.Reference, r.BookingStatus.ToString(), r.StudentName, r.ContactPhoneE164, r.GuardianPhoneE164,
             r.ScopeTitleAr, r.StartUtc, r.MethodNameAr, r.Amount, r.Currency, r.SenderReference, r.Channel.ToString(),
-            r.Status.ToString(), r.SubmittedAtUtc, Math.Round((now - r.SubmittedAtUtc).TotalMinutes))).ToList();
+            r.Status.ToString(), r.SubmittedAtUtc, Math.Round((now - r.SubmittedAtUtc).TotalMinutes), r.IsTopUp)).ToList();
     }
 
     public async Task<(Stream Content, string ContentType)> OpenFileAsync(Guid proofId, CancellationToken ct)
@@ -56,6 +56,12 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
         if (proof.Status == PaymentProofStatus.Rejected)
             throw new DomainException(BookingErrors.InvalidState, "This proof was already rejected.");
         var booking = proof.Booking!;
+        if (proof.AdjustmentId is { } adjustmentId)
+        {
+            await ApproveTopUpAsync(proof, adjustmentId, sessionId, actor, ct);
+            await tx.CommitAsync(ct);
+            return;
+        }
         if (booking.Status != BookingStatus.PaymentUnderReview)
             throw new DomainException(BookingErrors.InvalidState, $"Booking is {booking.Status}, not under payment review.");
 
@@ -99,7 +105,41 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
             DataJson = JsonSerializer.Serialize(new { proofId, booking.Reference, amount = booking.QuotedPrice }), AtUtc = now,
         });
         await db.SaveChangesAsync(ct);
+
+        // Payment approved after the group was decided: it may lower what the others owe (spec 6.4 rule 7).
+        var tracked = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
+        if (tracked.TierDecidedAtUtc is not null)
+        {
+            await decisions.RecalculateAsync(tracked, actor, ct);
+            await db.SaveChangesAsync(ct);
+        }
         await tx.CommitAsync(ct);
+    }
+
+    private async Task ApproveTopUpAsync(PaymentProof proof, Guid adjustmentId, Guid sessionId, string actor, CancellationToken ct)
+    {
+        var adj = await db.FinancialAdjustments.SingleAsync(a => a.Id == adjustmentId, ct);
+        if (adj.Status != AdjustmentStatus.Pending)
+            throw new DomainException(BookingErrors.InvalidState, "الفرق ده مبقاش مطلوب (اتلغى أو اتعاد حسابه). ارفض الإيصال وراجع مع الطالب.");
+        if (proof.Amount < adj.Amount)
+            throw new DomainException(BookingErrors.InvalidState, "مبلغ الإيصال أقل من الفرق المطلوب.");
+        var now = clock.UtcNow;
+        proof.Status = PaymentProofStatus.Approved;
+        proof.ReviewedBy = actor;
+        proof.ReviewedAtUtc = now;
+        adj.Status = AdjustmentStatus.Settled;
+        adj.ResolvedBy = actor;
+        adj.ResolvedAtUtc = now;
+        proof.Booking!.Status = BookingStatus.Confirmed;
+        db.AuditLogs.Add(new AuditLog
+        {
+            Actor = actor, Entity = nameof(Booking), EntityId = proof.BookingId.ToString(), Action = "TopUpApproved",
+            DataJson = JsonSerializer.Serialize(new { proofId = proof.Id, adj.Amount }), AtUtc = now,
+        });
+        await db.SaveChangesAsync(ct);
+        var session = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
+        await decisions.RefreshStatusAsync(session, ct);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task RejectAsync(Guid proofId, string reason, string actor, CancellationToken ct)
@@ -120,9 +160,9 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
         proof.RejectionReason = reason;
         proof.ReviewedBy = actor;
         proof.ReviewedAtUtc = now;
-        if (proof.Booking!.Status == BookingStatus.PaymentUnderReview)
+        if (proof.AdjustmentId is null && proof.Booking!.Status == BookingStatus.PaymentUnderReview)
         {
-            proof.Booking.Status = BookingStatus.PendingPayment;
+            proof.Booking!.Status = BookingStatus.PendingPayment;
             proof.Booking.PaymentDueAtUtc = now.AddMinutes(cfg.ProofResubmitMinutes);
         }
         db.AuditLogs.Add(new AuditLog

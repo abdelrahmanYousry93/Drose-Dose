@@ -3,7 +3,10 @@ using System.Threading.RateLimiting;
 using Dose.Api;
 using Dose.Application;
 using Dose.Infrastructure;
+using Dose.Application.Bookings;
+using Dose.Application.Sessions;
 using Dose.Infrastructure.Persistence;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,6 +60,18 @@ builder.Services.AddRateLimiter(o =>
 
 builder.Services.AddOpenApi();
 
+// ----- Background jobs (Hangfire, SQL Server storage). All jobs are idempotent. -----
+var jobsEnabled = builder.Configuration.GetValue("Jobs:Enabled", true);
+if (jobsEnabled)
+{
+    builder.Services.AddHangfire(c => c
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(builder.Configuration.GetConnectionString("Dose")));
+    builder.Services.AddHangfireServer(o => o.WorkerCount = 2);
+}
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -81,6 +96,14 @@ if (app.Environment.IsDevelopment())
 
 app.MapDoseEndpoints();
 app.MapAdminConfigEndpoints();
+app.MapPhase3Endpoints();
+
+if (jobsEnabled)
+{
+    var jobs = app.Services.GetRequiredService<IRecurringJobManager>();
+    jobs.AddOrUpdate<GroupDecisionService>("group-tier-decisions", s => s.RunDueDecisionsAsync(CancellationToken.None), "*/5 * * * *");
+    jobs.AddOrUpdate<BookingMaintenance>("expire-stale-bookings", s => s.ExpireStaleAsync(CancellationToken.None), "*/10 * * * *");
+}
 app.Run();
 
 public partial class Program;

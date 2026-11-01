@@ -2,6 +2,7 @@ using Dose.Application.Abstractions;
 using Dose.Application.Administration;
 using Dose.Application.Bookings;
 using Dose.Application.Payments;
+using Dose.Application.Sessions;
 using Dose.Domain.Catalog;
 using Dose.Domain.Pricing;
 using Dose.Domain.Sessions;
@@ -53,10 +54,14 @@ public sealed class DatabaseFixture : IAsyncLifetime
     public LocalFileStorage Storage => new(_storageRoot);
 
     public BookingService Bookings(DoseDbContext db, IClock clock) =>
-        new(db, clock, new SettingsService(db, clock), Storage);
+        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock));
 
     public PaymentReviewService Payments(DoseDbContext db, IClock clock) =>
-        new(db, clock, new SettingsService(db, clock), Storage);
+        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock));
+
+    public GroupDecisionService Decisions(DoseDbContext db, IClock clock) => new(db, clock, new SettingsService(db, clock));
+
+    public FollowUpService FollowUps(DoseDbContext db, IClock clock) => new(db, clock, Decisions(db, clock));
 
     /// <summary>Creates a fresh published session so tests don't share seats.</summary>
     public async Task<Session> CreateSessionAsync(
@@ -88,7 +93,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         return session;
     }
 
-    public static async Task<Guid> PaymentMethodIdAsync(DoseDbContext db) => (await db.PaymentMethods.FirstAsync()).Id;
+    public static async Task<Guid> PaymentMethodIdAsync(DoseDbContext db) => (await db.PaymentMethods.FirstAsync(m => m.Code == "instapay")).Id;
 
     public static MemoryStream TinyPng() => new(
     [

@@ -48,6 +48,8 @@ public static class BookingErrors
     public const string InvalidPhone = "booking.invalid_phone";
     public const string InvalidFile = "booking.invalid_file";
     public const string JoinNotAvailable = "booking.join_not_available";
+    public const string NoTopUp = "booking.no_topup";
+    public const string CancelNotAllowed = "booking.cancel_not_allowed";
 }
 
 /// <summary>Student contact captured at booking. No login.</summary>
@@ -85,6 +87,10 @@ public sealed class Booking : Entity
     public DateTime? TermsAcceptedAtUtc { get; set; }
     public DateTime? TopUpTermsAcceptedAtUtc { get; set; }
     public DateTime? ConfirmedAtUtc { get; set; }
+    public DateTime? CancelledAtUtc { get; set; }
+    public string? CancelReason { get; set; }
+    /// <summary>Set when an admin finished a follow-up (refund paid, transfer arranged).</summary>
+    public DateTime? FollowUpResolvedAtUtc { get; set; }
 
     public Guid? PriceSnapshotId { get; set; }
     public PriceSnapshot? PriceSnapshot { get; set; }
@@ -130,6 +136,9 @@ public sealed class PaymentProof : Entity
 {
     public Guid BookingId { get; init; }
     public Booking? Booking { get; set; }
+    /// <summary>Set when this proof pays a top-up (not the original booking price).</summary>
+    public Guid? AdjustmentId { get; init; }
+    public FinancialAdjustment? Adjustment { get; set; }
     public Guid PaymentMethodId { get; init; }
     public PaymentMethod? PaymentMethod { get; set; }
     public decimal Amount { get; init; }

@@ -50,3 +50,18 @@ public sealed record SessionBookingAdminDto(
     string? GuardianPhone, decimal Price, string Currency, DateTime CreatedAtUtc, DateTime? ConfirmedAtUtc);
 
 public sealed record ReissueLinkResponse(string Reference, string AccessToken, string? ContactPhone, string Message);
+
+// ---------- Follow-ups (top-ups, refunds, transfers) ----------
+public sealed record FollowUpDto(
+    Guid BookingId, string Kind, string BookingReference, string BookingStatus, string? StudentName, string? ContactPhone,
+    string? GuardianPhone, Guid SessionId, string SessionTitleAr, DateTime SessionStartUtc, decimal PaidAmount, string Currency,
+    decimal? TopUpAmount, DateTime? RespondByUtc, string? StudentChoice, string? TopUpProofStatus, string? Reason, bool Overdue);
+public sealed record ResolveRequest(string? Note);
+
+// ---------- Session requests ----------
+public sealed record SessionRequestAdminDto(
+    Guid Id, string Reference, string Status, string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone,
+    Guid GradeId, string GradeNameAr, Guid StudyTrackId, string StudyTrackNameAr, Guid SubjectId, string SubjectNameAr,
+    Guid ServiceTypeId, string ServiceTypeNameAr, string ScopeText, string PreferredDays, string PreferredTimes, string Mode,
+    string? PreferredTierNameAr, string? Notes, string? AdminNotes, Guid? FulfilledBySessionId, DateTime CreatedAtUtc);
+public sealed record UpdateRequestStatus(string Status, string? AdminNotes, Guid? FulfilledBySessionId);

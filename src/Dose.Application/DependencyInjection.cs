@@ -16,11 +16,15 @@ public static class DependencyInjection
         services.AddScoped<SettingsService>();
         services.AddScoped<CatalogQueries>();
         services.AddScoped<SessionQueries>();
+        services.AddScoped<GroupDecisionService>();
         services.AddScoped<BookingService>();
         services.AddScoped<PaymentReviewService>();
         services.AddScoped<AdminCatalogService>();
         services.AddScoped<AdminPricingService>();
         services.AddScoped<AdminSessionService>();
+        services.AddScoped<FollowUpService>();
+        services.AddScoped<SessionRequestService>();
+        services.AddScoped<BookingMaintenance>();
         return services;
     }
 }

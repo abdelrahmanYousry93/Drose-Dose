@@ -16,6 +16,8 @@ public static class SettingKeys
     public const string TierDecisionHoursBeforeStart = "group.tier_decision_hours_before_start";
     public const string MaxProofFileSizeKb = "payment.max_proof_file_size_kb";
     public const string PrivateBookingDeadlineHours = "session.private_booking_deadline_hours";
+    public const string TopUpResponseHours = "group.topup_response_hours";
+    public const string FullRefundCancellationHours = "booking.full_refund_cancellation_hours";
 
     public static readonly IReadOnlyDictionary<string, (string Default, string DescriptionAr)> Definitions =
         new Dictionary<string, (string, string)>
@@ -27,6 +29,8 @@ public static class SettingKeys
             [TierDecisionHoursBeforeStart] = ("24", "موعد حسم اكتمال الجروب قبل الجلسة (بالساعات)"),
             [MaxProofFileSizeKb] = ("5120", "أقصى حجم لصورة الإيصال (كيلوبايت)"),
             [PrivateBookingDeadlineHours] = ("2", "آخر ميعاد لحجز الجلسة الفردية قبل بدايتها (بالساعات)"),
+            [TopUpResponseHours] = ("6", "مهلة رد الطالب لو الجروب مكملش (بالساعات)"),
+            [FullRefundCancellationHours] = ("24", "الطالب يسترد فلوسه كاملة لو لغى قبل الجلسة بكام ساعة"),
         };
 }
 
@@ -37,7 +41,9 @@ public sealed record BookingSettings(
     int JoinOpensMinutesBeforeStart,
     int TierDecisionHoursBeforeStart,
     int MaxProofFileSizeKb,
-    int PrivateBookingDeadlineHours);
+    int PrivateBookingDeadlineHours,
+    int TopUpResponseHours,
+    int FullRefundCancellationHours);
 
 public sealed class SettingsService(IDoseDbContext db, IClock clock)
 {
@@ -52,7 +58,9 @@ public sealed class SettingsService(IDoseDbContext db, IClock clock)
             I(SettingKeys.JoinOpensMinutesBeforeStart),
             I(SettingKeys.TierDecisionHoursBeforeStart),
             I(SettingKeys.MaxProofFileSizeKb),
-            I(SettingKeys.PrivateBookingDeadlineHours));
+            I(SettingKeys.PrivateBookingDeadlineHours),
+            I(SettingKeys.TopUpResponseHours),
+            I(SettingKeys.FullRefundCancellationHours));
     }
 
     public async Task<Dictionary<string, string>> GetAllAsync(CancellationToken ct)

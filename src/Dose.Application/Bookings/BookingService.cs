@@ -13,7 +13,7 @@ namespace Dose.Application.Bookings;
 /// Student booking workflow (spec 8): hold → details → payment proof. Every seat-affecting step
 /// runs in a transaction holding an update lock on the session row, so capacity can't be oversold.
 /// </summary>
-public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files)
+public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, GroupDecisionService decisions)
 {
     public async Task<CreateHoldResponse> CreateHoldAsync(Guid sessionId, CancellationToken ct)
     {
@@ -139,19 +139,9 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
     public async Task SubmitPaymentProofAsync(
         string token, Guid paymentMethodId, Stream content, long length, string? senderReference, CancellationToken ct)
     {
-        var cfg = await settings.GetBookingSettingsAsync(ct);
-        if (length <= 0 || length > cfg.MaxProofFileSizeKb * 1024L)
-            throw new DomainException(BookingErrors.InvalidFile, $"The image must be smaller than {cfg.MaxProofFileSizeKb / 1024} MB.");
-
-        using var buffer = new MemoryStream();
-        await content.CopyToAsync(buffer, ct);
-        if (buffer.Length > cfg.MaxProofFileSizeKb * 1024L)
-            throw new DomainException(BookingErrors.InvalidFile, "The image is too large.");
-        var kind = ImageSniffer.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)))
-                   ?? throw new DomainException(BookingErrors.InvalidFile, "Only JPG, PNG or WebP screenshots are accepted.");
-
-        var method = await db.PaymentMethods.AsNoTracking().FirstOrDefaultAsync(m => m.Id == paymentMethodId && m.IsActive, ct)
-                     ?? throw new DomainException("payment.method_not_found", "Payment method not found.");
+        var (buffer, kind) = await ReadImageAsync(content, length, ct);
+        using var _ = buffer;
+        var method = await FindMethodAsync(paymentMethodId, ct);
 
         var bookingId = await FindIdAsync(token, ct);
         var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
@@ -201,8 +191,13 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var booking = await db.Bookings.AsNoTracking().Include(b => b.Student).SingleAsync(b => b.Id == bookingId, ct);
         var session = await LoadSessionAsync(booking.SessionId, ct, tracking: false)
                       ?? throw new DomainException(BookingErrors.SessionNotFound, "Session not found.");
-        var latestProof = await db.PaymentProofs.AsNoTracking().Where(p => p.BookingId == bookingId)
+        var latestProof = await db.PaymentProofs.AsNoTracking().Where(p => p.BookingId == bookingId && p.AdjustmentId == null)
             .OrderByDescending(p => p.SubmittedAtUtc).FirstOrDefaultAsync(ct);
+        var topUp = await db.FinancialAdjustments.AsNoTracking()
+            .Where(a => a.BookingId == bookingId && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending)
+            .OrderByDescending(a => a.CreatedAtUtc).FirstOrDefaultAsync(ct);
+        PaymentProof? topUpProof = topUp is null ? null : await db.PaymentProofs.AsNoTracking()
+            .Where(p => p.AdjustmentId == topUp.Id).OrderByDescending(p => p.SubmittedAtUtc).FirstOrDefaultAsync(ct);
 
         var counts = await new SessionQueries(db, clock).CountsAsync([session.Id], ct);
         var status = booking.IsExpired(now) ? BookingStatus.Expired : booking.Status;
@@ -217,8 +212,151 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
             booking.QuotedPrice, booking.Currency, booking.HoldExpiresAtUtc, booking.PaymentDueAtUtc,
             booking.Student?.Name, latestProof?.Status.ToString(), latestProof?.RejectionReason,
             canJoin, status == BookingStatus.Confirmed ? joinOpens : null,
-            $"مرحباً Dose، رقم حجزي {booking.Reference}");
+            $"مرحباً Dose، رقم حجزي {booking.Reference}",
+            topUp is null ? null : new TopUpViewDto(topUp.Amount, topUp.Currency, topUp.RespondByUtc, topUp.Reason,
+                topUp.StudentChoice?.ToString(), topUpProof?.Status.ToString(), topUpProof?.RejectionReason),
+            session.StartUtc.AddHours(-cfg.FullRefundCancellationHours),
+            CanCancel(status, session, now));
     }
+
+    /// <summary>Student's answer when their group did not fill (spec 6.4). Never charges anything by itself.</summary>
+    public async Task ChooseTopUpAsync(string token, string choiceText, CancellationToken ct)
+    {
+        if (!Enum.TryParse<TopUpChoice>(choiceText, out var choice))
+            throw new DomainException("booking.invalid_choice", "اختار: تدفع الفرق، أو تنقل لميعاد تاني، أو تسترد فلوسك.");
+        var bookingId = await FindIdAsync(token, ct);
+        var sessionId = await db.Bookings.Where(b => b.Id == bookingId).Select(b => b.SessionId).SingleAsync(ct);
+
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        await db.LockSessionAsync(sessionId, ct);
+        var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
+        var adj = await db.FinancialAdjustments.FirstOrDefaultAsync(a => a.BookingId == bookingId
+            && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending, ct);
+        if (booking.Status != BookingStatus.TopUpPending || adj is null)
+            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.");
+        if (await db.PaymentProofs.AnyAsync(p => p.AdjustmentId == adj.Id && p.Status == PaymentProofStatus.Submitted, ct))
+            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.");
+
+        var now = clock.UtcNow;
+        adj.StudentChoice = choice;
+        adj.ChoiceAtUtc = now;
+        if (choice != TopUpChoice.PayDifference)
+        {
+            adj.Status = AdjustmentStatus.Cancelled;
+            adj.ResolvedBy = "student";
+            adj.ResolvedAtUtc = now;
+            adj.ResolutionNote = choice == TopUpChoice.Refund ? "الطالب اختار الاسترداد" : "الطالب اختار النقل لميعاد تاني";
+            booking.Status = choice == TopUpChoice.Refund ? BookingStatus.RefundPending : BookingStatus.Transferred;
+            booking.CancelledAtUtc = now;
+            booking.CancelReason = adj.ResolutionNote;
+        }
+        db.AuditLogs.Add(new Domain.Administration.AuditLog
+        {
+            Actor = "student", Entity = nameof(Booking), EntityId = booking.Id.ToString(), Action = "TopUpChoice",
+            DataJson = $$"""{"choice":"{{choice}}","amount":{{adj.Amount}}}""", AtUtc = now,
+        });
+        await db.SaveChangesAsync(ct);
+        var session = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
+        await decisions.RefreshStatusAsync(session, ct);
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+    }
+
+    public async Task SubmitTopUpProofAsync(
+        string token, Guid paymentMethodId, Stream content, long length, string? senderReference, CancellationToken ct)
+    {
+        var (buffer, kind) = await ReadImageAsync(content, length, ct);
+        using var _ = buffer;
+        var method = await FindMethodAsync(paymentMethodId, ct);
+        var bookingId = await FindIdAsync(token, ct);
+        var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
+        var adj = await db.FinancialAdjustments.FirstOrDefaultAsync(a => a.BookingId == bookingId
+            && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending, ct);
+        if (booking.Status != BookingStatus.TopUpPending || adj is null)
+            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.");
+        if (await db.PaymentProofs.AnyAsync(p => p.AdjustmentId == adj.Id && p.Status == PaymentProofStatus.Submitted, ct))
+            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.");
+
+        var now = clock.UtcNow;
+        adj.StudentChoice = TopUpChoice.PayDifference;
+        adj.ChoiceAtUtc ??= now;
+        buffer.Position = 0;
+        var key = await files.SaveAsync(buffer, kind.Extension, ct);
+        db.PaymentProofs.Add(new PaymentProof
+        {
+            BookingId = booking.Id, AdjustmentId = adj.Id, PaymentMethodId = method.Id, Amount = adj.Amount, Currency = adj.Currency,
+            SenderReference = Trim100(senderReference), FileKey = key, FileContentType = kind.ContentType,
+            Channel = PaymentChannel.Platform, SubmittedAtUtc = now,
+        });
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Student cancellation. Unpaid bookings simply release the seat. Paid bookings get a full refund when cancelled
+    /// early enough (admin setting); later cancellations need explicit acceptance that no refund is due (decision D8).
+    /// </summary>
+    public async Task CancelAsync(string token, bool acceptNoRefund, CancellationToken ct)
+    {
+        var cfg = await settings.GetBookingSettingsAsync(ct);
+        var bookingId = await FindIdAsync(token, ct);
+        var sessionId = await db.Bookings.Where(b => b.Id == bookingId).Select(b => b.SessionId).SingleAsync(ct);
+
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        await db.LockSessionAsync(sessionId, ct);
+        var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
+        var session = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
+        var now = clock.UtcNow;
+        if (!CanCancel(booking.IsExpired(now) ? BookingStatus.Expired : booking.Status, session, now))
+            throw new DomainException(BookingErrors.CancelNotAllowed, "مينفعش تلغي الحجز ده دلوقتي.");
+
+        var paid = booking.Status is BookingStatus.PaymentUnderReview or BookingStatus.Confirmed or BookingStatus.TopUpPending;
+        var fullRefund = now <= session.StartUtc.AddHours(-cfg.FullRefundCancellationHours);
+        if (paid && !fullRefund && !acceptNoRefund)
+            throw new DomainException(BookingErrors.CancelNotAllowed,
+                $"الإلغاء قبل الجلسة بأقل من {cfg.FullRefundCancellationHours} ساعة مش بيرجّع الفلوس. أكّد إنك موافق تلغي من غير استرداد.");
+
+        await db.FinancialAdjustments
+            .Where(a => a.BookingId == bookingId && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending)
+            .ExecuteUpdateAsync(u => u.SetProperty(a => a.Status, AdjustmentStatus.Cancelled)
+                .SetProperty(a => a.ResolutionNote, "الطالب لغى الحجز").SetProperty(a => a.ResolvedAtUtc, now), ct);
+        booking.Status = paid && fullRefund ? BookingStatus.RefundPending : BookingStatus.Cancelled;
+        booking.CancelledAtUtc = now;
+        booking.CancelReason = paid ? (fullRefund ? "إلغاء من الطالب — استرداد كامل" : "إلغاء متأخر من الطالب — بدون استرداد") : "إلغاء من الطالب قبل الدفع";
+        db.AuditLogs.Add(new Domain.Administration.AuditLog
+        {
+            Actor = "student", Entity = nameof(Booking), EntityId = booking.Id.ToString(), Action = "StudentCancel",
+            DataJson = $$"""{"status":"{{booking.Status}}"}""", AtUtc = now,
+        });
+        await db.SaveChangesAsync(ct);
+        await decisions.RefreshStatusAsync(session, ct);
+        await db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+    }
+
+    private static bool CanCancel(BookingStatus status, Session session, DateTime now) =>
+        now < session.StartUtc && session.Status != SessionStatus.Cancelled && status is BookingStatus.PendingHold
+            or BookingStatus.PendingPayment or BookingStatus.PaymentUnderReview or BookingStatus.Confirmed or BookingStatus.TopUpPending;
+
+    private async Task<(MemoryStream Buffer, (string ContentType, string Extension) Kind)> ReadImageAsync(Stream content, long length, CancellationToken ct)
+    {
+        var cfg = await settings.GetBookingSettingsAsync(ct);
+        if (length <= 0 || length > cfg.MaxProofFileSizeKb * 1024L)
+            throw new DomainException(BookingErrors.InvalidFile, $"The image must be smaller than {cfg.MaxProofFileSizeKb / 1024} MB.");
+        var buffer = new MemoryStream();
+        await content.CopyToAsync(buffer, ct);
+        if (buffer.Length > cfg.MaxProofFileSizeKb * 1024L)
+            throw new DomainException(BookingErrors.InvalidFile, "The image is too large.");
+        var kind = ImageSniffer.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)))
+                   ?? throw new DomainException(BookingErrors.InvalidFile, "Only JPG, PNG or WebP screenshots are accepted.");
+        return (buffer, kind);
+    }
+
+    private async Task<PaymentMethod> FindMethodAsync(Guid id, CancellationToken ct) =>
+        await db.PaymentMethods.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id && m.IsActive, ct)
+        ?? throw new DomainException("payment.method_not_found", "Payment method not found.");
+
+    private static string? Trim100(string? s) =>
+        string.IsNullOrWhiteSpace(s) ? null : s.Trim()[..Math.Min(s.Trim().Length, 100)];
 
     /// <summary>Returns the meeting URL only for confirmed bookings inside the join window.</summary>
     public async Task<JoinResponse> JoinAsync(string token, CancellationToken ct)

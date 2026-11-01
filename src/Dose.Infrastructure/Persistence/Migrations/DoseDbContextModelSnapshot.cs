@@ -101,6 +101,13 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .HasColumnType("binary(32)")
                         .IsFixedLength();
 
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<DateTime?>("CancelledAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("ConfirmedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -116,6 +123,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("nchar(3)")
                         .IsFixedLength();
+
+                    b.Property<DateTime?>("FollowUpResolvedAtUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("HoldExpiresAtUtc")
                         .HasColumnType("datetime2");
@@ -182,6 +192,75 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("Dose.Domain.Bookings.FinancialAdjustment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ChoiceAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nchar(3)")
+                        .IsFixedLength();
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ResolutionNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ResolvedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResolvedBy")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<DateTime?>("RespondByUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentChoice")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Type", "Status");
+
+                    b.HasIndex("BookingId", "Type", "Status");
+
+                    b.ToTable("FinancialAdjustments", t =>
+                        {
+                            t.HasCheckConstraint("CK_Adjustment_Amount", "[Amount] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Dose.Domain.Bookings.PaymentMethod", b =>
                 {
                     b.Property<Guid>("Id")
@@ -225,6 +304,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AdjustmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
@@ -279,6 +361,8 @@ namespace Dose.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AdjustmentId");
+
                     b.HasIndex("BookingId");
 
                     b.HasIndex("PaymentMethodId");
@@ -288,6 +372,110 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.HasIndex("Status", "SubmittedAtUtc");
 
                     b.ToTable("PaymentProofs");
+                });
+
+            modelBuilder.Entity("Dose.Domain.Bookings.SessionRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdminNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ContactPhoneE164")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("FulfilledBySessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GradeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GuardianName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("GuardianPhoneE164")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PreferredDays")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("PreferredTierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PreferredTimes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("ScopeText")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("ServiceTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudyTrackId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactPhoneE164");
+
+                    b.HasIndex("FulfilledBySessionId");
+
+                    b.HasIndex("GradeId");
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.HasIndex("ServiceTypeId");
+
+                    b.HasIndex("StudyTrackId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("Status", "CreatedAtUtc");
+
+                    b.ToTable("SessionRequests");
                 });
 
             modelBuilder.Entity("Dose.Domain.Bookings.Student", b =>
@@ -767,6 +955,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("ChapterId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("DecisionConfirmedCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("EndUtc")
                         .HasColumnType("datetime2");
 
@@ -831,6 +1022,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("TierDecidedAtUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("TierDecisionAtUtc")
                         .HasColumnType("datetime2");
@@ -1149,8 +1343,24 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Dose.Domain.Bookings.FinancialAdjustment", b =>
+                {
+                    b.HasOne("Dose.Domain.Bookings.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("Dose.Domain.Bookings.PaymentProof", b =>
                 {
+                    b.HasOne("Dose.Domain.Bookings.FinancialAdjustment", "Adjustment")
+                        .WithMany()
+                        .HasForeignKey("AdjustmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Dose.Domain.Bookings.Booking", "Booking")
                         .WithMany()
                         .HasForeignKey("BookingId")
@@ -1163,9 +1373,43 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Adjustment");
+
                     b.Navigation("Booking");
 
                     b.Navigation("PaymentMethod");
+                });
+
+            modelBuilder.Entity("Dose.Domain.Bookings.SessionRequest", b =>
+                {
+                    b.HasOne("Dose.Domain.Sessions.Session", null)
+                        .WithMany()
+                        .HasForeignKey("FulfilledBySessionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Dose.Domain.Catalog.Grade", null)
+                        .WithMany()
+                        .HasForeignKey("GradeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Dose.Domain.Catalog.ServiceType", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Dose.Domain.Catalog.StudyTrack", null)
+                        .WithMany()
+                        .HasForeignKey("StudyTrackId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Dose.Domain.Catalog.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dose.Domain.Catalog.Chapter", b =>

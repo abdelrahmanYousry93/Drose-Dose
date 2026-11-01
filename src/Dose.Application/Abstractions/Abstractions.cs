@@ -32,6 +32,8 @@ public interface IDoseDbContext
     DbSet<PaymentProof> PaymentProofs { get; }
     DbSet<SystemSetting> SystemSettings { get; }
     DbSet<AuditLog> AuditLogs { get; }
+    DbSet<FinancialAdjustment> FinancialAdjustments { get; }
+    DbSet<SessionRequest> SessionRequests { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
