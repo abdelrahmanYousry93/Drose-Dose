@@ -319,3 +319,19 @@ Not yet (planned): session request form (Phase 3), tier-decision job & top-up fl
 | Tests | 70 passing (5 new admin integration tests) + browser walkthrough of the admin flow |
 
 Still planned: teacher photo upload (URL for now), session requests (Phase 3), tier-decision job and top-up/refund workflow (Phase 3), teacher area (Phase 4).
+
+## 7. Phase 3 — delivered
+
+| Area | What works |
+|---|---|
+| Session requests | Public form (grade, subject, track, service, scope, preferred days/times, private or group size with indicative prices, guardian rule). Admin list by status, WhatsApp chat, "create session from request" (pre-filled; request marked fulfilled on save) |
+| Group decision | Hangfire job every 5 minutes decides due group sessions (admin can also "decide now"). Target reached → session confirmed. Not reached → each confirmed student gets a top-up entry (difference to the tier of the actual count, or the private price if alone) and a response deadline |
+| Student choice | On the private booking page: pay the difference (upload proof), move to another date, or full refund. Nothing is charged without the student's choice |
+| Fairness rules | The count used for pricing never drops below the count at decision time, so students who opt out never raise what others owe. A late payment approval re-calculates and can only lower top-ups (cancelled when the target is reached) |
+| Ledger | Top-ups, waivers and refunds are separate ledger entries; amounts are never edited — recalculation cancels and re-issues. Price snapshots untouched |
+| Admin follow-ups | One page for top-ups (waive), refunds (mark transferred back), transfers (mark arranged), with ready WhatsApp messages; top-up proofs appear in the payments queue tagged "فرق جروب" |
+| Cancellation | Student can cancel from the booking page: unpaid → seat released; paid and early enough (admin setting, default 24h) → refund pending; later → only with explicit "no refund" acceptance |
+| Jobs | Hangfire (SQL Server storage): tier decisions every 5 min, expire stale holds every 10 min. Disable with `Jobs__Enabled=false` |
+| Tests | 76 passing (6 new Phase 3 integration tests) + browser walkthrough of the full request → booking → decision → top-up → refund flow |
+
+Next (Phase 4): teacher area (login, availability, assigned sessions, attendance), notification log with message templates.

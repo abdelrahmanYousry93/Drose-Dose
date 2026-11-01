@@ -14,7 +14,7 @@ instead of paying for monthly lessons.
 |---|---|
 | API | ASP.NET Core, .NET 10 (LTS), modular monolith |
 | Data | SQL Server / Azure SQL, EF Core (from Phase 1) |
-| Jobs | Hangfire (from Phase 3) |
+| Jobs | Hangfire on SQL Server: group tier decisions (5 min), expire stale bookings (10 min) |
 | Auth | ASP.NET Core Identity, HTTP-only same-site cookie (admin/teacher); students use secret booking links |
 | Web | Angular 22, Arabic RTL, Cairo font (self-hosted) |
 
@@ -74,8 +74,9 @@ New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s sr
 |---|---|
 | `/` | Home: choose grade, subject, track |
 | `/sessions`, `/open-groups` | Available sessions / open groups |
-| `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join |
-| `/admin` | Admin: payments, sessions, pricing, teachers, catalog, payment methods, settings |
+| `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join; group top-up choice; cancel |
+| `/request-session` | Request a new session |
+| `/admin` | Admin: payments, follow-ups, requests, sessions, pricing, teachers, catalog, payment methods, settings |
 
 ## Configuration
 
@@ -91,7 +92,8 @@ never hard-coded.
 | `Public__BusinessTimeZone` | Display time zone (default `Africa/Cairo`) |
 | `Seed__AdminEmail` / `Seed__AdminPassword` | Development-only initial admin |
 | `Storage__LocalRoot` | Private folder for payment screenshots (dev) |
+| `Jobs__Enabled` | Run background jobs in this instance (default `true`) |
 
 ## Status
 
-Phase 2 delivered — see `docs/phase0-assessment.md` sections 5–6. Next: Phase 3 (session requests, group tier decision and top-up/refund workflow).
+Phase 3 delivered — see `docs/phase0-assessment.md` sections 5–7. Next: Phase 4 (teacher area, notification log).
