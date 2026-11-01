@@ -40,6 +40,11 @@ docs/                   Spec, assessment, brand
 
 ## Run locally
 
+Windows, one command (needs .NET 10 SDK, Node.js 22+, Docker Desktop): `powershell -ExecutionPolicy Bypass -File .\run-local.ps1`
+— or with an existing SQL Server: add `-ConnectionString "Server=...;Database=Dose;..."`.
+
+Manual steps:
+
 ```bash
 # 1. Database (needed from Phase 1)
 cp .env.example .env          # set DOSE_SQL_SA_PASSWORD
