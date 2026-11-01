@@ -8,7 +8,19 @@ export const adminRoutes: Routes = [
     component: AdminShell,
     canActivate: [adminGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'payments' },
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard', title: 'الرئيسية — Dose',
+        loadComponent: () => import('./admin-dashboard').then((m) => m.AdminDashboard),
+      },
+      {
+        path: 'users', title: 'المستخدمين — Dose',
+        loadComponent: () => import('./admin-users').then((m) => m.AdminUsers),
+      },
+      {
+        path: 'availability', title: 'مواعيد المدرسين — Dose',
+        loadComponent: () => import('./admin-users').then((m) => m.AdminAvailability),
+      },
       { path: 'payments', component: AdminPayments, title: 'مراجعة المدفوعات — Dose' },
       {
         path: 'sessions', title: 'الجلسات — Dose',

@@ -40,6 +40,7 @@ const messages: Record<string, string> = {
   'payment.reason_required': 'اكتب سبب الرفض للطالب.',
   'booking.no_topup': 'مفيش فرق مطلوب على الحجز ده.',
   'booking.invalid_choice': 'اختار واحد من الاختيارات.',
+  'teacher.not_linked': 'حسابك مش مربوط بملف مدرس. كلّم الإدارة.',
   'http.401': 'لازم تسجّل دخول.',
   'http.403': 'مش مسموح لك بالصفحة دي.',
   'http.429': 'محاولات كتير. استنى دقيقة وجرّب تاني.',

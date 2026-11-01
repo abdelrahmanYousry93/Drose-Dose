@@ -10,9 +10,9 @@ export const adminGuard: CanActivateFn = async () => {
   const router = inject(Router);
   try {
     const me = await api.me();
-    return me.roles.includes('Admin') ? true : router.parseUrl('/admin/login');
+    return me.roles.includes('Admin') ? true : router.parseUrl('/login');
   } catch {
-    return router.parseUrl('/admin/login');
+    return router.parseUrl('/login');
   }
 };
 
@@ -22,7 +22,8 @@ export const adminGuard: CanActivateFn = async () => {
   template: `
     <section class="page narrow">
       <form class="dose-card box" (ngSubmit)="login()">
-        <h1 class="page-title">دخول الإدارة</h1>
+        <h1 class="page-title">دخول فريق Dose</h1>
+        <p class="muted small">للإدارة والمدرسين. الطلاب مش محتاجين حساب — بيدخلوا من لينك الحجز.</p>
         @if (error()) { <p class="alert alert--error">{{ error() }}</p> }
         <label class="field"><span>البريد الإلكتروني</span>
           <input name="email" type="email" [(ngModel)]="email" required dir="ltr" autocomplete="username" /></label>
@@ -47,7 +48,8 @@ export class AdminLogin {
     this.error.set('');
     try {
       await this.api.login(this.email, this.password);
-      await this.router.navigateByUrl('/admin/payments');
+      const me = await this.api.me();
+      await this.router.navigateByUrl(me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/');
     } catch (e) {
       this.error.set(errorMessage(e) === 'لازم تسجّل دخول.' ? 'بيانات الدخول غير صحيحة.' : errorMessage(e));
     } finally {
@@ -61,6 +63,7 @@ export class AdminLogin {
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <nav class="admin-nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="on">الرئيسية</a>
       <a routerLink="/admin/payments" routerLinkActive="on">المدفوعات</a>
       <a routerLink="/admin/follow-ups" routerLinkActive="on">المتابعات</a>
       <a routerLink="/admin/requests" routerLinkActive="on">الطلبات</a>
@@ -69,6 +72,8 @@ export class AdminLogin {
       <a routerLink="/admin/teachers" routerLinkActive="on">المدرسين</a>
       <a routerLink="/admin/catalog" routerLinkActive="on">الكتالوج</a>
       <a routerLink="/admin/payment-methods" routerLinkActive="on">طرق الدفع</a>
+      <a routerLink="/admin/availability" routerLinkActive="on">مواعيد المدرسين</a>
+      <a routerLink="/admin/users" routerLinkActive="on">المستخدمين</a>
       <a routerLink="/admin/settings" routerLinkActive="on">الإعدادات</a>
       <button type="button" (click)="logout()">خروج</button>
     </nav>
@@ -85,7 +90,7 @@ export class AdminShell {
   private readonly router = inject(Router);
   protected async logout() {
     await this.api.logout().catch(() => undefined);
-    await this.router.navigateByUrl('/admin/login');
+    await this.router.navigateByUrl('/login');
   }
 }
 

@@ -31,6 +31,15 @@ export const routes: Routes = [
     title: 'طلب جلسة — Dose',
   },
   {
+    path: 'login',
+    loadComponent: () => import('./features/admin/admin').then((m) => m.AdminLogin),
+    title: 'دخول فريق Dose',
+  },
+  {
+    path: 'teacher',
+    loadChildren: () => import('./features/teacher/teacher.routes').then((m) => m.teacherRoutes),
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },

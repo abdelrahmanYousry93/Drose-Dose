@@ -63,6 +63,21 @@ export interface SessionRequestA {
   preferredDays: string; preferredTimes: string; mode: 'Private' | 'Group'; preferredTierNameAr: string | null;
   notes: string | null; adminNotes: string | null; fulfilledBySessionId: string | null; createdAtUtc: string;
 }
+export interface DashSession {
+  id: string; titleAr: string; subjectNameAr: string; teacherNameAr: string; startUtc: string; mode: string; status: string;
+  confirmedCount: number; capacity: number; minParticipants: number; hasMeetingUrl: boolean; tierDecisionAtUtc: string | null;
+}
+export interface Dashboard {
+  pendingProofs: number; oldestPendingProofMinutes: number | null; openTopUps: number; overdueTopUps: number; pendingRefunds: number;
+  pendingTransfers: number; newRequests: number; pendingAvailability: number; upcomingSessions: DashSession[];
+  groupsNearDecision: DashSession[]; periodDays: number; periodConfirmedBookings: number; periodCollected: number;
+  periodRefunded: number; currency: string;
+}
+export interface UserA { id: string; email: string; roles: string[]; isDisabled: boolean; teacherId: string | null; teacherNameAr: string | null }
+export interface AvailabilityA {
+  id: string; teacherId: string; teacherNameAr: string; startUtc: string; endUtc: string; note: string | null; status: string;
+  reviewNote: string | null; createdAtUtc: string;
+}
 export interface ReissueLink { reference: string; accessToken: string; contactPhone: string | null; message: string }
 
 @Injectable({ providedIn: 'root' })
@@ -132,6 +147,18 @@ export class AdminApi {
   sessionBookings(id: string) { return this.get<SessionBookingA[]>(`/sessions/${id}/bookings`); }
   reissueLink(bookingId: string) { return this.post<ReissueLink>(`/bookings/${bookingId}/reissue-link`, {}); }
   decide(sessionId: string) { return this.post<void>(`/sessions/${sessionId}/decide`, {}); }
+
+  // Dashboard, users, availability
+  dashboard(days = 30) { return this.get<Dashboard>('/dashboard', { days: String(days) }); }
+  users() { return this.get<UserA[]>('/users'); }
+  createUser(email: string, password: string, role: string, teacherId: string | null) {
+    return this.post<{ id: string }>('/users', { email, password, role, teacherId });
+  }
+  resetPassword(id: string, password: string) { return this.post<void>(`/users/${id}/password`, { password }); }
+  setDisabled(id: string, disabled: boolean) { return this.post<void>(`/users/${id}/disabled`, { disabled }); }
+  linkTeacher(id: string, teacherId: string | null) { return this.post<void>(`/users/${id}/teacher`, { teacherId }); }
+  availability(status: string | null) { return this.get<AvailabilityA[]>('/availability', { status }); }
+  reviewAvailability(id: string, approve: boolean, note: string | null) { return this.post<void>(`/availability/${id}/review`, { approve, note }); }
 
   // Follow-ups & requests
   followUps() { return this.get<FollowUp[]>('/follow-ups'); }
