@@ -18,6 +18,7 @@ public static class SettingKeys
     public const string PrivateBookingDeadlineHours = "session.private_booking_deadline_hours";
     public const string TopUpResponseHours = "group.topup_response_hours";
     public const string FullRefundCancellationHours = "booking.full_refund_cancellation_hours";
+    public const string ProofRetentionDays = "privacy.payment_proof_retention_days";
 
     public static readonly IReadOnlyDictionary<string, (string Default, string DescriptionAr)> Definitions =
         new Dictionary<string, (string, string)>
@@ -31,6 +32,7 @@ public static class SettingKeys
             [PrivateBookingDeadlineHours] = ("2", "آخر ميعاد لحجز الجلسة الفردية قبل بدايتها (بالساعات)"),
             [TopUpResponseHours] = ("6", "مهلة رد الطالب لو الجروب مكملش (بالساعات)"),
             [FullRefundCancellationHours] = ("24", "الطالب يسترد فلوسه كاملة لو لغى قبل الجلسة بكام ساعة"),
+            [ProofRetentionDays] = ("180", "صور إيصالات الدفع بتتمسح بعد انتهاء الجلسة بكام يوم"),
         };
 }
 

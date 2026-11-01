@@ -365,5 +365,27 @@ Not yet: notification log with message templates; teacher photo upload; deployme
 | Tests | 88 backend tests passing (messages, templates, photo validation, language fallback, follow-up language) + browser walkthrough in both languages (English and Arabic bookings, admin approval, Messages compose with link, templates, photo upload, language switch) |
 
 Admin-only lists (payments, follow-ups, requests, dashboard) show content names in Arabic as entered; the admin interface itself is translated.
-Not yet: optional admin page to override interface texts; Phase 5 (hardening, PWA, Azure deployment).
+Not yet: optional admin page to override interface texts.
 
+
+## 10. Phase 5a — security hardening + PWA — delivered
+
+| Area | What works |
+|---|---|
+| Encryption keys | The keys behind login cookies and the encrypted booking links are stored in the database (`DataProtectionKeys`). Before this, every restart or redeploy would have logged the team out and broken message links for existing bookings |
+| HTTPS | Production redirects HTTP → HTTPS (port 443 behind App Service), sends HSTS (1 year), and the login cookie is HTTPS-only (`Secure`, `HttpOnly`, `SameSite=Strict`) |
+| Real client IP | Forwarded headers from the Azure front end are honoured (one hop), so rate limits apply per real visitor, not per proxy |
+| Browser security headers | Content-Security-Policy (same-origin scripts only, no framing, no plugins), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` (the secret `/b/` link never leaks to other sites), `Permissions-Policy` (no camera/mic/location), `Cross-Origin-Opener-Policy` |
+| Cross-site requests | Any state-changing API call carrying an `Origin` from another site is rejected (403, code `http.cross_site`) — on top of the SameSite cookie. Extra allowed origins: `Security__AllowedOrigins__0…` |
+| Rate limits | Per-IP ceiling across the whole API (300/min, sliding) on top of the existing booking (60/min) and login (10/min) limits. Request bodies capped at 12 MB |
+| No caching of personal data | Every API response is `Cache-Control: no-store` unless an endpoint opts in (teacher photos) |
+| Data retention (D12) | Daily job deletes payment screenshots N days after the session ended (admin setting, default **180**). The payment record (amount, method, reviewer, status) is kept; the admin page shows "screenshot deleted" instead of the image. Each run is written to the audit log |
+| Health check | `/api/health` checks the database (503 if unreachable) — for the App Service health probe |
+| Single origin hosting | When the built Angular app is in the API's `wwwroot`, the API serves it (hashed files cached for a year; `index.html` and service-worker files never cached) — one origin, so the SameSite cookie and CSP stay simple |
+| Logs | Production logs are JSON; database command logging is off by default; phone numbers, tokens and request bodies are not logged |
+| Already in place (earlier phases) | Admin/teacher lockout after 5 wrong passwords (15 min), 10-character passwords, disabled accounts signed out within a minute, uploaded files checked by content (not extension) and stored outside the web root, secret links stored only as hashes, audit log of admin actions |
+| PWA | Installable app: manifest (name, colours, icons incl. maskable, shortcuts to open groups / request a session), iPhone home-screen tags. Angular service worker (production builds only): app files cached for fast repeat visits; catalog, sessions and the student's own booking page cached with network-first so they still show offline; Meet "join", payments and all admin/teacher APIs are never cached |
+| PWA screens | Offline notice under the header; "new version ready — update now" when an update is downloaded (installed apps also check every 6 hours); "add Dose to your home screen" card for students (Android install button, iPhone Share-menu hint), hidden on admin/teacher pages and for 30 days after "Not now". Arabic and English |
+| Tests | 94 backend tests passing (new: security headers, HTTPS redirect, cross-site block, 401/404 behaviour, keys surviving an app restart, screenshot retention) + browser walkthrough on the production build (service worker takes control, offline open-groups page, full booking with screenshot upload under the CSP, admin login, retention setting, language switch; install card in both languages and on iPhone) |
+
+Still to do for go-live (Phase 5b — Azure deployment): Azure Blob private container for screenshots/photos (today: local disk), Key Vault references for the connection string, Azure SQL automatic backups / retention check, CI/CD pipeline, custom domain + TLS certificate, and optionally two-step sign-in for admins.

@@ -1,0 +1,46 @@
+{
+ "pwa.offline": [
+  "إنت مش متصل بالإنترنت دلوقتي — بنعرضلك آخر بيانات اتحفظت. الحجز والدفع محتاجين نت.",
+  "You're offline — showing the last saved information. Booking and payment need a connection."
+ ],
+ "pwa.updateReady": [
+  "فيه نسخة جديدة من Dose جاهزة.",
+  "A new version of Dose is ready."
+ ],
+ "pwa.updateNow": [
+  "حدّث دلوقتي",
+  "Update now"
+ ],
+ "pwa.installTitle": [
+  "ضيف Dose على شاشة موبايلك",
+  "Add Dose to your home screen"
+ ],
+ "pwa.installBody": [
+  "يفتح أسرع وملء الشاشة زي أي تطبيق، ومن غير ما تنزّل حاجة من المتجر.",
+  "Opens faster and full-screen like an app — nothing to download from a store."
+ ],
+ "pwa.iosHint": [
+  "على الآيفون: دوس على زرار المشاركة (المربع اللي فيه سهم لفوق) وبعدين «إضافة إلى الشاشة الرئيسية».",
+  "On iPhone: tap the Share button (the square with an up arrow), then “Add to Home Screen”."
+ ],
+ "pwa.install": [
+  "ضيفه",
+  "Add"
+ ],
+ "pwa.notNow": [
+  "مش دلوقتي",
+  "Not now"
+ ],
+ "payments.fileDeleted": [
+  "صورة الإيصال اتمسحت حسب سياسة الاحتفاظ بالبيانات. بيانات الدفع نفسها محفوظة.",
+  "The screenshot was deleted under the data-retention policy. The payment record is kept."
+ ],
+ "settings.keys.privacy_payment_proof_retention_days": [
+  "صور إيصالات الدفع بتتمسح بعد انتهاء الجلسة بكام يوم",
+  "Delete payment screenshots this many days after the session ends"
+ ],
+ "errors.http_cross_site": [
+  "الطلب اترفض لأسباب أمان. افتح Dose من اللينك الرسمي وجرّب تاني.",
+  "The request was blocked for security reasons. Open Dose from its official address and try again."
+ ]
+}

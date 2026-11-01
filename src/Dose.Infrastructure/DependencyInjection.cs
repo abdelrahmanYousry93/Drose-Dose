@@ -21,7 +21,9 @@ public static class DependencyInjection
 
         var root = config["Storage:LocalRoot"] ?? Path.Combine(AppContext.BaseDirectory, "private-uploads");
         services.AddSingleton<IFileStorage>(new LocalFileStorage(root));
-        services.AddDataProtection().SetApplicationName("Dose");
+        // Keys live in the database: login cookies and the encrypted booking links keep working after a restart, redeploy
+        // or scale-out. (At rest they are protected by Azure SQL encryption; a Key Vault key can wrap them later.)
+        services.AddDataProtection().SetApplicationName("Dose").PersistKeysToDbContext<DoseDbContext>();
         services.AddSingleton<ITokenProtector, Security.DataProtectionTokenProtector>();
         return services;
     }

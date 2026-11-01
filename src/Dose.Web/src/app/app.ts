@@ -4,10 +4,11 @@ import { PublicSettingsService } from './core/public-settings.service';
 import { TranslatePipe } from './core/i18n';
 import { LangSwitch } from './shared/lang-switch';
 import { Logo } from './shared/logo';
+import { PwaBanners } from './shared/pwa-banners';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, Logo, LangSwitch, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, Logo, LangSwitch, PwaBanners, TranslatePipe],
   templateUrl: './app.html',
   styles: `
     :host { display: flex; flex-direction: column; min-height: 100dvh; }

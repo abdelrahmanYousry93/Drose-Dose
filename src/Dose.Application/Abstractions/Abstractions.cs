@@ -66,6 +66,8 @@ public interface IFileStorage
 {
     Task<string> SaveAsync(Stream content, string extension, CancellationToken ct);
     Task<Stream?> OpenAsync(string key, CancellationToken ct);
+    /// <summary>Removes the file if it exists (idempotent).</summary>
+    Task DeleteAsync(string key, CancellationToken ct);
 }
 
 /// <summary>The language of the current request ("ar" or "en"), resolved from the Accept-Language header.</summary>

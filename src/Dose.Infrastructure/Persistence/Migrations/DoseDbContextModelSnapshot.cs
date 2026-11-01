@@ -347,6 +347,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<DateTime?>("FileDeletedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FileKey")
                         .IsRequired()
                         .HasMaxLength(400)
@@ -1385,6 +1388,27 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_Availability_Time", "[EndUtc] > [StartUtc]");
                         });
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Xml")
+                        .HasMaxLength(-1)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

@@ -156,6 +156,8 @@ public sealed class PaymentProof : Entity
     public string? SenderReference { get; init; }
     public required string FileKey { get; init; }
     public required string FileContentType { get; init; }
+    /// <summary>Set when the screenshot file was deleted under the retention policy (the payment record stays).</summary>
+    public DateTime? FileDeletedAtUtc { get; set; }
     public PaymentChannel Channel { get; init; }
     public PaymentProofStatus Status { get; set; } = PaymentProofStatus.Submitted;
     public DateTime SubmittedAtUtc { get; init; }

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -17,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Dose.Api\Dose.Api.csproj" />
     <ProjectReference Include="..\..\src\Dose.Infrastructure\Dose.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Dose.Application\Dose.Application.csproj" />
     <ProjectReference Include="..\..\src\Dose.Domain\Dose.Domain.csproj" />

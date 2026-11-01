@@ -26,18 +26,22 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
                 StudentName = p.Booking.Student!.Name, p.Booking.Student.ContactPhoneE164, p.Booking.Student.GuardianPhoneE164,
                 p.Booking.Session!.ScopeTitleAr, p.Booking.Session.StartUtc,
                 MethodNameAr = p.PaymentMethod!.NameAr, p.Amount, p.Currency, p.SenderReference, p.Channel, p.Status, p.SubmittedAtUtc, IsTopUp = p.AdjustmentId != null,
+                FileDeleted = p.FileDeletedAtUtc != null,
             })
             .ToListAsync(ct);
         return rows.Select(r => new PaymentProofAdminDto(
             r.Id, r.Reference, r.BookingStatus.ToString(), r.StudentName, r.ContactPhoneE164, r.GuardianPhoneE164,
             r.ScopeTitleAr, r.StartUtc, r.MethodNameAr, r.Amount, r.Currency, r.SenderReference, r.Channel.ToString(),
-            r.Status.ToString(), r.SubmittedAtUtc, Math.Round((now - r.SubmittedAtUtc).TotalMinutes), r.IsTopUp)).ToList();
+            r.Status.ToString(), r.SubmittedAtUtc, Math.Round((now - r.SubmittedAtUtc).TotalMinutes), r.IsTopUp, r.FileDeleted)).ToList();
     }
 
     public async Task<(Stream Content, string ContentType)> OpenFileAsync(Guid proofId, CancellationToken ct)
     {
         var proof = await db.PaymentProofs.AsNoTracking().FirstOrDefaultAsync(p => p.Id == proofId, ct)
                     ?? throw new DomainException("payment.proof_not_found", "إيصال الدفع مش موجود.", "Payment proof not found.");
+        if (proof.FileDeletedAtUtc is not null)
+            throw new DomainException("payment.file_deleted", "صورة الإيصال اتمسحت حسب سياسة الاحتفاظ بالبيانات. بيانات الدفع نفسها لسه محفوظة.",
+                "The screenshot was deleted under the data-retention policy. The payment record itself is kept.");
         var stream = await files.OpenAsync(proof.FileKey, ct)
                      ?? throw new DomainException("payment.file_missing", "صورة الإيصال مش موجودة في التخزين.", "The screenshot file is missing from storage.");
         return (stream, proof.FileContentType);

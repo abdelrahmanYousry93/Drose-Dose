@@ -255,7 +255,8 @@ export const en: typeof ar = {
     "http_403": "You don't have access to this page.",
     "http_404": "Not found.",
     "http_429": "Too many attempts. Wait a minute and try again.",
-    "http_500": "Server error. Please try again shortly."
+    "http_500": "Server error. Please try again shortly.",
+    "http_cross_site": "The request was blocked for security reasons. Open Dose from its official address and try again."
   },
   "f": {
     "active": "Active",
@@ -413,6 +414,7 @@ export const en: typeof ar = {
     "age": "Waiting",
     "approve": "Approve payment",
     "empty": "No receipts here.",
+    "fileDeleted": "The screenshot was deleted under the data-retention policy. The payment record is kept.",
     "filterApproved": "Approved",
     "filterRejected": "Rejected",
     "hide": "Hide receipt",
@@ -469,6 +471,16 @@ export const en: typeof ar = {
     "to": "Ends (optional)",
     "version": "Version {n}",
     "whoFor": "Who is this plan for?"
+  },
+  "pwa": {
+    "install": "Add",
+    "installBody": "Opens faster and full-screen like an app — nothing to download from a store.",
+    "installTitle": "Add Dose to your home screen",
+    "iosHint": "On iPhone: tap the Share button (the square with an up arrow), then “Add to Home Screen”.",
+    "notNow": "Not now",
+    "offline": "You're offline — showing the last saved information. Booking and payment need a connection.",
+    "updateNow": "Update now",
+    "updateReady": "A new version of Dose is ready."
   },
   "request": {
     "choose": "Choose",
@@ -609,6 +621,7 @@ export const en: typeof ar = {
       "group_tier_decision_hours_before_start": "When the group size is decided before the session (hours)",
       "group_topup_response_hours": "Time for the student to reply if the group doesn't fill (hours)",
       "payment_max_proof_file_size_kb": "Maximum receipt image size (KB)",
+      "privacy_payment_proof_retention_days": "Delete payment screenshots this many days after the session ends",
       "session_join_opens_minutes_before_start": "Join button opens this many minutes before start",
       "session_private_booking_deadline_hours": "Private session booking closes this many hours before start"
     },

@@ -23,7 +23,10 @@ public static class Endpoints
     {
         var api = app.MapGroup("/api");
 
-        api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+        // Used by the Azure App Service health check: 503 when the database is unreachable.
+        api.MapGet("/health", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
+            await db.Database.CanConnectAsync(ct) ? Results.Ok(new { status = "ok" }) : Results.StatusCode(503))
+            .DisableRateLimiting();
         api.MapGet("/public-settings", async (IOptions<PublicSettings> s, SettingsService settings, CancellationToken ct) =>
             Results.Ok(new PublicSettingsDto(s.Value.WhatsAppBusinessNumber, s.Value.BusinessTimeZone,
                 (await settings.GetBookingSettingsAsync(ct)).FullRefundCancellationHours)));

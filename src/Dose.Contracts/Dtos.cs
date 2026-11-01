@@ -118,7 +118,8 @@ public sealed record PaymentProofAdminDto(
     string Status,
     DateTime SubmittedAtUtc,
     double AgeMinutes,
-    bool IsTopUp);
+    bool IsTopUp,
+    bool FileDeleted = false);
 
 public sealed record RejectPaymentRequest(string Reason);
 

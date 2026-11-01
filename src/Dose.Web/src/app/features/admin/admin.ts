@@ -129,10 +129,14 @@ export class AdminShell {
             @if (p.senderReference) { <li><span>{{ 'payments.senderRef' | t }}</span><span dir="ltr">{{ p.senderReference }}</span></li> }
             <li><span>{{ 'payments.age' | t }}</span><span>{{ 'duration.minutes' | t: { n: round(p.ageMinutes) } }}</span></li>
           </ul>
-          <button type="button" class="dose-btn dose-btn--ghost" (click)="toggleImage(p.id)">
-            {{ (openImage() === p.id ? 'payments.hide' : 'payments.show') | t }}
-          </button>
-          @if (openImage() === p.id) { <img [src]="fileUrl(p.id)" [alt]="'payments.image' | t" class="proof" /> }
+          @if (p.fileDeleted) {
+            <p class="muted small">{{ 'payments.fileDeleted' | t }}</p>
+          } @else {
+            <button type="button" class="dose-btn dose-btn--ghost" (click)="toggleImage(p.id)">
+              {{ (openImage() === p.id ? 'payments.hide' : 'payments.show') | t }}
+            </button>
+            @if (openImage() === p.id) { <img [src]="fileUrl(p.id)" [alt]="'payments.image' | t" class="proof" /> }
+          }
 
           @if (p.status === 'Submitted') {
             <div class="actions">

@@ -101,7 +101,15 @@ never hard-coded.
 | `Seed__AdminEmail` / `Seed__AdminPassword` | Development-only initial admin |
 | `Storage__LocalRoot` | Private folder for payment screenshots (dev) |
 | `Jobs__Enabled` | Run background jobs in this instance (default `true`) |
+| `Public__AppBaseUrl` | Public site address — used in booking links and as the allowed origin for API calls |
+| `Security__AllowedOrigins__0` | Optional extra site allowed to call the API (e.g. a staging front end) |
+| `Security__HttpsPort` | Public HTTPS port for the redirect (default `443`) |
+| `ASPNETCORE_WEBROOT` | Folder with the built Angular app (`dist/dose-web/browser`) when the API serves the site |
+
+Production build served by the API (one origin): `cd src/Dose.Web && npm run build`, then run the API with
+`ASPNETCORE_WEBROOT=<repo>/src/Dose.Web/dist/dose-web/browser` (or copy that folder to the API's `wwwroot`).
+The service worker (PWA) is active only in production builds.
 
 ## Status
 
-Phase 4 plus Arabic/English, WhatsApp messages and teacher photos delivered — see `docs/phase0-assessment.md` sections 5–9. Next: Phase 5 (hardening, PWA, Azure deployment).
+Phase 4, Arabic/English, WhatsApp messages, teacher photos, security hardening and PWA delivered — see `docs/phase0-assessment.md` sections 5–10. Next: Azure deployment (Blob storage, Key Vault, CI/CD, domain).

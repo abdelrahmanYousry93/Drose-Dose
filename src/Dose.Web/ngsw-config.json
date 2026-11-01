@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "navigationUrls": ["/**", "!/**/*.*", "!/**/*__*", "!/**/*__*/**", "!/api/**"],
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": { "files": ["/index.html", "/manifest.webmanifest", "/*.css", "/*.js"] }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": { "files": ["/brand/**", "/icons/**", "/media/**", "/**/*.(svg|png|webp|jpg|woff|woff2)"] }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "catalog",
+      "urls": ["/api/catalog/**", "/api/services", "/api/payment-methods", "/api/public-settings"],
+      "cacheConfig": { "strategy": "freshness", "timeout": "4s", "maxAge": "1d", "maxSize": 30 }
+    },
+    {
+      "name": "sessions",
+      "urls": ["/api/sessions", "/api/sessions/**"],
+      "cacheConfig": { "strategy": "freshness", "timeout": "4s", "maxAge": "1h", "maxSize": 40 }
+    },
+    {
+      "name": "my-booking",
+      "urls": ["/api/b/*"],
+      "cacheConfig": { "strategy": "freshness", "timeout": "5s", "maxAge": "7d", "maxSize": 5 }
+    },
+    {
+      "name": "teacher-photos",
+      "urls": ["/api/teachers/*/photo"],
+      "cacheConfig": { "strategy": "performance", "maxAge": "7d", "maxSize": 50 }
+    }
+  ]
+}

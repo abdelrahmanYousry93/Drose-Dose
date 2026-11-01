@@ -28,6 +28,13 @@ public sealed class LocalFileStorage(string rootPath) : IFileStorage
         return Task.FromResult<Stream?>(File.Exists(path) ? File.OpenRead(path) : null);
     }
 
+    public Task DeleteAsync(string key, CancellationToken ct)
+    {
+        var path = Resolve(key);
+        if (File.Exists(path)) File.Delete(path);
+        return Task.CompletedTask;
+    }
+
     private string Resolve(string key)
     {
         var full = Path.GetFullPath(Path.Combine(_root, key));

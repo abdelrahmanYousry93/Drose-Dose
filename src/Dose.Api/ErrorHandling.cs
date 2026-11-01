@@ -20,6 +20,7 @@ public sealed class DomainExceptionHandler(IProblemDetailsService problems, ILog
                 or AdminErrors.NotFound
                 => StatusCodes.Status404NotFound,
             AdminErrors.Conflict => StatusCodes.Status409Conflict,
+            "payment.file_deleted" => StatusCodes.Status410Gone,
             Dose.Application.Teachers.TeacherErrors.NotLinked or Dose.Application.Teachers.TeacherErrors.NotYours => StatusCodes.Status403Forbidden,
             PricingErrors.NotConfigured or PricingErrors.Ambiguous => StatusCodes.Status422UnprocessableEntity,
             BookingErrors.SessionFull or BookingErrors.SessionClosed or BookingErrors.Duplicate or BookingErrors.Expired

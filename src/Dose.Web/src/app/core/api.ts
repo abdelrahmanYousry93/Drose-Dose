@@ -63,6 +63,7 @@ export interface PaymentProofAdmin {
   guardianPhone: string | null; sessionTitleAr: string; sessionStartUtc: string; methodNameAr: string; amount: number;
   currency: string; senderReference: string | null; channel: string; status: string; submittedAtUtc: string; ageMinutes: number;
   isTopUp: boolean;
+  fileDeleted?: boolean;
 }
 export interface Setting { key: string; value: string; descriptionAr: string | null }
 

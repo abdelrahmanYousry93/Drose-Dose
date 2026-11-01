@@ -5,6 +5,7 @@ using Dose.Domain.Catalog;
 using Dose.Domain.Pricing;
 using Dose.Domain.Sessions;
 using Dose.Domain.Teachers;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
@@ -14,8 +15,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dose.Infrastructure.Persistence;
 
 public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
-    : IdentityDbContext<IdentityUser>(options), IDoseDbContext
+    : IdentityDbContext<IdentityUser>(options), IDoseDbContext, IDataProtectionKeyContext
 {
+    /// <summary>Encryption keys for login cookies and booking links — kept in the database so they survive restarts and redeploys.</summary>
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
     public DbSet<EducationalStage> EducationalStages => Set<EducationalStage>();
     public DbSet<StudyTrack> StudyTracks => Set<StudyTrack>();
     public DbSet<PricingBand> PricingBands => Set<PricingBand>();
@@ -67,6 +70,7 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
     {
         base.OnModelCreating(b);
         b.ApplyConfigurationsFromAssembly(typeof(DoseDbContext).Assembly);
+        b.Entity<DataProtectionKey>().Property(k => k.Xml).HasColumnType("nvarchar(max)").HasMaxLength(-1);
     }
 }
 

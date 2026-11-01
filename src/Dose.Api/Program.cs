@@ -11,6 +11,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddDoseSecurity();
+if (!builder.Environment.IsDevelopment())
+{
+    // Structured JSON logs for Azure; request bodies, phone numbers and tokens are never logged.
+    builder.Logging.ClearProviders();
+    builder.Logging.AddJsonConsole(o => o.UseUtcTimestamp = true);
+}
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
@@ -41,7 +48,7 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Cookie.Name = "dose.auth";
     o.Cookie.HttpOnly = true;
     o.Cookie.SameSite = SameSiteMode.Strict;
-    o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    o.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
     o.ExpireTimeSpan = TimeSpan.FromHours(8);
     o.SlidingExpiration = true;
     o.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = 401; return Task.CompletedTask; };
@@ -58,11 +65,12 @@ builder.Services.AddScoped<Dose.Infrastructure.Identity.UserAdminService>();
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.AddGlobalLimiter();
     o.AddPolicy(Endpoints.BookingRateLimit, http => RateLimitPartition.GetFixedWindowLimiter(
-        http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        Security.ClientKey(http),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 60, Window = TimeSpan.FromMinutes(1) }));
     o.AddPolicy(Endpoints.LoginRateLimit, http => RateLimitPartition.GetFixedWindowLimiter(
-        http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        Security.ClientKey(http),
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
 });
 
@@ -82,6 +90,7 @@ if (jobsEnabled)
 
 var app = builder.Build();
 
+app.UseDoseSecurity();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseRateLimiter();
@@ -117,13 +126,7 @@ app.MapAdminConfigEndpoints();
 app.MapPhase3Endpoints();
 app.MapPhase4Endpoints();
 app.MapMessagingEndpoints();
-
-if (!app.Environment.IsDevelopment())
-{
-    // Default message texts are inserted once; admins edit them afterwards.
-    await using var scope = app.Services.CreateAsyncScope();
-    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(scope.ServiceProvider.GetRequiredService<DoseDbContext>());
-}
+app.MapDoseSpa();
 
 if (jobsEnabled)
 {
@@ -131,6 +134,7 @@ if (jobsEnabled)
     jobs.AddOrUpdate<GroupDecisionService>("group-tier-decisions", s => s.RunDueDecisionsAsync(CancellationToken.None), "*/5 * * * *");
     jobs.AddOrUpdate<Dose.Application.Notifications.NotificationService>("queue-session-reminders", s => s.QueueRemindersAsync(CancellationToken.None), "*/15 * * * *");
     jobs.AddOrUpdate<BookingMaintenance>("expire-stale-bookings", s => s.ExpireStaleAsync(CancellationToken.None), "*/10 * * * *");
+    jobs.AddOrUpdate<Dose.Application.Payments.ProofRetention>("delete-old-payment-screenshots", s => s.PurgeAsync(CancellationToken.None), "30 3 * * *");
 }
 app.Run();
 
