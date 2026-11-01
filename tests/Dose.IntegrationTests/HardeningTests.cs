@@ -52,7 +52,8 @@ public sealed class HardeningTests(DatabaseFixture fx)
         RequireDb();
         await using var f = Api();
         var http = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("http://dose.test"), AllowAutoRedirect = false });
-        var res = await http.GetAsync("/api/health");
+        Assert.Equal(HttpStatusCode.OK, (await http.GetAsync("/api/health")).StatusCode); // platform health probe over plain HTTP
+        var res = await http.GetAsync("/api/sessions");
         Assert.True(res.StatusCode is HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect or HttpStatusCode.Redirect);
         Assert.Equal("https", res.Headers.Location?.Scheme);
     }

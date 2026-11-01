@@ -64,7 +64,8 @@ public static class Security
         if (!app.Environment.IsDevelopment())
         {
             app.UseHsts();
-            app.UseHttpsRedirection();
+            // The platform health probe calls plain HTTP inside the network; everything else goes to HTTPS.
+            app.UseWhen(ctx => !ctx.Request.Path.StartsWithSegments("/api/health"), b => b.UseHttpsRedirection());
         }
 
         var allowedOrigins = AllowedOrigins(app);

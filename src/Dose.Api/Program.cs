@@ -97,28 +97,28 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+// ----- Database start-up -----
+// Development: always migrate + seed SAMPLE data. Production: migrate only when Database__MigrateOnStartup=true
+// (simple hosts such as DigitalOcean App Platform; a release step can do it instead), SAMPLE data only when
+// Seed__SampleData=true is set explicitly. Roles always exist; the first admin is created from Seed__AdminEmail /
+// Seed__AdminPassword when that account does not exist yet (an existing account and its password are never changed).
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
 {
-    app.MapOpenApi();
+    var isDev = app.Environment.IsDevelopment();
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<DoseDbContext>();
-    await db.Database.MigrateAsync();
+    if (isDev || app.Configuration.GetValue("Database:MigrateOnStartup", false))
+        await db.Database.MigrateAsync();
     await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(db);
     await DevelopmentSeeder.SeedRolesAndAdminAsync(
         scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
         scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(),
         app.Configuration["Seed:AdminEmail"], app.Configuration["Seed:AdminPassword"]);
-    if (app.Configuration.GetValue("Seed:SampleData", true))
+    if (app.Configuration.GetValue("Seed:SampleData", isDev))
     {
         await DevelopmentSeeder.SeedSampleDataAsync(db, DateTime.UtcNow);
         await DevelopmentSeeder.FillSampleEnglishAsync(db);
     }
-}
-else
-{
-    // Production: schema is migrated by the deployment step; default message templates are inserted once if missing.
-    await using var scope = app.Services.CreateAsyncScope();
-    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(scope.ServiceProvider.GetRequiredService<DoseDbContext>());
 }
 
 app.MapDoseEndpoints();

@@ -115,6 +115,24 @@ Production build served by the API (one origin): `cd src/Dose.Web && npm run bui
 `ASPNETCORE_WEBROOT=<repo>/src/Dose.Web/dist/dose-web/browser` (or copy that folder to the API's `wwwroot`).
 The service worker (PWA) is active only in production builds.
 
+## Deploy (container)
+
+The root `Dockerfile` builds the Angular site and the API into one image listening on port **8080**
+(site and API on one origin). Works on DigitalOcean App Platform, Azure App Service (containers), or any Docker host.
+
+Required environment variables:
+
+| Variable | Value |
+|---|---|
+| `ConnectionStrings__Dose` | SQL Server / Azure SQL connection string (secret) |
+| `Public__AppBaseUrl` | Public address, e.g. `https://dose-xxxx.ondigitalocean.app` |
+| `Database__MigrateOnStartup` | `true` to create/upgrade the database on start |
+| `Seed__AdminEmail` / `Seed__AdminPassword` | First admin account (created only if missing; secret) |
+| `Seed__SampleData` | `true` only for a demo environment (adds SAMPLE catalog, sessions, prices) |
+
+Health check path: `/api/health`. Uploaded files are stored on the container disk (`Storage__LocalRoot`), which is
+**not permanent** on App Platform — fine for a demo, move to object storage before real students use it.
+
 ## Status
 
 Phase 4, Arabic/English, WhatsApp messages, teacher photos, security hardening and PWA delivered — see `docs/phase0-assessment.md` sections 5–10. Next: Azure deployment (Blob storage, Key Vault, CI/CD, domain).
