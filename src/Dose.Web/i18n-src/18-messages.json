@@ -1,0 +1,106 @@
+{
+ "messages.lead": [
+  "الأحداث (تأكيد الدفع، رفض الإيصال، فرق الجروب، التذكير، الإلغاء…) بتجهّز رسالة بلغة الطالب. افتحها بـ «جهّز»، ابعتها من واتساب البيزنس، وعلّمها «اتبعتت». الصفحة دي هي قايمة المهام وسجل الرسائل في نفس الوقت.",
+  "Events (payment approved, receipt rejected, group top-up, reminders, cancellations…) queue a message in the student's language. Open it with “Prepare”, send it from the business WhatsApp and mark it sent. This page is both the to-do list and the message log."
+ ],
+ "messages.templatesLead": [
+  "عدّل نص كل رسالة بالعربي والإنجليزي. استخدم المتغيرات اللي تحت بس — النظام بيرفض أي متغير مش معروف. لو وقفت قالب، الأحداث مش هتجهّز رسالته.",
+  "Edit each message in Arabic and English. Use only the placeholders listed — unknown placeholders are rejected. If a template is turned off, its events won't queue a message."
+ ],
+ "messages.tabs.Pending": [
+  "مستنية تتبعت",
+  "To send"
+ ],
+ "messages.tabs.Sent": [
+  "اتبعتت",
+  "Sent"
+ ],
+ "messages.tabs.Skipped": [
+  "اتلغت",
+  "Skipped"
+ ],
+ "messages.tabs.templates": [
+  "القوالب",
+  "Templates"
+ ],
+ "messages.off": [
+  "موقوف",
+  "Off"
+ ],
+ "messages.placeholders": [
+  "المتغيرات:",
+  "Placeholders:"
+ ],
+ "messages.active": [
+  "القالب شغال (الأحداث بتجهّز رسالته)",
+  "Template on (events queue this message)"
+ ],
+ "messages.scheduled": [
+  "مجدولة {when}",
+  "Scheduled {when}"
+ ],
+ "messages.created": [
+  "اتجهزت {when}",
+  "Queued {when}"
+ ],
+ "messages.sentBy": [
+  "اتبعتت {when} — {who}",
+  "Sent {when} — {who}"
+ ],
+ "messages.skippedBy": [
+  "اتلغت {when} — {who}",
+  "Skipped {when} — {who}"
+ ],
+ "messages.prepare": [
+  "جهّز الرسالة",
+  "Prepare"
+ ],
+ "messages.markSent": [
+  "اتبعتت ✓",
+  "Mark sent ✓"
+ ],
+ "messages.skip": [
+  "تجاهل",
+  "Skip"
+ ],
+ "messages.howTo": [
+  "انسخ الرسالة وافتح الشات وابعتها. اللينك اللي فيها سري وخاص بالطالب.",
+  "Copy the message, open the chat and send it. Any link in it is secret and belongs to this student."
+ ],
+ "messages.openGuardianChat": [
+  "افتح شات ولي الأمر",
+  "Open parent's chat"
+ ],
+ "messages.empty": [
+  "مفيش رسائل هنا.",
+  "No messages here."
+ ],
+ "messages.title.booking_confirmed": [
+  "تأكيد الحجز",
+  "Booking confirmed"
+ ],
+ "messages.title.payment_rejected": [
+  "رفض إيصال الدفع",
+  "Payment proof rejected"
+ ],
+ "messages.title.session_reminder": [
+  "تذكير بالجلسة",
+  "Session reminder"
+ ],
+ "messages.title.topup_required": [
+  "الجروب مكملش",
+  "Group did not fill"
+ ],
+ "messages.title.refund_completed": [
+  "الاسترداد اتحوّل",
+  "Refund sent"
+ ],
+ "messages.title.session_cancelled": [
+  "إلغاء الجلسة",
+  "Session cancelled"
+ ],
+ "messages.title.request_received": [
+  "استلام طلب جلسة",
+  "Session request received"
+ ]
+}

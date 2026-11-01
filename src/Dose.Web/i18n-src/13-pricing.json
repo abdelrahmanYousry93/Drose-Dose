@@ -1,0 +1,142 @@
+{
+ "pricing.addPlan": [
+  "خطة تسعير",
+  "Pricing plan"
+ ],
+ "pricing.lead": [
+  "كل خطة بتحدد لمين السعر ده: نوع الخدمة، فردي ولا جماعي، وممكن تخصصها لشريحة صفوف أو منهج أو مادة. لو أكتر من خطة تنطبق، الأكثر تحديداً هي اللي بتتطبق. الأرقام اللي اسمها SAMPLE تجريبية وغيّرها قبل الإطلاق.",
+  "Each plan says who a price applies to: service type, private or group, optionally narrowed to a grade band, track or subject. If several plans match, the most specific wins. Numbers named SAMPLE are placeholders — change them before launch."
+ ],
+ "pricing.newPlan": [
+  "خطة جديدة",
+  "New plan"
+ ],
+ "pricing.group": [
+  "جماعي",
+  "Group"
+ ],
+ "pricing.private": [
+  "فردي",
+  "Private"
+ ],
+ "pricing.version": [
+  "نسخة {n}",
+  "Version {n}"
+ ],
+ "pricing.inUse": [
+  "مستخدمة",
+  "in use"
+ ],
+ "pricing.noPrices": [
+  "مفيش أسعار لسه",
+  "No prices yet"
+ ],
+ "pricing.whoFor": [
+  "لمين الخطة دي؟",
+  "Who is this plan for?"
+ ],
+ "pricing.planName": [
+  "اسم الخطة",
+  "Plan name"
+ ],
+ "pricing.service": [
+  "نوع الخدمة",
+  "Service type"
+ ],
+ "pricing.mode": [
+  "فردي / جماعي",
+  "Private / group"
+ ],
+ "pricing.band": [
+  "شريحة الصفوف",
+  "Grade band"
+ ],
+ "pricing.allGrades": [
+  "كل الصفوف",
+  "All grades"
+ ],
+ "pricing.from": [
+  "يبدأ من",
+  "Starts"
+ ],
+ "pricing.to": [
+  "ينتهي (اختياري)",
+  "Ends (optional)"
+ ],
+ "pricing.savePlan": [
+  "حفظ بيانات الخطة",
+  "Save plan details"
+ ],
+ "pricing.lockedHint": [
+  "الأسعار دي مستخدمة في جلسات. لو غيّرتها هتتعمل نسخة جديدة للجلسات الجديدة بس، والجلسات والحجوزات الحالية هتفضل بسعرها.",
+  "These prices are used by sessions. Changing them creates a new version for new sessions only; existing sessions and bookings keep their price."
+ ],
+ "pricing.privatePrice": [
+  "سعر الجلسة الفردية للطالب",
+  "Private session price per student"
+ ],
+ "pricing.alonePrice": [
+  "سعر الطالب لو بقى لوحده (اختياري)",
+  "Price if the student ends up alone (optional)"
+ ],
+ "pricing.aloneHint": [
+  "بيتستخدم لحساب أقصى فرق ممكن لو الجروب مكملش.",
+  "Used to work out the maximum possible difference if the group doesn't fill."
+ ],
+ "pricing.tierName": [
+  "اسم الشريحة",
+  "Tier name"
+ ],
+ "pricing.tierNameEn": [
+  "الاسم بالإنجليزي",
+  "English name"
+ ],
+ "pricing.min": [
+  "من",
+  "From"
+ ],
+ "pricing.max": [
+  "لـ",
+  "To"
+ ],
+ "pricing.minA": [
+  "أقل عدد",
+  "Minimum students"
+ ],
+ "pricing.maxA": [
+  "أكبر عدد",
+  "Maximum students"
+ ],
+ "pricing.priceA": [
+  "السعر",
+  "Price"
+ ],
+ "pricing.removeTier": [
+  "حذف الشريحة",
+  "Remove tier"
+ ],
+ "pricing.tier": [
+  "شريحة",
+  "Tier"
+ ],
+ "pricing.savePrices": [
+  "حفظ الأسعار",
+  "Save prices"
+ ],
+ "pricing.planSaved": [
+  "اتحفظت بيانات الخطة ✓",
+  "Plan details saved ✓"
+ ],
+ "pricing.addPricesBelow": [
+  " — حط الأسعار تحت.",
+  " — now add the prices below."
+ ],
+ "pricing.newVersion": [
+  "اتعملت نسخة أسعار جديدة ({n}) ✓",
+  "Created a new price version ({n}) ✓"
+ ],
+ "pricing.pricesSaved": [
+  "اتحفظت الأسعار ✓",
+  "Prices saved ✓"
+ ]
+}

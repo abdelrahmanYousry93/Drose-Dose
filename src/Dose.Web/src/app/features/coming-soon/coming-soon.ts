@@ -1,15 +1,16 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, translate } from '../../core/i18n';
 
 /** Placeholder for screens scheduled in later phases. Title comes from route data. */
 @Component({
   selector: 'dose-coming-soon',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <section class="dose-card box">
       <h1>{{ heading() }}</h1>
-      <p>الصفحة دي قيد التطوير.</p>
-      <a class="dose-btn dose-btn--ghost" routerLink="/">الرجوع للرئيسية</a>
+      <p>{{ 'comingSoon.body' | t }}</p>
+      <a class="dose-btn dose-btn--ghost" routerLink="/">{{ 'common.backHome' | t }}</a>
     </section>
   `,
   styles: `
@@ -19,5 +20,5 @@ import { RouterLink } from '@angular/router';
   `,
 })
 export class ComingSoon {
-  readonly heading = input('قريباً');
+  readonly heading = input(translate('comingSoon.title'));
 }

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { translate } from './i18n';
 
 export interface PublicSettings {
   whatsAppBusinessNumber: string;
@@ -23,7 +24,7 @@ export class PublicSettingsService {
   );
 
   /** Click-to-chat link. Only a non-sensitive message is ever put in the URL. */
-  whatsAppLink(message = 'مرحباً Dose، محتاج مساعدة'): string | null {
+  whatsAppLink(message = translate('nav.whatsappHello')): string | null {
     const number = this.settings()?.whatsAppBusinessNumber?.replace(/\D/g, '');
     return number ? `https://wa.me/${number}?text=${encodeURIComponent(message)}` : null;
   }

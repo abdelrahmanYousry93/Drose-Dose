@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CanActivateFn, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Api, PaymentProofAdmin, Setting } from '../../core/api';
+import { Api, ApiError, PaymentProofAdmin, Setting } from '../../core/api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
+import { TranslatePipe, translate } from '../../core/i18n';
 
 /** Route guard: admin area requires an authenticated Admin (checked server-side on every call too). */
 export const adminGuard: CanActivateFn = async () => {
@@ -18,18 +19,18 @@ export const adminGuard: CanActivateFn = async () => {
 
 @Component({
   selector: 'dose-admin-login',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page narrow">
       <form class="dose-card box" (ngSubmit)="login()">
-        <h1 class="page-title">دخول فريق Dose</h1>
-        <p class="muted small">للإدارة والمدرسين. الطلاب مش محتاجين حساب — بيدخلوا من لينك الحجز.</p>
+        <h1 class="page-title">{{ 'titles.login' | t }}</h1>
+        <p class="muted small">{{ 'login.hint' | t }}</p>
         @if (error()) { <p class="alert alert--error">{{ error() }}</p> }
-        <label class="field"><span>البريد الإلكتروني</span>
+        <label class="field"><span>{{ 'login.email' | t }}</span>
           <input name="email" type="email" [(ngModel)]="email" required dir="ltr" autocomplete="username" /></label>
-        <label class="field"><span>كلمة السر</span>
+        <label class="field"><span>{{ 'login.password' | t }}</span>
           <input name="password" type="password" [(ngModel)]="password" required dir="ltr" autocomplete="current-password" /></label>
-        <button class="dose-btn dose-btn--primary" type="submit" [disabled]="busy()">دخول</button>
+        <button class="dose-btn dose-btn--primary" type="submit" [disabled]="busy()">{{ 'login.submit' | t }}</button>
       </form>
     </section>
   `,
@@ -51,7 +52,7 @@ export class AdminLogin {
       const me = await this.api.me();
       await this.router.navigateByUrl(me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/');
     } catch (e) {
-      this.error.set(errorMessage(e) === 'لازم تسجّل دخول.' ? 'بيانات الدخول غير صحيحة.' : errorMessage(e));
+      this.error.set(e instanceof ApiError && e.status === 401 ? translate('login.invalid') : errorMessage(e));
     } finally {
       this.busy.set(false);
     }
@@ -60,22 +61,23 @@ export class AdminLogin {
 
 @Component({
   selector: 'dose-admin-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   template: `
     <nav class="admin-nav">
-      <a routerLink="/admin/dashboard" routerLinkActive="on">الرئيسية</a>
-      <a routerLink="/admin/payments" routerLinkActive="on">المدفوعات</a>
-      <a routerLink="/admin/follow-ups" routerLinkActive="on">المتابعات</a>
-      <a routerLink="/admin/requests" routerLinkActive="on">الطلبات</a>
-      <a routerLink="/admin/sessions" routerLinkActive="on">الجلسات</a>
-      <a routerLink="/admin/pricing" routerLinkActive="on">الأسعار</a>
-      <a routerLink="/admin/teachers" routerLinkActive="on">المدرسين</a>
-      <a routerLink="/admin/catalog" routerLinkActive="on">الكتالوج</a>
-      <a routerLink="/admin/payment-methods" routerLinkActive="on">طرق الدفع</a>
-      <a routerLink="/admin/availability" routerLinkActive="on">مواعيد المدرسين</a>
-      <a routerLink="/admin/users" routerLinkActive="on">المستخدمين</a>
-      <a routerLink="/admin/settings" routerLinkActive="on">الإعدادات</a>
-      <button type="button" (click)="logout()">خروج</button>
+      <a routerLink="/admin/dashboard" routerLinkActive="on">{{ 'adminNav.dashboard' | t }}</a>
+      <a routerLink="/admin/payments" routerLinkActive="on">{{ 'adminNav.payments' | t }}</a>
+      <a routerLink="/admin/follow-ups" routerLinkActive="on">{{ 'adminNav.followUps' | t }}</a>
+      <a routerLink="/admin/messages" routerLinkActive="on">{{ 'adminNav.messages' | t }}</a>
+      <a routerLink="/admin/requests" routerLinkActive="on">{{ 'adminNav.requests' | t }}</a>
+      <a routerLink="/admin/sessions" routerLinkActive="on">{{ 'adminNav.sessions' | t }}</a>
+      <a routerLink="/admin/pricing" routerLinkActive="on">{{ 'adminNav.pricing' | t }}</a>
+      <a routerLink="/admin/teachers" routerLinkActive="on">{{ 'adminNav.teachers' | t }}</a>
+      <a routerLink="/admin/catalog" routerLinkActive="on">{{ 'adminNav.catalog' | t }}</a>
+      <a routerLink="/admin/payment-methods" routerLinkActive="on">{{ 'adminNav.paymentMethods' | t }}</a>
+      <a routerLink="/admin/availability" routerLinkActive="on">{{ 'adminNav.availability' | t }}</a>
+      <a routerLink="/admin/users" routerLinkActive="on">{{ 'adminNav.users' | t }}</a>
+      <a routerLink="/admin/settings" routerLinkActive="on">{{ 'adminNav.settings' | t }}</a>
+      <button type="button" (click)="logout()">{{ 'adminNav.logout' | t }}</button>
     </nav>
     <router-outlet />
   `,
@@ -96,47 +98,47 @@ export class AdminShell {
 
 @Component({
   selector: 'dose-admin-payments',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
       <div class="row">
-        <h1 class="page-title">مراجعة المدفوعات</h1>
-        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" aria-label="الحالة">
-          <option value="Submitted">في انتظار المراجعة</option>
-          <option value="Approved">مقبولة</option>
-          <option value="Rejected">مرفوضة</option>
-          <option value="">الكل</option>
+        <h1 class="page-title">{{ 'titles.adminPayments' | t }}</h1>
+        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" [attr.aria-label]="'payments.status' | t">
+          <option value="Submitted">{{ 'payments.st.Submitted' | t }}</option>
+          <option value="Approved">{{ 'payments.filterApproved' | t }}</option>
+          <option value="Rejected">{{ 'payments.filterRejected' | t }}</option>
+          <option value="">{{ 'sessions.all' | t }}</option>
         </select>
       </div>
       @if (error()) { <p class="alert alert--error">{{ error() }}</p> }
-      @if (proofs().length === 0 && !loading()) { <p class="muted">مفيش إيصالات هنا.</p> }
+      @if (proofs().length === 0 && !loading()) { <p class="muted">{{ 'payments.empty' | t }}</p> }
 
       @for (p of proofs(); track p.id) {
         <article class="dose-card item" [class.late]="p.status === 'Submitted' && p.ageMinutes > 60">
           <div class="row">
-            <strong dir="ltr">{{ p.bookingReference }} @if (p.isTopUp) { <span class="badge">فرق جروب</span> }</strong>
+            <strong dir="ltr">{{ p.bookingReference }} @if (p.isTopUp) { <span class="badge">{{ 'payments.topUp' | t }}</span> }</strong>
             <span class="badge" [class.badge--yellow]="p.status === 'Submitted'" [class.badge--green]="p.status === 'Approved'"
-                  [class.badge--gray]="p.status === 'Rejected'">{{ statusAr(p.status) }}</span>
+                  [class.badge--gray]="p.status === 'Rejected'">{{ ('payments.st.' + p.status) | t }}</span>
           </div>
           <ul class="info-list small">
-            <li><span>الطالب</span><span>{{ p.studentName }}</span></li>
-            <li><span>واتساب</span><span dir="ltr">{{ p.contactPhone }}</span></li>
-            @if (p.guardianPhone) { <li><span>ولي الأمر</span><span dir="ltr">{{ p.guardianPhone }}</span></li> }
-            <li><span>الجلسة</span><span>{{ p.sessionTitleAr }} — {{ dt(p.sessionStartUtc) }}</span></li>
-            <li><span>المبلغ</span><span>{{ money(p.amount, p.currency) }} · {{ p.methodNameAr }}</span></li>
-            @if (p.senderReference) { <li><span>رقم العملية</span><span dir="ltr">{{ p.senderReference }}</span></li> }
-            <li><span>من</span><span>{{ p.ageMinutes }} دقيقة</span></li>
+            <li><span>{{ 'admin.student' | t }}</span><span>{{ p.studentName }}</span></li>
+            <li><span>{{ 'admin.whatsapp' | t }}</span><span dir="ltr">{{ p.contactPhone }}</span></li>
+            @if (p.guardianPhone) { <li><span>{{ 'admin.guardian' | t }}</span><span dir="ltr">{{ p.guardianPhone }}</span></li> }
+            <li><span>{{ 'admin.session' | t }}</span><span>{{ p.sessionTitleAr }} — {{ dt(p.sessionStartUtc) }}</span></li>
+            <li><span>{{ 'booking.amount' | t }}</span><span>{{ money(p.amount, p.currency) }} · {{ p.methodNameAr }}</span></li>
+            @if (p.senderReference) { <li><span>{{ 'payments.senderRef' | t }}</span><span dir="ltr">{{ p.senderReference }}</span></li> }
+            <li><span>{{ 'payments.age' | t }}</span><span>{{ 'duration.minutes' | t: { n: round(p.ageMinutes) } }}</span></li>
           </ul>
           <button type="button" class="dose-btn dose-btn--ghost" (click)="toggleImage(p.id)">
-            {{ openImage() === p.id ? 'إخفاء الإيصال' : 'عرض الإيصال' }}
+            {{ (openImage() === p.id ? 'payments.hide' : 'payments.show') | t }}
           </button>
-          @if (openImage() === p.id) { <img [src]="fileUrl(p.id)" alt="صورة الإيصال" class="proof" /> }
+          @if (openImage() === p.id) { <img [src]="fileUrl(p.id)" [alt]="'payments.image' | t" class="proof" /> }
 
           @if (p.status === 'Submitted') {
             <div class="actions">
-              <button type="button" class="dose-btn dose-btn--primary" (click)="approve(p)" [disabled]="busy()">تأكيد الدفع</button>
-              <input [(ngModel)]="reasons[p.id]" placeholder="سبب الرفض (هيظهر للطالب)" aria-label="سبب الرفض" />
-              <button type="button" class="dose-btn reject" (click)="reject(p)" [disabled]="busy()">رفض</button>
+              <button type="button" class="dose-btn dose-btn--primary" (click)="approve(p)" [disabled]="busy()">{{ 'payments.approve' | t }}</button>
+              <input [(ngModel)]="reasons[p.id]" [placeholder]="'payments.reasonPh' | t" [attr.aria-label]="'payments.reason' | t" />
+              <button type="button" class="dose-btn reject" (click)="reject(p)" [disabled]="busy()">{{ 'payments.reject' | t }}</button>
             </div>
           }
         </article>
@@ -168,9 +170,7 @@ export class AdminPayments {
 
   constructor() { void this.load(); }
 
-  protected statusAr(s: string) {
-    return ({ Submitted: 'في انتظار المراجعة', Approved: 'مقبول', Rejected: 'مرفوض' } as Record<string, string>)[s] ?? s;
-  }
+  protected round(n: number) { return Math.round(n); }
   protected fileUrl(id: string) { return this.api.proofFileUrl(id); }
   protected toggleImage(id: string) { this.openImage.set(this.openImage() === id ? null : id); }
 
@@ -204,21 +204,21 @@ export class AdminPayments {
 
 @Component({
   selector: 'dose-admin-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
-      <h1 class="page-title">الإعدادات</h1>
-      <p class="muted">المدد والمهل دي بتتطبق على الحجوزات الجديدة فوراً.</p>
+      <h1 class="page-title">{{ 'titles.adminSettings' | t }}</h1>
+      <p class="muted">{{ 'settings.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error">{{ error() }}</p> }
-      @if (saved()) { <p class="alert alert--ok">اتحفظت الإعدادات.</p> }
+      @if (saved()) { <p class="alert alert--ok">{{ 'settings.saved' | t }}</p> }
       <form class="dose-card box" (ngSubmit)="save()">
         @for (s of items(); track s.key) {
           <label class="field">
-            <span>{{ s.descriptionAr ?? s.key }}</span>
+            <span>{{ settingLabel(s) }}</span>
             <input type="number" min="1" [name]="s.key" [(ngModel)]="s.value" dir="ltr" />
           </label>
         }
-        <button class="dose-btn dose-btn--primary" type="submit" [disabled]="busy()">حفظ</button>
+        <button class="dose-btn dose-btn--primary" type="submit" [disabled]="busy()">{{ 'common.save' | t }}</button>
       </form>
     </section>
   `,
@@ -232,6 +232,12 @@ export class AdminSettings {
   protected readonly busy = signal(false);
 
   constructor() { void this.load(); }
+
+  protected settingLabel(s: Setting) {
+    const key = `settings.keys.${s.key.replace(/\./g, '_')}`;
+    const t = translate(key);
+    return t !== key ? t : (s.descriptionAr ?? s.key);
+  }
 
   private async load() {
     try {

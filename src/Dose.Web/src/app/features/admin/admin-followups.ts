@@ -3,20 +3,21 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminApi, FollowUp, ReissueLink, SessionRequestA } from '../../core/admin-api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
+import { Lang, TranslatePipe, translate as tr, translateIn } from '../../core/i18n';
 
-const CHOICE_AR: Record<string, string> = { PayDifference: 'هيدفع الفرق', Transfer: 'عايز ينقل', Refund: 'عايز يسترد' };
+const choiceLabel = (c: string) => { const k = `followUps.choice.${c}`; const t = tr(k); return t === k ? c : t; };
+/** Amount written for the student's language (independent of the admin's UI language). */
+const moneyIn = (lang: Lang, amount: number, currency: string) =>
+  `${new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'ar-EG', { maximumFractionDigits: 2 }).format(amount)} ${currency === 'EGP' ? translateIn(lang, 'common.egp') : currency}`;
 
 /** Students who owe a top-up, refunds to send, and transfers to arrange (spec 6.4, decision D8). */
 @Component({
   selector: 'dose-admin-followups',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
-      <h1 class="page-title">المتابعات</h1>
-      <p class="muted small">
-        الجروبات اللي مكملتش بتظهر هنا بعد ميعاد الحسم: كل طالب بيختار من صفحة حجزه. الفلوس بتتحوّل برّه المنصة
-        (إنستاباي / فودافون كاش)، وإنت بتسجّل اللي حصل هنا. إيصالات الفرق بتظهر في صفحة المدفوعات.
-      </p>
+      <h1 class="page-title">{{ 'titles.adminFollowUps' | t }}</h1>
+      <p class="muted small">{{ 'followUps.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
       @for (g of groups(); track g.kind) {
@@ -25,41 +26,41 @@ const CHOICE_AR: Record<string, string> = { PayDifference: 'هيدفع الفر�
           <article class="dose-card item" [class.overdue]="f.overdue">
             <div class="row">
               <strong dir="ltr">{{ f.bookingReference }}</strong>
-              @if (f.overdue) { <span class="badge badge--yellow">عدّى ميعاد الرد</span> }
+              @if (f.overdue) { <span class="badge badge--yellow">{{ 'followUps.overdue' | t }}</span> }
               @if (f.studentChoice) { <span class="badge">{{ choiceAr(f.studentChoice) }}</span> }
-              @if (f.topUpProofStatus === 'Submitted') { <span class="badge badge--green">إيصال الفرق تحت المراجعة</span> }
+              @if (f.topUpProofStatus === 'Submitted') { <span class="badge badge--green">{{ 'followUps.proofReview' | t }}</span> }
             </div>
             <ul class="info-list small">
-              <li><span>الطالب</span><span>{{ f.studentName }} · <span dir="ltr">{{ f.contactPhone }}</span></span></li>
-              @if (f.guardianPhone) { <li><span>ولي الأمر</span><span dir="ltr">{{ f.guardianPhone }}</span></li> }
-              <li><span>الجلسة</span><span>{{ f.sessionTitleAr }} — {{ dt(f.sessionStartUtc) }}</span></li>
-              <li><span>دفع</span><span>{{ money(f.paidAmount, f.currency) }}</span></li>
-              @if (f.topUpAmount) { <li><span>الفرق المطلوب</span><span>{{ money(f.topUpAmount, f.currency) }}</span></li> }
-              @if (f.respondByUtc) { <li><span>آخر ميعاد للرد</span><span>{{ dt(f.respondByUtc) }}</span></li> }
-              @if (f.reason) { <li><span>السبب</span><span>{{ f.reason }}</span></li> }
+              <li><span>{{ 'admin.student' | t }}</span><span>{{ f.studentName }} · <span dir="ltr">{{ f.contactPhone }}</span></span></li>
+              @if (f.guardianPhone) { <li><span>{{ 'admin.guardian' | t }}</span><span dir="ltr">{{ f.guardianPhone }}</span></li> }
+              <li><span>{{ 'admin.session' | t }}</span><span>{{ f.sessionTitleAr }} — {{ dt(f.sessionStartUtc) }}</span></li>
+              <li><span>{{ 'followUps.paid' | t }}</span><span>{{ money(f.paidAmount, f.currency) }}</span></li>
+              @if (f.topUpAmount) { <li><span>{{ 'followUps.diff' | t }}</span><span>{{ money(f.topUpAmount, f.currency) }}</span></li> }
+              @if (f.respondByUtc) { <li><span>{{ 'followUps.respondBy' | t }}</span><span>{{ dt(f.respondByUtc) }}</span></li> }
+              @if (f.reason) { <li><span>{{ 'followUps.reason' | t }}</span><span>{{ f.reason }}</span></li> }
             </ul>
-            <input class="note" [(ngModel)]="notes[f.bookingId]" placeholder="ملاحظة (اختياري)" aria-label="ملاحظة" />
+            <input class="note" [(ngModel)]="notes[f.bookingId]" [placeholder]="'followUps.notePh' | t" [attr.aria-label]="'availability.note' | t" />
             <div class="actions">
-              <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="message(f)">رسالة واتساب للطالب</button>
+              <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="message(f)">{{ 'followUps.message' | t }}</button>
               @switch (f.kind) {
-                @case ('TopUp') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'waive')">تنازل عن الفرق</button> }
-                @case ('Refund') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'refunded')">تم تحويل الاسترداد</button> }
-                @case ('Transfer') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'transfer')">تم النقل</button> }
+                @case ('TopUp') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'waive')">{{ 'followUps.waive' | t }}</button> }
+                @case ('Refund') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'refunded')">{{ 'followUps.refunded' | t }}</button> }
+                @case ('Transfer') { <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="act(f, 'transfer')">{{ 'followUps.transferred' | t }}</button> }
               }
             </div>
             @if (msg()?.bookingId === f.bookingId) {
               <div class="link-box">
-                <textarea readonly [value]="msg()!.text" aria-label="الرسالة"></textarea>
+                <textarea readonly [value]="msg()!.text" [attr.aria-label]="'followUps.msgLabel' | t"></textarea>
                 <div class="actions">
-                  <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="copy(msg()!.text)">{{ copied() ? 'اتنسخت ✓' : 'انسخ' }}</button>
+                  <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="copy(msg()!.text)">{{ (copied() ? 'common.copied' : 'common.copy') | t }}</button>
                   @if (f.contactPhone) {
-                    <a class="dose-btn dose-btn--whatsapp small-btn" [href]="'https://wa.me/' + digits(f.contactPhone)" target="_blank" rel="noopener">افتح الشات</a>
+                    <a class="dose-btn dose-btn--whatsapp small-btn" [href]="'https://wa.me/' + digits(f.contactPhone)" target="_blank" rel="noopener">{{ 'followUps.openChat' | t }}</a>
                   }
                 </div>
               </div>
             }
           </article>
-        } @empty { <p class="muted small">مفيش.</p> }
+        } @empty { <p class="muted small">{{ 'followUps.none' | t }}</p> }
       }
     </section>
   `,
@@ -84,12 +85,12 @@ export class AdminFollowUps {
   protected notes: Record<string, string> = {};
   protected readonly dt = fmtDateTime;
   protected readonly money = fmtMoney;
-  protected readonly choiceAr = (c: string) => CHOICE_AR[c] ?? c;
+  protected readonly choiceAr = choiceLabel;
   protected readonly digits = (p: string) => p.replace(/\D/g, '');
   protected readonly groups = computed(() => [
-    { kind: 'TopUp', title: 'جروبات مكملتش — مستني رد أو فرق', items: this.items().filter((i) => i.kind === 'TopUp') },
-    { kind: 'Refund', title: 'استرداد مطلوب', items: this.items().filter((i) => i.kind === 'Refund') },
-    { kind: 'Transfer', title: 'نقل لميعاد تاني', items: this.items().filter((i) => i.kind === 'Transfer') },
+    { kind: 'TopUp', title: tr('followUps.groupTopUp'), items: this.items().filter((i) => i.kind === 'TopUp') },
+    { kind: 'Refund', title: tr('followUps.groupRefund'), items: this.items().filter((i) => i.kind === 'Refund') },
+    { kind: 'Transfer', title: tr('followUps.groupTransfer'), items: this.items().filter((i) => i.kind === 'Transfer') },
   ]);
 
   constructor() { void this.load(); }
@@ -100,8 +101,7 @@ export class AdminFollowUps {
 
   protected async act(f: FollowUp, action: 'waive' | 'refunded' | 'transfer') {
     const note = this.notes[f.bookingId] ?? '';
-    const q = { waive: 'تتنازل عن الفرق وتأكد حجز الطالب؟', refunded: 'اتأكدت إن الفلوس اتحوّلت للطالب؟', transfer: 'الطالب اتنقل لجلسة تانية؟' }[action];
-    if (!confirm(q)) return;
+    if (!confirm(tr(`followUps.confirm.${action}`))) return;
     try {
       if (action === 'waive') await this.api.waive(f.bookingId, note);
       if (action === 'refunded') await this.api.markRefunded(f.bookingId, note);
@@ -113,20 +113,19 @@ export class AdminFollowUps {
   /** Builds the WhatsApp message; top-up messages include a fresh secret link so the student can choose. */
   protected async message(f: FollowUp) {
     try {
-      let text: string;
+      // Written in the language the student booked in.
+      const lang: Lang = f.language === 'en' ? 'en' : 'ar';
+      const p = {
+        name: f.studentName ?? '', ref: f.bookingReference,
+        title: lang === 'en' && f.sessionTitleEn ? f.sessionTitleEn : f.sessionTitleAr,
+        amount: moneyIn(lang, f.topUpAmount ?? 0, f.currency), paid: moneyIn(lang, f.paidAmount, f.currency), url: '',
+      };
       if (f.kind === 'TopUp') {
-        if (!confirm('هيتعمل لينك جديد لصفحة حجز الطالب (القديم هيبطل). تكمّل؟')) return;
+        if (!confirm(tr('followUps.reissueConfirm'))) return;
         const link: ReissueLink = await this.api.reissueLink(f.bookingId);
-        const url = `${window.location.origin}/b/${link.accessToken}`;
-        text = `أهلاً ${f.studentName ?? ''}، جروب "${f.sessionTitleAr}" مكملش العدد المطلوب.\n` +
-          `علشان الجلسة تتم في ميعادها المطلوب فرق ${this.money(f.topUpAmount ?? 0, f.currency)}، أو تقدر تنقل لميعاد تاني أو تسترد فلوسك كاملة.\n` +
-          `اختار من صفحة حجزك:\n${url}`;
-      } else if (f.kind === 'Refund') {
-        text = `أهلاً ${f.studentName ?? ''}، بخصوص حجز ${f.bookingReference}: هنرجّعلك ${this.money(f.paidAmount, f.currency)}. ` +
-          `ابعتلنا الرقم اللي تحب نحوّل عليه لو مختلف عن اللي حوّلت منه.`;
-      } else {
-        text = `أهلاً ${f.studentName ?? ''}، بخصوص حجز ${f.bookingReference}: إيه المواعيد اللي تناسبك علشان ننقلك لجلسة تانية لنفس الجزء؟`;
+        p.url = `${window.location.origin}/b/${link.accessToken}`;
       }
+      const text = translateIn(lang, `followUps.msg.${f.kind}`, p);
       this.msg.set({ bookingId: f.bookingId, text });
     } catch (e) { this.error.set(errorMessage(e)); }
   }
@@ -136,22 +135,22 @@ export class AdminFollowUps {
   }
 }
 
-const REQ_STATUS_AR: Record<string, string> = { New: 'جديد', Contacted: 'اتكلمنا معاه', Fulfilled: 'اتعملت جلسة', Closed: 'مقفول' };
+const reqStatus = (s: string) => { const k = `requests.st.${s}`; const t = tr(k); return t === k ? s : t; };
 
 /** Student session requests (spec 7). Admin contacts the student and creates a session from the request. */
 @Component({
   selector: 'dose-admin-requests',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
       <div class="row">
-        <h1 class="page-title">طلبات الجلسات</h1>
-        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" aria-label="الحالة">
-          <option value="New">جديدة</option><option value="Contacted">اتكلمنا معاهم</option>
-          <option value="Fulfilled">اتعملت جلسة</option><option value="Closed">مقفولة</option><option value="">الكل</option>
+        <h1 class="page-title">{{ 'titles.adminRequests' | t }}</h1>
+        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" [attr.aria-label]="'payments.status' | t">
+          <option value="New">{{ 'requests.st.New' | t }}</option><option value="Contacted">{{ 'requests.st.Contacted' | t }}</option>
+          <option value="Fulfilled">{{ 'requests.st.Fulfilled' | t }}</option><option value="Closed">{{ 'requests.st.Closed' | t }}</option><option value="">{{ 'sessions.all' | t }}</option>
         </select>
       </div>
-      <p class="muted small">الطلبات المتشابهة (نفس الصف والمادة والجزء) ممكن تتجمع في جلسة جماعية واحدة.</p>
+      <p class="muted small">{{ 'requests.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
       @for (r of items(); track r.id) {
@@ -162,23 +161,23 @@ const REQ_STATUS_AR: Record<string, string> = { New: 'جديد', Contacted: 'ا�
           </div>
           <p>{{ r.scopeText }}</p>
           <ul class="info-list small">
-            <li><span>الرقم</span><span dir="ltr">{{ r.reference }}</span></li>
-            <li><span>النوع</span><span>{{ r.serviceTypeNameAr }} · {{ r.studyTrackNameAr }} · {{ r.mode === 'Group' ? 'جماعي' + (r.preferredTierNameAr ? ' (' + r.preferredTierNameAr + ')' : '') : 'فردي' }}</span></li>
-            <li><span>المواعيد</span><span>{{ r.preferredDays }} — {{ r.preferredTimes }}</span></li>
-            <li><span>الطالب</span><span>{{ r.studentName }} · <span dir="ltr">{{ r.contactPhone }}</span></span></li>
-            @if (r.guardianPhone) { <li><span>ولي الأمر</span><span>{{ r.guardianName }} · <span dir="ltr">{{ r.guardianPhone }}</span></span></li> }
-            @if (r.notes) { <li><span>ملاحظات</span><span>{{ r.notes }}</span></li> }
-            <li><span>اتبعت</span><span>{{ dt(r.createdAtUtc) }}</span></li>
+            <li><span>{{ 'requests.ref' | t }}</span><span dir="ltr">{{ r.reference }}</span></li>
+            <li><span>{{ 'booking.type' | t }}</span><span>{{ r.serviceTypeNameAr }} · {{ r.studyTrackNameAr }} · {{ r.mode === 'Group' ? ('pricing.group' | t) + (r.preferredTierNameAr ? ' (' + r.preferredTierNameAr + ')' : '') : ('pricing.private' | t) }}</span></li>
+            <li><span>{{ 'requests.times' | t }}</span><span>{{ r.preferredDays }} — {{ r.preferredTimes }}</span></li>
+            <li><span>{{ 'admin.student' | t }}</span><span>{{ r.studentName }} · <span dir="ltr">{{ r.contactPhone }}</span></span></li>
+            @if (r.guardianPhone) { <li><span>{{ 'admin.guardian' | t }}</span><span>{{ r.guardianName }} · <span dir="ltr">{{ r.guardianPhone }}</span></span></li> }
+            @if (r.notes) { <li><span>{{ 'request.notes' | t }}</span><span>{{ r.notes }}</span></li> }
+            <li><span>{{ 'requests.sent' | t }}</span><span>{{ dt(r.createdAtUtc) }}</span></li>
           </ul>
-          <input class="note" [(ngModel)]="r.adminNotes" placeholder="ملاحظاتك (داخلية)" aria-label="ملاحظات داخلية" />
+          <input class="note" [(ngModel)]="r.adminNotes" [placeholder]="'requests.notesPh' | t" [attr.aria-label]="'requests.notesPh' | t" />
           <div class="actions">
-            <a class="dose-btn dose-btn--whatsapp small-btn" [href]="'https://wa.me/' + digits(r.contactPhone)" target="_blank" rel="noopener">كلّم الطالب</a>
-            <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="createSession(r)">اعمل جلسة من الطلب</button>
-            @if (r.status === 'New') { <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="set(r, 'Contacted')">اتكلمنا معاه</button> }
-            @if (r.status !== 'Closed') { <button type="button" class="dose-btn small-btn" (click)="set(r, 'Closed')">اقفل الطلب</button> }
+            <a class="dose-btn dose-btn--whatsapp small-btn" [href]="'https://wa.me/' + digits(r.contactPhone)" target="_blank" rel="noopener">{{ 'requests.contact' | t }}</a>
+            <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="createSession(r)">{{ 'requests.createSession' | t }}</button>
+            @if (r.status === 'New') { <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="set(r, 'Contacted')">{{ 'requests.markContacted' | t }}</button> }
+            @if (r.status !== 'Closed') { <button type="button" class="dose-btn small-btn" (click)="set(r, 'Closed')">{{ 'requests.close' | t }}</button> }
           </div>
         </article>
-      } @empty { <p class="muted">مفيش طلبات.</p> }
+      } @empty { <p class="muted">{{ 'requests.empty' | t }}</p> }
     </section>
   `,
   styles: `
@@ -197,7 +196,7 @@ export class AdminRequests {
   protected readonly status = signal('New');
   protected readonly error = signal('');
   protected readonly dt = fmtDateTime;
-  protected readonly statusAr = (s: string) => REQ_STATUS_AR[s] ?? s;
+  protected readonly statusAr = reqStatus;
   protected readonly digits = (p: string) => p.replace(/\D/g, '');
 
   constructor() { void this.load(); }

@@ -24,7 +24,7 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
             {
                 b.Id, b.Reference, b.Status, b.QuotedPrice, b.Currency, b.CancelReason, b.SessionId,
                 StudentName = (string?)b.Student!.Name, Phone = (string?)b.Student.ContactPhoneE164, Guardian = b.Student.GuardianPhoneE164,
-                b.Session!.ScopeTitleAr, b.Session.StartUtc,
+                b.Session!.ScopeTitleAr, ScopeTitleEn = b.Session.ScopeTitleEn, b.Session.StartUtc, b.Language,
             })
             .OrderBy(b => b.StartUtc).Take(300).ToListAsync(ct);
 
@@ -50,7 +50,8 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
             return new FollowUpDto(b.Id, kind, b.Reference, b.Status.ToString(), b.StudentName, b.Phone, b.Guardian, b.SessionId,
                 b.ScopeTitleAr, b.StartUtc, b.QuotedPrice + settled, b.Currency, pending?.Amount, pending?.RespondByUtc,
                 pending?.StudentChoice?.ToString(), proof?.Status.ToString(), pending?.Reason ?? b.CancelReason,
-                pending?.RespondByUtc < now && pending.StudentChoice is null);
+                pending?.RespondByUtc < now && pending.StudentChoice is null,
+                b.Language == "en" ? "en" : "ar", b.ScopeTitleEn);
         }).ToList();
     }
 

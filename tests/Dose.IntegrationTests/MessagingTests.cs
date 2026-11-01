@@ -107,6 +107,23 @@ public sealed class MessagingTests(DatabaseFixture fx)
     }
 
     [Fact]
+    public async Task Follow_up_carries_the_students_language_for_admin_messages()
+    {
+        RequireDb();
+        var session = await fx.CreateSessionAsync(SessionMode.Group, "جروب متوسط (5–9)");
+        var clock = new FakeClock(fx.SeedTime);
+        var (_, bookingId, proofId) = await BookWithProofAsync(session.Id, clock, FixedLanguage.English);
+        await using (var db = fx.NewDb()) await fx.Payments(db, clock).ApproveAsync(proofId, Admin, default);
+        clock.UtcNow = session.TierDecisionAtUtc!.Value.AddMinutes(1);
+        await using (var db = fx.NewDb()) await fx.Decisions(db, clock).RunDueDecisionsAsync(default);
+
+        await using var db2 = fx.NewDb();
+        var item = Assert.Single(await fx.FollowUps(db2, clock).ListAsync(default), f => f.BookingId == bookingId);
+        Assert.Equal("TopUp", item.Kind);
+        Assert.Equal("en", item.Language);
+    }
+
+    [Fact]
     public async Task Reminders_are_queued_once_for_sessions_starting_soon()
     {
         RequireDb();

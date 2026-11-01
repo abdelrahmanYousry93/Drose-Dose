@@ -1,0 +1,270 @@
+{
+ "status.Draft": [
+  "مسودة",
+  "Draft"
+ ],
+ "status.Published": [
+  "منشورة",
+  "Published"
+ ],
+ "status.TopUpRequired": [
+  "مستنية رد الطلاب على الفرق",
+  "Waiting for top-up replies"
+ ],
+ "status.Confirmed": [
+  "مؤكدة",
+  "Confirmed"
+ ],
+ "status.InProgress": [
+  "شغالة",
+  "In progress"
+ ],
+ "status.Completed": [
+  "خلصت",
+  "Completed"
+ ],
+ "status.Cancelled": [
+  "ملغية",
+  "Cancelled"
+ ],
+ "status.PendingHold": [
+  "حجز مؤقت",
+  "Temporary hold"
+ ],
+ "status.PendingPayment": [
+  "منتظر الدفع",
+  "Awaiting payment"
+ ],
+ "status.PaymentUnderReview": [
+  "الدفع تحت المراجعة",
+  "Payment under review"
+ ],
+ "status.TopUpPending": [
+  "منتظر قرار الفرق",
+  "Awaiting top-up decision"
+ ],
+ "status.Expired": [
+  "انتهت المهلة",
+  "Expired"
+ ],
+ "status.RefundPending": [
+  "محتاج استرداد",
+  "Refund pending"
+ ],
+ "status.Refunded": [
+  "اترد",
+  "Refunded"
+ ],
+ "status.Transferred": [
+  "اتنقل",
+  "Transferred"
+ ],
+ "status.NoShow": [
+  "محضرش",
+  "No-show"
+ ],
+ "sessionsAdmin.savedPublished": [
+  "الجلسة اتحفظت واتنشرت للطلاب ✓",
+  "Session saved and published to students ✓"
+ ],
+ "sessionsAdmin.saved": [
+  "الجلسة اتحفظت ✓",
+  "Session saved ✓"
+ ],
+ "sessionsAdmin.published": [
+  "اتنشرت ✓",
+  "Published ✓"
+ ],
+ "sessionsAdmin.cancelPrompt": [
+  "سبب إلغاء \"{title}\"؟ (الحجوزات المدفوعة هتتحول لـ \"محتاج استرداد\")",
+  "Reason for cancelling \"{title}\"? (Paid bookings will move to \"Refund pending\")"
+ ],
+ "sessionsAdmin.cancelledRefunds": [
+  "الجلسة اتلغت. فيه {n} حجز محتاج استرداد — رسايل الإلغاء في صفحة الرسائل.",
+  "Session cancelled. {n} bookings need a refund — cancellation messages are queued on the Messages page."
+ ],
+ "sessionsAdmin.cancelled": [
+  "الجلسة اتلغت.",
+  "Session cancelled."
+ ],
+ "sessionsAdmin.decideConfirm": [
+  "حسم الجروب دلوقتي؟ لو العدد مكملش، كل طالب هيتطلب منه الفرق أو يختار ينقل أو يسترد. ده بيحصل تلقائي في ميعاد الحسم.",
+  "Decide the group now? If it isn't full, each student will be asked to pay the difference, move, or get a refund. This happens automatically at the decision time."
+ ],
+ "sessionsAdmin.decided": [
+  "اتحسم ✓ — شوف صفحة المتابعات.",
+  "Decided ✓ — see the Follow-ups page."
+ ],
+ "sessionsAdmin.reissueConfirm": [
+  "هيتعمل لينك جديد لحجز {ref} واللينك القديم هيبطل. تكمّل؟",
+  "A new link will be created for booking {ref} and the old one will stop working. Continue?"
+ ],
+ "sessionsAdmin.new": [
+  "جلسة جديدة",
+  "New session"
+ ],
+ "sessionsAdmin.fromRequest": [
+  "من طلب {ref}: {name} — المواعيد المناسبة: {days} ({times}). بعد الحفظ الطلب هيتعلّم إنه اتعملّه جلسة، وابعت للطالب رابط الجلسة على واتساب.",
+  "From request {ref}: {name} — preferred: {days} ({times}). After saving, the request is marked fulfilled; send the student the session link on WhatsApp."
+ ],
+ "sessionsAdmin.locked": [
+  "فيه حجوزات في الجلسة دي: تقدر تغيّر الميعاد والمدرس والعنوان والرابط بس. لو غيّرت الميعاد بلّغ الطلاب على واتساب.",
+  "This session has bookings: you can only change the time, teacher, title and link. If you change the time, tell the students on WhatsApp."
+ ],
+ "sessionsAdmin.unit": [
+  "الوحدة (اختياري)",
+  "Unit (optional)"
+ ],
+ "sessionsAdmin.lesson": [
+  "الدرس (اختياري)",
+  "Lesson (optional)"
+ ],
+ "sessionsAdmin.title": [
+  "عنوان الجلسة (اللي هيشوفه الطالب)",
+  "Session title (shown to students)"
+ ],
+ "sessionsAdmin.titleEn": [
+  "عنوان الجلسة بالإنجليزي (اختياري)",
+  "Session title in English (optional)"
+ ],
+ "sessionsAdmin.details": [
+  "تفاصيل النطاق (اختياري)",
+  "Scope details (optional)"
+ ],
+ "sessionsAdmin.detailsEn": [
+  "التفاصيل بالإنجليزي (اختياري)",
+  "Details in English (optional)"
+ ],
+ "sessionsAdmin.date": [
+  "التاريخ",
+  "Date"
+ ],
+ "sessionsAdmin.time": [
+  "الساعة (بتوقيت القاهرة)",
+  "Time (Cairo time)"
+ ],
+ "sessionsAdmin.meet": [
+  "رابط Google Meet (ممكن تضيفه بعدين)",
+  "Google Meet link (can be added later)"
+ ],
+ "sessionsAdmin.meetHint": [
+  "مش بيظهر لحد غير الحجوزات المؤكدة، ومن صفحة الحجز في ميعاد الجلسة بس.",
+  "Only shown to confirmed bookings, from their booking page at session time."
+ ],
+ "sessionsAdmin.mode": [
+  "نوع الجلسة",
+  "Session type"
+ ],
+ "sessionsAdmin.fromPlan": [
+  "التسعير من خطة:",
+  "Priced by plan:"
+ ],
+ "sessionsAdmin.groupSize": [
+  "حجم الجروب",
+  "Group size"
+ ],
+ "sessionsAdmin.privatePrice": [
+  "سعر الجلسة الفردية:",
+  "Private session price:"
+ ],
+ "sessionsAdmin.saveDraft": [
+  "حفظ كمسودة",
+  "Save as draft"
+ ],
+ "sessionsAdmin.savePublish": [
+  "حفظ ونشر",
+  "Save and publish"
+ ],
+ "sessionsAdmin.allStatuses": [
+  "كل الحالات",
+  "All statuses"
+ ],
+ "sessionsAdmin.showPast": [
+  "اعرض القديمة",
+  "Show past"
+ ],
+ "sessionsAdmin.bookings": [
+  "الحجوزات",
+  "Bookings"
+ ],
+ "sessionsAdmin.bookingsLine": [
+  "{c} مؤكد · {o} من {cap} مقعد",
+  "{c} confirmed · {o} of {cap} seats"
+ ],
+ "sessionsAdmin.deadline": [
+  "آخر حجز",
+  "Booking closes"
+ ],
+ "sessionsAdmin.decision": [
+  "حسم الجروب",
+  "Group decision"
+ ],
+ "sessionsAdmin.link": [
+  "رابط الجلسة",
+  "Meeting link"
+ ],
+ "sessionsAdmin.editBtn": [
+  "تعديل",
+  "Edit"
+ ],
+ "sessionsAdmin.publish": [
+  "نشر",
+  "Publish"
+ ],
+ "sessionsAdmin.decideNow": [
+  "حسم الجروب الآن",
+  "Decide group now"
+ ],
+ "sessionsAdmin.cancel": [
+  "إلغاء الجلسة",
+  "Cancel session"
+ ],
+ "sessionsAdmin.noBookings": [
+  "مفيش حجوزات.",
+  "No bookings."
+ ],
+ "sessionsAdmin.sendLink": [
+  "ابعت لينك الحجز",
+  "Send booking link"
+ ],
+ "sessionsAdmin.linkHint": [
+  "ابعت الرسالة دي للطالب على واتساب. اللينك ده سري وبيفتح صفحة حجزه.",
+  "Send this message to the student on WhatsApp. The link is secret and opens their booking page."
+ ],
+ "messages.openChat": [
+  "افتح شات الطالب",
+  "Open student's chat"
+ ],
+ "sessionsAdmin.empty": [
+  "مفيش جلسات.",
+  "No sessions."
+ ],
+ "sessionsAdmin.titlePh": [
+  "مثلاً: التفاضل والتكامل — قواعد الاشتقاق",
+  "e.g. Calculus — differentiation rules"
+ ],
+ "sessionsAdmin.detailsPh": [
+  "إيه بالظبط اللي هيتشرح",
+  "What exactly will be explained"
+ ],
+ "sessionsAdmin.edit": [
+  "تعديل الجلسة",
+  "Edit session"
+ ],
+ "sessionsAdmin.linkYes": [
+  "موجود ✓",
+  "Added ✓"
+ ],
+ "sessionsAdmin.linkNo": [
+  "لسه",
+  "Not yet"
+ ],
+ "sessionsAdmin.linkMsg": [
+  "رسالة الحجز",
+  "Booking message"
+ ],
+ "messages.copy": [
+  "انسخ الرسالة",
+  "Copy message"
+ ]
+}

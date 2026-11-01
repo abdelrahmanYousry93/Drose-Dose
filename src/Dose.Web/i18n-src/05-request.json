@@ -1,0 +1,146 @@
+{
+ "request.days.sat": [
+  "السبت",
+  "Saturday"
+ ],
+ "request.days.sun": [
+  "الأحد",
+  "Sunday"
+ ],
+ "request.days.mon": [
+  "الاثنين",
+  "Monday"
+ ],
+ "request.days.tue": [
+  "الثلاثاء",
+  "Tuesday"
+ ],
+ "request.days.wed": [
+  "الأربعاء",
+  "Wednesday"
+ ],
+ "request.days.thu": [
+  "الخميس",
+  "Thursday"
+ ],
+ "request.days.fri": [
+  "الجمعة",
+  "Friday"
+ ],
+ "request.days.anyDay": [
+  "أي يوم",
+  "Any day"
+ ],
+ "request.times.morning": [
+  "صباحاً",
+  "Morning"
+ ],
+ "request.times.afternoon": [
+  "بعد الظهر",
+  "Afternoon"
+ ],
+ "request.times.evening": [
+  "مساءً",
+  "Evening"
+ ],
+ "request.times.anyTime": [
+  "أي وقت",
+  "Any time"
+ ],
+ "request.lead": [
+  "مفيش ميعاد مناسب؟ قولنا محتاج إيه وإمتى، وإحنا هنرتّب الجلسة ونكلمك على واتساب.",
+  "No time that suits you? Tell us what you need and when, and we'll arrange the session and message you on WhatsApp."
+ ],
+ "request.doneTitle": [
+  "طلبك وصلنا",
+  "We've received your request"
+ ],
+ "request.doneRef": [
+  "رقم الطلب",
+  "Request reference"
+ ],
+ "request.doneBody": [
+  "هنكلمك على واتساب في أقرب وقت.",
+  "We'll message you on WhatsApp soon."
+ ],
+ "request.sendWhatsapp": [
+  "ابعتلنا على واتساب",
+  "Message us on WhatsApp"
+ ],
+ "request.whatNeed": [
+  "إيه اللي محتاجه؟",
+  "What do you need?"
+ ],
+ "request.choose": [
+  "اختار",
+  "Choose"
+ ],
+ "request.service": [
+  "نوع الشرح",
+  "Type of help"
+ ],
+ "request.scope": [
+  "الجزء المطلوب شرحه",
+  "What should be explained"
+ ],
+ "request.scopePlaceholder": [
+  "مثلاً: الدرس التاني في الوحدة الأولى — قوانين نيوتن",
+  "e.g. Unit 1, lesson 2 — Newton's laws"
+ ],
+ "request.when": [
+  "إمتى يناسبك؟",
+  "When suits you?"
+ ],
+ "request.daysLabel": [
+  "الأيام",
+  "Days"
+ ],
+ "request.timesLabel": [
+  "الوقت",
+  "Time"
+ ],
+ "request.modeTitle": [
+  "فردي ولا جماعي؟",
+  "Private or group?"
+ ],
+ "request.group": [
+  "جلسة جماعية",
+  "Group session"
+ ],
+ "request.groupHint": [
+  "أوفر — بنجمّع طلاب على نفس الجزء",
+  "Cheaper — we gather students on the same topic"
+ ],
+ "request.groupSize": [
+  "حجم الجروب اللي يناسبك",
+  "Preferred group size"
+ ],
+ "request.studentsRange": [
+  "{min}–{max} طلاب",
+  "{min}–{max} students"
+ ],
+ "request.priceNote": [
+  "السعر النهائي بيتأكد لما نرتّب الجلسة، وبيظهرلك قبل ما تحجز.",
+  "The final price is confirmed when we arrange the session, and you'll see it before booking."
+ ],
+ "request.priceLater": [
+  "هنحدد السعر ونبلغك قبل الحجز.",
+  "We'll set the price and tell you before you book."
+ ],
+ "request.contact": [
+  "بيانات التواصل",
+  "Contact details"
+ ],
+ "request.notes": [
+  "ملاحظات",
+  "Notes"
+ ],
+ "request.sending": [
+  "جاري الإرسال…",
+  "Sending…"
+ ],
+ "request.send": [
+  "ابعت الطلب",
+  "Send request"
+ ]
+}

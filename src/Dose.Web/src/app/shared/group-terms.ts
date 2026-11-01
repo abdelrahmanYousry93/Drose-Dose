@@ -1,30 +1,29 @@
 import { Component, input } from '@angular/core';
 import { GroupTerms } from '../core/api';
 import { fmtDateTime, fmtMoney } from '../core/format';
+import { TranslatePipe } from '../core/i18n';
 
 /** Mandatory disclosure for the target-tier-with-top-up model (spec 6.4). */
 @Component({
   selector: 'dose-group-terms',
+  imports: [TranslatePipe],
   template: `
     @let g = terms();
     <div class="dose-card terms">
-      <h2>إزاي سعر الجروب بيشتغل؟</h2>
-      <p>
-        إنت بتحجز في <strong>{{ g.targetTierNameAr }}</strong> وبتدفع
-        <strong>{{ money(price(), currency()) }}</strong> بس — سعر الجروب لما يكمل من {{ g.targetMin }} لـ {{ g.targetMax }} طلاب.
-      </p>
+      <h2>{{ 'groupTerms.title' | t }}</h2>
+      <p [innerHTML]="'groupTerms.youBook' | t: { tier: bold(g.targetTierName), price: bold(money(price(), currency())), min: g.targetMin, max: g.targetMax }"></p>
       @if (g.tierDecisionAtUtc) {
-        <p>هنحسم عدد الجروب يوم <strong>{{ dateTime(g.tierDecisionAtUtc) }}</strong>.</p>
+        <p [innerHTML]="'groupTerms.decideOn' | t: { when: bold(dateTime(g.tierDecisionAtUtc)) }"></p>
       }
       @if (g.maxExtraAmount > 0) {
         <div class="alert">
-          لو العدد مكملش لحد الميعاد ده، هنكلمك على واتساب <strong>قبل الجلسة</strong> وتختار:
+          <span [innerHTML]="'groupTerms.ifShort' | t"></span>
           <ul>
-            <li>تدفع الفرق (أقصى فرق ممكن: <strong>{{ money(g.maxExtraAmount, currency()) }}</strong>)</li>
-            <li>أو تنقل لميعاد تاني</li>
-            <li>أو تسترد فلوسك كاملة</li>
+            <li [innerHTML]="'groupTerms.payDiff' | t: { max: bold(money(g.maxExtraAmount, currency())) }"></li>
+            <li>{{ 'groupTerms.orMove' | t }}</li>
+            <li>{{ 'groupTerms.orRefund' | t }}</li>
           </ul>
-          ومفيش أي مبلغ هيتخصم منك من غير موافقتك.
+          {{ 'groupTerms.noCharge' | t }}
         </div>
       }
     </div>
@@ -42,4 +41,10 @@ export class GroupTermsBox {
   readonly currency = input('EGP');
   protected readonly money = fmtMoney;
   protected readonly dateTime = fmtDateTime;
+  /** Values are escaped before being wrapped, so server text can't inject markup. */
+  protected bold(v: string) { return `<strong>${escapeHtml(v)}</strong>`; }
+}
+
+export function escapeHtml(v: string) {
+  return v.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }

@@ -1,0 +1,170 @@
+{
+ "teacher.statSessions": [
+  "جلسة",
+  "sessions"
+ ],
+ "teacher.statStudents": [
+  "طالب مؤكد",
+  "confirmed students"
+ ],
+ "teacher.statAttendance": [
+  "محتاجة تسجيل حضور",
+  "need attendance"
+ ],
+ "teacher.confirmedN": [
+  "{n} طالب مؤكد",
+  "{n} confirmed students"
+ ],
+ "teacher.markAttendance": [
+  "سجّل الحضور",
+  "Mark attendance"
+ ],
+ "teacher.openMeet": [
+  "افتح Google Meet",
+  "Open Google Meet"
+ ],
+ "teacher.noLink": [
+  "لينك الجلسة لسه متضافش. الإدارة هتضيفه قبل الميعاد.",
+  "The session link hasn't been added yet. The admin team will add it before the session."
+ ],
+ "teacher.students": [
+  "الطلاب ({n})",
+  "Students ({n})"
+ ],
+ "teacher.studentsHint": [
+  "بتظهر الأسماء الأولى بس. أي تواصل مع الطلاب بيكون عن طريق الإدارة.",
+  "Only first names are shown. Any contact with students goes through the admin team."
+ ],
+ "teacher.noStudents": [
+  "مفيش طلاب مؤكدين لسه.",
+  "No confirmed students yet."
+ ],
+ "teacher.saveAttendance": [
+  "حفظ الحضور",
+  "Save attendance"
+ ],
+ "teacher.complete": [
+  "إنهاء الجلسة",
+  "End session"
+ ],
+ "teacher.attendanceOpens": [
+  "تسجيل الحضور بيتفتح قبل الجلسة بربع ساعة.",
+  "Attendance opens 15 minutes before the session."
+ ],
+ "teacher.avTitle": [
+  "مواعيدي المتاحة",
+  "My availability"
+ ],
+ "teacher.avLead": [
+  "ضيف الأوقات اللي تقدر تشرح فيها، والإدارة هتوافق عليها وتبني عليها الجلسات. المواعيد بتوقيت القاهرة.",
+  "Add the times you can teach; the admin team approves them and builds sessions on them. Times are Cairo time."
+ ],
+ "teacher.day": [
+  "اليوم",
+  "Day"
+ ],
+ "teacher.addSlot": [
+  "إضافة الميعاد",
+  "Add time slot"
+ ],
+ "teacher.adminNote": [
+  "ملاحظة الإدارة: {note}",
+  "Admin note: {note}"
+ ],
+ "teacher.withdraw": [
+  "سحب",
+  "Withdraw"
+ ],
+ "teacher.noSlots": [
+  "لسه مضفتش مواعيد.",
+  "You haven't added any times yet."
+ ],
+ "teacher.hello": [
+  "أهلاً {name}",
+  "Hello {name}"
+ ],
+ "teacher.past": [
+  "جلسات قديمة",
+  "Past sessions"
+ ],
+ "teacher.upcoming": [
+  "جلساتي الجاية",
+  "My upcoming sessions"
+ ],
+ "teacher.showUpcoming": [
+  "الجاية",
+  "Upcoming"
+ ],
+ "teacher.showPast": [
+  "القديمة",
+  "Past"
+ ],
+ "teacher.attendanceOf": [
+  "حضور {name}",
+  "Attendance for {name}"
+ ],
+ "teacher.present": [
+  "حاضر",
+  "Present"
+ ],
+ "teacher.absent": [
+  "غايب",
+  "Absent"
+ ],
+ "teacher.attendanceSaved": [
+  "اتحفظ الحضور ✓",
+  "Attendance saved ✓"
+ ],
+ "teacher.completeConfirm": [
+  "إنهاء الجلسة؟ اتأكد إنك سجلت حضور كل الطلاب.",
+  "End the session? Make sure you've marked attendance for every student."
+ ],
+ "teacher.completed": [
+  "الجلسة اتقفلت ✓ شكراً!",
+  "Session closed ✓ Thank you!"
+ ],
+ "teacher.withdrawConfirm": [
+  "سحب الميعاد ده؟",
+  "Withdraw this time slot?"
+ ],
+ "teacher.st.Published": [
+  "مفتوحة للحجز",
+  "Open for booking"
+ ],
+ "teacher.st.TopUpRequired": [
+  "مستنية رد الطلاب",
+  "Waiting for students"
+ ],
+ "teacher.st.Confirmed": [
+  "مؤكدة",
+  "Confirmed"
+ ],
+ "teacher.st.InProgress": [
+  "شغالة",
+  "In progress"
+ ],
+ "teacher.st.Completed": [
+  "خلصت",
+  "Completed"
+ ],
+ "teacher.st.Cancelled": [
+  "ملغية",
+  "Cancelled"
+ ],
+ "teacher.av.Submitted": [
+  "مستني موافقة",
+  "Awaiting approval"
+ ],
+ "teacher.av.Approved": [
+  "اتوافق عليه",
+  "Approved"
+ ],
+ "teacher.av.Rejected": [
+  "مرفوض",
+  "Rejected"
+ ],
+ "teacher.av.Withdrawn": [
+  "اتسحب",
+  "Withdrawn"
+ ]
+}

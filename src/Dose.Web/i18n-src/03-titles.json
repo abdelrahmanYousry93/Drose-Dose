@@ -1,0 +1,19 @@
+{
+ "titles.adminLogin": ["دخول الإدارة", "Admin sign-in"],
+ "titles.adminDashboard": ["الرئيسية", "Dashboard"],
+ "titles.adminUsers": ["المستخدمين", "Users"],
+ "titles.adminAvailability": ["مواعيد المدرسين", "Teacher availability"],
+ "titles.adminPayments": ["مراجعة المدفوعات", "Payment review"],
+ "titles.adminSessions": ["الجلسات", "Sessions"],
+ "titles.adminPricing": ["الأسعار", "Pricing"],
+ "titles.adminTeachers": ["المدرسين", "Teachers"],
+ "titles.adminCatalog": ["الكتالوج", "Catalog"],
+ "titles.adminPaymentMethods": ["طرق الدفع", "Payment methods"],
+ "titles.adminSettings": ["الإعدادات", "Settings"],
+ "titles.adminFollowUps": ["المتابعات", "Follow-ups"],
+ "titles.adminRequests": ["طلبات الجلسات", "Session requests"],
+ "titles.adminMessages": ["الرسائل", "Messages"],
+ "titles.teacherSessions": ["جلساتي", "My sessions"],
+ "titles.teacherSession": ["الجلسة", "Session"],
+ "titles.teacherAvailability": ["مواعيدي", "My availability"]
+}

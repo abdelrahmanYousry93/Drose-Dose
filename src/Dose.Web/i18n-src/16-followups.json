@@ -1,0 +1,170 @@
+{
+ "followUps.lead": [
+  "الجروبات اللي مكملتش بتظهر هنا بعد ميعاد الحسم: كل طالب بيختار من صفحة حجزه. الفلوس بتتحوّل برّه المنصة (إنستاباي / فودافون كاش)، وإنت بتسجّل اللي حصل هنا. إيصالات الفرق بتظهر في صفحة المدفوعات.",
+  "Groups that didn't fill appear here after the decision time: each student chooses on their booking page. Money moves outside the platform (InstaPay / Vodafone Cash) and you record what happened here. Top-up receipts appear on the Payments page."
+ ],
+ "followUps.overdue": [
+  "عدّى ميعاد الرد",
+  "Reply overdue"
+ ],
+ "followUps.proofReview": [
+  "إيصال الفرق تحت المراجعة",
+  "Top-up receipt under review"
+ ],
+ "followUps.paid": [
+  "دفع",
+  "Paid"
+ ],
+ "followUps.diff": [
+  "الفرق المطلوب",
+  "Difference due"
+ ],
+ "followUps.respondBy": [
+  "آخر ميعاد للرد",
+  "Reply by"
+ ],
+ "followUps.reason": [
+  "السبب",
+  "Reason"
+ ],
+ "followUps.message": [
+  "رسالة واتساب للطالب",
+  "WhatsApp message to student"
+ ],
+ "followUps.waive": [
+  "تنازل عن الفرق",
+  "Waive the difference"
+ ],
+ "followUps.refunded": [
+  "تم تحويل الاسترداد",
+  "Refund sent"
+ ],
+ "followUps.transferred": [
+  "تم النقل",
+  "Transfer done"
+ ],
+ "followUps.openChat": [
+  "افتح الشات",
+  "Open chat"
+ ],
+ "followUps.none": [
+  "مفيش.",
+  "None."
+ ],
+ "requests.lead": [
+  "الطلبات المتشابهة (نفس الصف والمادة والجزء) ممكن تتجمع في جلسة جماعية واحدة.",
+  "Similar requests (same grade, subject and topic) can be grouped into one group session."
+ ],
+ "requests.ref": [
+  "الرقم",
+  "Reference"
+ ],
+ "requests.times": [
+  "المواعيد",
+  "Preferred times"
+ ],
+ "requests.sent": [
+  "اتبعت",
+  "Sent"
+ ],
+ "requests.contact": [
+  "كلّم الطالب",
+  "Message student"
+ ],
+ "requests.createSession": [
+  "اعمل جلسة من الطلب",
+  "Create session from request"
+ ],
+ "requests.markContacted": [
+  "اتكلمنا معاه",
+  "Mark contacted"
+ ],
+ "requests.close": [
+  "اقفل الطلب",
+  "Close request"
+ ],
+ "requests.empty": [
+  "مفيش طلبات.",
+  "No requests."
+ ],
+ "followUps.choice.PayDifference": [
+  "هيدفع الفرق",
+  "Will pay the difference"
+ ],
+ "followUps.choice.Transfer": [
+  "عايز ينقل",
+  "Wants to move"
+ ],
+ "followUps.choice.Refund": [
+  "عايز يسترد",
+  "Wants a refund"
+ ],
+ "followUps.notePh": [
+  "ملاحظة (اختياري)",
+  "Note (optional)"
+ ],
+ "followUps.msgLabel": [
+  "الرسالة",
+  "Message"
+ ],
+ "followUps.groupTopUp": [
+  "جروبات مكملتش — مستني رد أو فرق",
+  "Groups that didn't fill — awaiting reply or difference"
+ ],
+ "followUps.groupRefund": [
+  "استرداد مطلوب",
+  "Refunds to send"
+ ],
+ "followUps.groupTransfer": [
+  "نقل لميعاد تاني",
+  "Move to another time"
+ ],
+ "followUps.confirm.waive": [
+  "تتنازل عن الفرق وتأكد حجز الطالب؟",
+  "Waive the difference and confirm the student's booking?"
+ ],
+ "followUps.confirm.refunded": [
+  "اتأكدت إن الفلوس اتحوّلت للطالب؟",
+  "Have you confirmed the money was sent to the student?"
+ ],
+ "followUps.confirm.transfer": [
+  "الطالب اتنقل لجلسة تانية؟",
+  "Has the student been moved to another session?"
+ ],
+ "followUps.reissueConfirm": [
+  "هيتعمل لينك جديد لصفحة حجز الطالب (القديم هيبطل). تكمّل؟",
+  "A new link to the student's booking page will be created (the old one stops working). Continue?"
+ ],
+ "followUps.msg.TopUp": [
+  "أهلاً {name}، جروب \"{title}\" مكملش العدد المطلوب.\nعلشان الجلسة تتم في ميعادها المطلوب فرق {amount}، أو تقدر تنقل لميعاد تاني أو تسترد فلوسك كاملة.\nاختار من صفحة حجزك:\n{url}",
+  "Hi {name}, the group for \"{title}\" didn't reach the required size.\nTo keep the session at its time the difference is {amount}, or you can move to another time or get a full refund.\nChoose on your booking page:\n{url}"
+ ],
+ "followUps.msg.Refund": [
+  "أهلاً {name}، بخصوص حجز {ref}: هنرجّعلك {paid}. ابعتلنا الرقم اللي تحب نحوّل عليه لو مختلف عن اللي حوّلت منه.",
+  "Hi {name}, about booking {ref}: we'll refund {paid}. Send us the number to transfer to if it's different from the one you paid from."
+ ],
+ "followUps.msg.Transfer": [
+  "أهلاً {name}، بخصوص حجز {ref}: إيه المواعيد اللي تناسبك علشان ننقلك لجلسة تانية لنفس الجزء؟",
+  "Hi {name}, about booking {ref}: which times suit you so we can move you to another session on the same topic?"
+ ],
+ "requests.st.New": [
+  "جديد",
+  "New"
+ ],
+ "requests.st.Contacted": [
+  "اتكلمنا معاه",
+  "Contacted"
+ ],
+ "requests.st.Fulfilled": [
+  "اتعملت جلسة",
+  "Session created"
+ ],
+ "requests.st.Closed": [
+  "مقفول",
+  "Closed"
+ ],
+ "requests.notesPh": [
+  "ملاحظاتك (داخلية)",
+  "Your notes (internal)"
+ ]
+}

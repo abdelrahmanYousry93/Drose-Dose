@@ -1,19 +1,21 @@
 import { Component, computed, input } from '@angular/core';
 import { TeacherPublic } from '../core/api';
+import { TranslatePipe } from '../core/i18n';
 
 @Component({
   selector: 'dose-teacher-card',
+  imports: [TranslatePipe],
   template: `
     @let t = teacher();
     <div class="dose-card teacher">
-      @if (t.photoUrl) { <img [src]="t.photoUrl" [alt]="t.displayNameAr" /> }
+      @if (t.photoUrl) { <img [src]="t.photoUrl" [alt]="t.displayName" /> }
       @else { <span class="avatar" aria-hidden="true">{{ initials() }}</span> }
       <div class="body">
-        <span class="muted small">المدرس</span>
-        <strong>{{ t.displayNameAr }}</strong>
-        @if (t.yearsOfExperience) { <span class="small">خبرة {{ t.yearsOfExperience }} سنين</span> }
-        @if (t.qualificationsAr) { <span class="small">{{ t.qualificationsAr }}</span> }
-        @if (t.bioAr) { <p class="muted small">{{ t.bioAr }}</p> }
+        <span class="muted small">{{ 'common.teacher' | t }}</span>
+        <strong dir="auto">{{ t.displayName }}</strong>
+        @if (t.yearsOfExperience) { <span class="small">{{ 'teacherCard.experience' | t: { n: t.yearsOfExperience } }}</span> }
+        @if (t.qualifications) { <span class="small" dir="auto">{{ t.qualifications }}</span> }
+        @if (t.bio) { <p class="muted small" dir="auto">{{ t.bio }}</p> }
       </div>
     </div>
   `,
@@ -29,5 +31,5 @@ import { TeacherPublic } from '../core/api';
 export class TeacherCard {
   readonly teacher = input.required<TeacherPublic>();
   protected readonly initials = computed(() =>
-    this.teacher().displayNameAr.replace(/^(أ\.|م\.|د\.)\s*/, '').split(/\s+/).slice(0, 2).map((w) => w[0]).join(' '));
+    this.teacher().displayName.replace(/^(أ\.|م\.|د\.|Mr\.|Ms\.|Mrs\.|Dr\.)\s*/i, '').split(/\s+/).slice(0, 2).map((w) => w[0]).join(' '));
 }

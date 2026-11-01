@@ -1,9 +1,9 @@
 <section class="page">
   @if (error()) {
     <div class="dose-card box center">
-      <h1 class="page-title">مش لاقيين الحجز ده</h1>
+      <h1 class="page-title">{{ 'booking.notFound' | t }}</h1>
       <p class="muted">{{ error() }}</p>
-      <a class="dose-btn dose-btn--ghost" routerLink="/">الرئيسية</a>
+      <a class="dose-btn dose-btn--ghost" routerLink="/">{{ 'booking.home' | t }}</a>
     </div>
   } @else if (!b()) {
     <div class="skeleton"></div>
@@ -13,32 +13,32 @@
 
     <header class="head">
       <div>
-        <span class="muted small">رقم الحجز</span>
+        <span class="muted small">{{ 'booking.reference' | t }}</span>
         <strong class="ref">{{ v.reference }}</strong>
       </div>
       <button class="dose-btn dose-btn--ghost small-btn" type="button" (click)="copyLink()">
-        {{ copied() ? 'اتنسخ ✓' : 'انسخ لينك الحجز' }}
+        {{ (copied() ? 'common.copied' : 'booking.copyLink') | t }}
       </button>
     </header>
-    <p class="alert alert--info small">اللينك ده خاص بيك ومنه هتدخل الجلسة. احفظه ومتبعتهوش لحد.</p>
+    <p class="alert alert--info small">{{ 'booking.privateLink' | t }}</p>
 
     @if (step() > 0) {
-      <ol class="steps" aria-label="خطوات الحجز">
-        <li [class.on]="step() >= 1">البيانات</li>
-        <li [class.on]="step() >= 2">الدفع</li>
-        <li [class.on]="step() >= 3">المراجعة</li>
-        <li [class.on]="step() >= 4">مؤكد</li>
+      <ol class="steps" [attr.aria-label]="'booking.steps' | t">
+        <li [class.on]="step() >= 1">{{ 'booking.stepDetails' | t }}</li>
+        <li [class.on]="step() >= 2">{{ 'booking.stepPay' | t }}</li>
+        <li [class.on]="step() >= 3">{{ 'booking.stepReview' | t }}</li>
+        <li [class.on]="step() >= 4">{{ 'booking.stepConfirmed' | t }}</li>
       </ol>
     }
 
     <div class="dose-card box">
-      <h1 class="title">{{ s.subjectNameAr }} — {{ s.scopeTitleAr }}</h1>
+      <h1 class="title" dir="auto">{{ s.subjectName }} — {{ s.scopeTitle }}</h1>
       <ul class="info-list">
-        <li><span>الميعاد</span><span>{{ fmt.date(s.startUtc) }} — {{ fmt.time(s.startUtc) }}</span></li>
-        <li><span>المدة</span><span>{{ fmt.duration(s.durationMinutes) }}</span></li>
-        <li><span>النوع</span><span>{{ s.mode === 'Group' ? 'جماعية' : 'فردية' }}</span></li>
-        <li><span>المدرس</span><span>{{ v.teacher.displayNameAr }}</span></li>
-        <li><span>المبلغ</span><span class="price">{{ fmt.money(v.price, v.currency) }}</span></li>
+        <li><span>{{ 'details.when' | t }}</span><span>{{ fmt.date(s.startUtc) }} — {{ fmt.time(s.startUtc) }}</span></li>
+        <li><span>{{ 'details.duration' | t }}</span><span>{{ fmt.duration(s.durationMinutes) }}</span></li>
+        <li><span>{{ 'booking.type' | t }}</span><span>{{ (s.mode === 'Group' ? 'booking.group' : 'booking.private') | t }}</span></li>
+        <li><span>{{ 'common.teacher' | t }}</span><span>{{ v.teacher.displayName }}</span></li>
+        <li><span>{{ 'booking.amount' | t }}</span><span class="price">{{ fmt.money(v.price, v.currency) }}</span></li>
       </ul>
     </div>
 
@@ -48,27 +48,27 @@
       @case ('PendingHold') {
         <form class="dose-card box" (ngSubmit)="submitDetails()">
           <div class="row">
-            <h2>بيانات الحجز</h2>
-            @if (deadline()) { <span class="badge badge--yellow">مكانك محجوز لمدة {{ deadline() }}</span> }
+            <h2>{{ 'booking.detailsTitle' | t }}</h2>
+            @if (deadline()) { <span class="badge badge--yellow">{{ 'booking.heldFor' | t: { t: deadline() } }}</span> }
           </div>
           <dose-teacher-card [teacher]="v.teacher" />
 
           <label class="field">
-            <span>اسم الطالب <span class="req">*</span></span>
+            <span>{{ 'booking.studentName' | t }} <span class="req">*</span></span>
             <input name="studentName" [(ngModel)]="studentName" required maxlength="100" autocomplete="name" />
           </label>
           <label class="field">
-            <span>رقم واتساب <span class="req">*</span></span>
+            <span>{{ 'booking.whatsapp' | t }} <span class="req">*</span></span>
             <input name="contactPhone" [(ngModel)]="contactPhone" required inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" autocomplete="tel" />
-            <span class="hint">هنبعتلك عليه تأكيد الحجز وأي تحديث.</span>
+            <span class="hint">{{ 'booking.whatsappHint' | t }}</span>
           </label>
 
           <label class="field">
-            <span>اسم ولي الأمر @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">(اختياري)</span> }</span>
+            <span>{{ 'booking.guardianName' | t }} @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">{{ 'common.optional' | t }}</span> }</span>
             <input name="guardianName" [(ngModel)]="guardianName" [required]="v.requiresGuardianContact" maxlength="100" />
           </label>
           <label class="field">
-            <span>رقم واتساب ولي الأمر @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">(اختياري)</span> }</span>
+            <span>{{ 'booking.guardianPhone' | t }} @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">{{ 'common.optional' | t }}</span> }</span>
             <input name="guardianPhone" [(ngModel)]="guardianPhone" [required]="v.requiresGuardianContact" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" />
           </label>
 
@@ -76,16 +76,16 @@
             <dose-group-terms [terms]="g" [price]="v.price" [currency]="v.currency" />
             <label class="check">
               <input type="checkbox" name="acceptTopUpTerms" [(ngModel)]="acceptTopUpTerms" />
-              <span>فاهم إن لو الجروب مكملش هتكلموني قبل الجلسة وأختار: أدفع الفرق، أو أنقل لميعاد تاني، أو أسترد فلوسي.</span>
+              <span>{{ 'booking.acceptTopUp' | t }}</span>
             </label>
           }
           <label class="check">
             <input type="checkbox" name="acceptTerms" [(ngModel)]="acceptTerms" />
-            <span>موافق على شروط الحجز والإلغاء.</span>
+            <span>{{ 'booking.acceptTerms' | t }}</span>
           </label>
 
           <button class="dose-btn dose-btn--primary btn-block" type="submit" [disabled]="busy()">
-            {{ busy() ? 'جاري الحفظ…' : 'كمّل للدفع' }}
+            {{ (busy() ? 'common.saving' : 'booking.toPayment') | t }}
           </button>
         </form>
       }
@@ -93,40 +93,40 @@
       @case ('PendingPayment') {
         <div class="dose-card box">
           <div class="row">
-            <h2>ادفع وارفع صورة التحويل</h2>
-            @if (deadline()) { <span class="badge badge--yellow">فاضل {{ deadline() }}</span> }
+            <h2>{{ 'booking.payTitle' | t }}</h2>
+            @if (deadline()) { <span class="badge badge--yellow">{{ 'booking.timeLeft' | t: { t: deadline() } }}</span> }
           </div>
           @if (v.latestProofStatus === 'Rejected') {
-            <p class="alert alert--error">الإيصال السابق اترفض: {{ v.latestProofRejectionReason }}. ارفع صورة تانية.</p>
+            <p class="alert alert--error">{{ 'booking.proofRejected' | t: { reason: v.latestProofRejectionReason } }}</p>
           }
-          <p>حوّل <strong class="price">{{ fmt.money(v.price, v.currency) }}</strong> واكتب رقم الحجز <strong dir="ltr">{{ v.reference }}</strong> في الملاحظات لو ينفع.</p>
+          <p [innerHTML]="'booking.transferHint' | t: { amount: bold(fmt.money(v.price, v.currency)), ref: bold(v.reference) }"></p>
 
-          <div class="methods" role="radiogroup" aria-label="طريقة الدفع">
+          <div class="methods" role="radiogroup" [attr.aria-label]="'booking.method' | t">
             @for (m of methods(); track m.id) {
               <label class="method" [class.on]="methodId === m.id">
                 <input type="radio" name="method" [value]="m.id" [(ngModel)]="methodId" />
-                <span class="m-name">{{ m.nameAr }}</span>
+                <span class="m-name" dir="auto">{{ m.name }}</span>
                 <span class="m-acc" dir="ltr">{{ m.receivingAccount }}</span>
-                @if (m.instructionsAr) { <span class="muted small">{{ m.instructionsAr }}</span> }
+                @if (m.instructions) { <span class="muted small" dir="auto">{{ m.instructions }}</span> }
               </label>
             }
           </div>
 
           <label class="field">
-            <span>صورة التحويل <span class="req">*</span></span>
+            <span>{{ 'booking.screenshot' | t }} <span class="req">*</span></span>
             <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFile($event)" />
-            <span class="hint">JPG أو PNG أو WebP.</span>
+            <span class="hint">{{ 'booking.fileTypes' | t }}</span>
           </label>
           <label class="field">
-            <span>رقم العملية أو الرقم اللي حوّلت منه <span class="hint">(اختياري)</span></span>
+            <span>{{ 'booking.senderRef' | t }} <span class="hint">{{ 'common.optional' | t }}</span></span>
             <input name="senderReference" [(ngModel)]="senderReference" maxlength="100" dir="ltr" />
           </label>
 
           <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadProof()" [disabled]="busy()">
-            {{ busy() ? 'جاري الرفع…' : 'ارفع الإيصال' }}
+            {{ (busy() ? 'booking.uploading' : 'booking.upload') | t }}
           </button>
           @if (whatsAppLink(); as wa) {
-            <a class="dose-btn dose-btn--whatsapp btn-block" [href]="wa" target="_blank" rel="noopener">أو ابعت الإيصال على واتساب</a>
+            <a class="dose-btn dose-btn--whatsapp btn-block" [href]="wa" target="_blank" rel="noopener">{{ 'booking.orWhatsapp' | t }}</a>
           }
         </div>
       }
@@ -134,22 +134,22 @@
       @case ('PaymentUnderReview') {
         <div class="dose-card box center">
           <span class="big">⏳</span>
-          <h2>استلمنا الإيصال وبنراجعه</h2>
-          <p class="muted">مكانك محجوز. أول ما نأكد الدفع الصفحة دي هتتحدث، وهنبعتلك على واتساب.</p>
-          <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">تحديث الحالة</button>
+          <h2>{{ 'booking.reviewTitle' | t }}</h2>
+          <p class="muted">{{ 'booking.reviewBody' | t }}</p>
+          <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">{{ 'booking.refreshStatus' | t }}</button>
         </div>
       }
 
       @case ('Confirmed') {
         <div class="dose-card box center confirmed">
           <span class="big ok">✓</span>
-          <h2>تم تأكيد حجزك!</h2>
+          <h2>{{ 'booking.confirmed' | t }}</h2>
           @if (v.canJoinNow) {
-            <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="joinSession()">ادخل الجلسة دلوقتي</button>
+            <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="joinSession()">{{ 'booking.joinNow' | t }}</button>
           } @else {
-            <p class="muted">زرار دخول الجلسة هيتفعّل {{ fmt.dateTime(v.joinOpensAtUtc) }}.</p>
-            <p class="muted small">افتح نفس اللينك ده في الميعاد.</p>
-            <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">تحديث</button>
+            <p class="muted">{{ 'booking.joinOpens' | t: { when: fmt.dateTime(v.joinOpensAtUtc) } }}</p>
+            <p class="muted small">{{ 'booking.openSameLink' | t }}</p>
+            <button class="dose-btn dose-btn--ghost" type="button" (click)="load()">{{ 'common.refresh' | t }}</button>
           }
         </div>
       }
@@ -157,43 +157,43 @@
       @case ('TopUpPending') {
         @let t = v.topUp!;
         <div class="dose-card box topup">
-          <h2>الجروب مكملش العدد</h2>
-          <p>{{ t.reason }}. علشان الجلسة تتم بنفس الميعاد، المطلوب فرق <strong class="price">{{ fmt.money(t.amount, t.currency) }}</strong>.</p>
-          @if (t.respondByUtc) { <p class="muted small">ياريت ترد قبل {{ fmt.dateTime(t.respondByUtc) }}.</p> }
-          <p class="muted small">مفيش أي مبلغ هيتخصم منك من غير ما تختار.</p>
+          <h2>{{ 'booking.topUpTitle' | t }}</h2>
+          <p [innerHTML]="'booking.topUpBody' | t: { n: t.decisionCount, min: t.minParticipants, amount: bold(fmt.money(t.amount, t.currency)) }"></p>
+          @if (t.respondByUtc) { <p class="muted small">{{ 'booking.respondBy' | t: { when: fmt.dateTime(t.respondByUtc) } }}</p> }
+          <p class="muted small">{{ 'groupTerms.noCharge' | t }}</p>
 
           @if (t.proofStatus === 'Submitted') {
-            <p class="alert alert--info">استلمنا إيصال الفرق وبنراجعه. أول ما يتأكد حجزك هيرجع مؤكد.</p>
+            <p class="alert alert--info">{{ 'booking.topUpReview' | t }}</p>
           } @else {
-            @if (t.proofStatus === 'Rejected') { <p class="alert alert--error">إيصال الفرق اترفض: {{ t.proofRejectionReason }}</p> }
-            <div class="choices" role="radiogroup" aria-label="اختار">
+            @if (t.proofStatus === 'Rejected') { <p class="alert alert--error">{{ 'booking.topUpRejected' | t: { reason: t.proofRejectionReason } }}</p> }
+            <div class="choices" role="radiogroup" [attr.aria-label]="'booking.choose' | t">
               <label class="choice" [class.on]="topUpChoice === 'PayDifference'">
                 <input type="radio" name="topup" value="PayDifference" [(ngModel)]="topUpChoice" />
-                <strong>أدفع الفرق</strong><span class="muted small">وأحضر في نفس الميعاد</span></label>
+                <strong>{{ 'booking.choicePay' | t }}</strong><span class="muted small">{{ 'booking.choicePayHint' | t }}</span></label>
               <label class="choice" [class.on]="topUpChoice === 'Transfer'">
                 <input type="radio" name="topup" value="Transfer" [(ngModel)]="topUpChoice" />
-                <strong>أنقل لميعاد تاني</strong><span class="muted small">هنكلمك على واتساب نرتّب</span></label>
+                <strong>{{ 'booking.choiceMove' | t }}</strong><span class="muted small">{{ 'booking.choiceMoveHint' | t }}</span></label>
               <label class="choice" [class.on]="topUpChoice === 'Refund'">
                 <input type="radio" name="topup" value="Refund" [(ngModel)]="topUpChoice" />
-                <strong>أسترد فلوسي كاملة</strong><span class="muted small">{{ fmt.money(v.price, v.currency) }}</span></label>
+                <strong>{{ 'booking.choiceRefund' | t }}</strong><span class="muted small">{{ fmt.money(v.price, v.currency) }}</span></label>
             </div>
 
             @if (topUpChoice === 'PayDifference') {
-              <div class="methods" role="radiogroup" aria-label="طريقة الدفع">
+              <div class="methods" role="radiogroup" [attr.aria-label]="'booking.method' | t">
                 @for (m of methods(); track m.id) {
                   <label class="method" [class.on]="methodId === m.id">
                     <input type="radio" name="method2" [value]="m.id" [(ngModel)]="methodId" />
-                    <span class="m-name">{{ m.nameAr }}</span>
+                    <span class="m-name" dir="auto">{{ m.name }}</span>
                     <span class="m-acc" dir="ltr">{{ m.receivingAccount }}</span>
                   </label>
                 }
               </div>
-              <label class="field"><span>صورة تحويل الفرق <span class="req">*</span></span>
+              <label class="field"><span>{{ 'booking.topUpScreenshot' | t }} <span class="req">*</span></span>
                 <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFile($event)" /></label>
-              <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadTopUp()" [disabled]="busy()">ارفع إيصال الفرق</button>
+              <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadTopUp()" [disabled]="busy()">{{ 'booking.uploadTopUp' | t }}</button>
             } @else if (topUpChoice) {
               <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="chooseTopUp()" [disabled]="busy()">
-                {{ topUpChoice === 'Refund' ? 'أكّد الاسترداد' : 'أكّد النقل لميعاد تاني' }}</button>
+                {{ (topUpChoice === 'Refund' ? 'booking.confirmRefund' : 'booking.confirmMove') | t }}</button>
             }
           }
         </div>
@@ -201,62 +201,62 @@
 
       @case ('RefundPending') {
         <div class="dose-card box center">
-          <h2>طلب الاسترداد وصلنا</h2>
-          <p class="muted">هنرجّعلك فلوسك على نفس الرقم اللي حوّلت منه، وهنبلغك على واتساب أول ما تتحوّل.</p>
+          <h2>{{ 'booking.refundPendingTitle' | t }}</h2>
+          <p class="muted">{{ 'booking.refundPendingBody' | t }}</p>
         </div>
       }
       @case ('Refunded') {
-        <div class="dose-card box center"><h2>فلوسك رجعت ✓</h2><p class="muted">لو محتاج أي حاجة كلّمنا على واتساب.</p></div>
+        <div class="dose-card box center"><h2>{{ 'booking.refundedTitle' | t }}</h2><p class="muted">{{ 'booking.anyHelp' | t }}</p></div>
       }
       @case ('Transferred') {
         <div class="dose-card box center">
-          <h2>هننقلك لميعاد تاني</h2>
-          <p class="muted">هنكلمك على واتساب نتفق على الميعاد الجديد، وحجزك الجديد هيوصلك على لينك جديد.</p>
+          <h2>{{ 'booking.transferTitle' | t }}</h2>
+          <p class="muted">{{ 'booking.transferBody' | t }}</p>
         </div>
       }
       @case ('Cancelled') {
         <div class="dose-card box center">
-          <h2>الحجز اتلغى</h2>
-          <p class="muted">تقدر تحجز جلسة تانية في أي وقت.</p>
-          <a class="dose-btn dose-btn--ghost" routerLink="/sessions">الجلسات المتاحة</a>
+          <h2>{{ 'booking.cancelledTitle' | t }}</h2>
+          <p class="muted">{{ 'booking.cancelledBody' | t }}</p>
+          <a class="dose-btn dose-btn--ghost" routerLink="/sessions">{{ 'sessions.title' | t }}</a>
         </div>
       }
 
       @case ('Expired') {
         <div class="dose-card box center">
-          <h2>مدة الحجز خلصت</h2>
-          <p class="muted">المقعد اتفك علشان البيانات أو الإيصال موصلوش في الوقت. تقدر تحجز تاني لو لسه فيه أماكن.</p>
-          <a class="dose-btn dose-btn--primary" [routerLink]="['/sessions', s.id]">ارجع للجلسة</a>
+          <h2>{{ 'booking.expiredTitle' | t }}</h2>
+          <p class="muted">{{ 'booking.expiredBody' | t }}</p>
+          <a class="dose-btn dose-btn--primary" [routerLink]="['/sessions', s.id]">{{ 'booking.backToSession' | t }}</a>
         </div>
       }
 
       @default {
         <div class="dose-card box center">
-          <h2>حالة الحجز: {{ v.status }}</h2>
-          <p class="muted">لو عندك أي سؤال كلّمنا على واتساب.</p>
+          <h2>{{ 'booking.statusIs' | t: { s: v.status } }}</h2>
+          <p class="muted">{{ 'booking.anyQuestion' | t }}</p>
         </div>
       }
     }
 
     @if (v.canCancel) {
       <details class="cancel">
-        <summary>محتاج تلغي الحجز؟</summary>
+        <summary>{{ 'booking.needCancel' | t }}</summary>
         @if (isPaid(v)) {
           @if (fullRefundAvailable(v)) {
-            <p class="small">لو لغيت دلوقتي هترجعلك فلوسك كاملة (الإلغاء المجاني لحد {{ fmt.dateTime(v.fullRefundUntilUtc) }}).</p>
+            <p class="small">{{ 'booking.cancelFull' | t: { until: fmt.dateTime(v.fullRefundUntilUtc) } }}</p>
           } @else {
-            <p class="small alert">فاضل وقت قليل على الجلسة، فالإلغاء دلوقتي <strong>مش بيرجّع الفلوس</strong>.</p>
-            <label class="check"><input type="checkbox" [(ngModel)]="acceptNoRefund" /><span>موافق ألغي من غير استرداد</span></label>
+            <p class="small alert" [innerHTML]="'booking.cancelNoRefund' | t"></p>
+            <label class="check"><input type="checkbox" [(ngModel)]="acceptNoRefund" /><span>{{ 'booking.acceptNoRefund' | t }}</span></label>
           }
         } @else {
-          <p class="small">لسه مدفعتش، فالإلغاء هيفك المقعد بس.</p>
+          <p class="small">{{ 'booking.cancelUnpaid' | t }}</p>
         }
-        <button class="dose-btn cancel-btn" type="button" (click)="cancelBooking()" [disabled]="busy()">إلغاء الحجز</button>
+        <button class="dose-btn cancel-btn" type="button" (click)="cancelBooking()" [disabled]="busy()">{{ 'booking.cancel' | t }}</button>
       </details>
     }
 
     @if (whatsAppLink(); as wa) {
-      <a class="support" [href]="wa" target="_blank" rel="noopener">محتاج مساعدة؟ كلّمنا على واتساب</a>
+      <a class="support" [href]="wa" target="_blank" rel="noopener">{{ 'booking.help' | t }}</a>
     }
   }
 </section>

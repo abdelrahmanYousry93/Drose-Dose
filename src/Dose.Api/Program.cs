@@ -100,7 +100,16 @@ if (app.Environment.IsDevelopment())
         scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(),
         app.Configuration["Seed:AdminEmail"], app.Configuration["Seed:AdminPassword"]);
     if (app.Configuration.GetValue("Seed:SampleData", true))
+    {
         await DevelopmentSeeder.SeedSampleDataAsync(db, DateTime.UtcNow);
+        await DevelopmentSeeder.FillSampleEnglishAsync(db);
+    }
+}
+else
+{
+    // Production: schema is migrated by the deployment step; default message templates are inserted once if missing.
+    await using var scope = app.Services.CreateAsyncScope();
+    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(scope.ServiceProvider.GetRequiredService<DoseDbContext>());
 }
 
 app.MapDoseEndpoints();

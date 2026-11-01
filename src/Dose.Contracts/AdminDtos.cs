@@ -55,7 +55,8 @@ public sealed record ReissueLinkResponse(string Reference, string AccessToken, s
 public sealed record FollowUpDto(
     Guid BookingId, string Kind, string BookingReference, string BookingStatus, string? StudentName, string? ContactPhone,
     string? GuardianPhone, Guid SessionId, string SessionTitleAr, DateTime SessionStartUtc, decimal PaidAmount, string Currency,
-    decimal? TopUpAmount, DateTime? RespondByUtc, string? StudentChoice, string? TopUpProofStatus, string? Reason, bool Overdue);
+    decimal? TopUpAmount, DateTime? RespondByUtc, string? StudentChoice, string? TopUpProofStatus, string? Reason, bool Overdue,
+    string Language = "ar", string? SessionTitleEn = null);
 public sealed record ResolveRequest(string? Note);
 
 // ---------- Session requests ----------

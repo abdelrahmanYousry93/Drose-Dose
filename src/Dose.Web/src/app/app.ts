@@ -1,11 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { PublicSettingsService } from './core/public-settings.service';
+import { TranslatePipe } from './core/i18n';
+import { LangSwitch } from './shared/lang-switch';
 import { Logo } from './shared/logo';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, Logo],
+  imports: [RouterOutlet, RouterLink, Logo, LangSwitch, TranslatePipe],
   templateUrl: './app.html',
   styles: `
     :host { display: flex; flex-direction: column; min-height: 100dvh; }
@@ -14,7 +16,8 @@ import { Logo } from './shared/logo';
       backdrop-filter: blur(8px); border-bottom: 1px solid var(--dose-border);
     }
     .bar__inner, main, .foot__inner { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 16px; }
-    .bar__inner { display: flex; align-items: center; justify-content: space-between; min-height: 64px; }
+    .bar__inner { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+    .home-link { margin-inline-end: auto; }
     .home-link { text-decoration: none; }
     nav { display: none; gap: 18px; }
     nav a { text-decoration: none; color: var(--dose-text); font-weight: 600; }

@@ -137,6 +137,73 @@ public static class DevelopmentSeeder
         await db.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Development only: English names for the SAMPLE catalog so the English site can be previewed. Fills only empty
+    /// English fields of rows whose Arabic text matches the sample data — anything an admin entered is left alone.
+    /// </summary>
+    public static async Task FillSampleEnglishAsync(DoseDbContext db)
+    {
+        var names = new Dictionary<string, string>
+        {
+            ["ابتدائي"] = "Primary", ["إعدادي"] = "Preparatory", ["ثانوي"] = "Secondary",
+            ["ابتدائي مبكر (1–3)"] = "Early primary (1–3)", ["ابتدائي عليا (4–6)"] = "Upper primary (4–6)",
+            ["إعدادي (1–2)"] = "Preparatory (1–2)", ["الشهادة الإعدادية"] = "Preparatory certificate",
+            ["أولى ثانوي"] = "Secondary 1", ["تانية وتالتة ثانوي"] = "Secondary 2 & 3",
+            ["عربي"] = "Arabic", ["لغات"] = "Languages",
+            ["رياضيات"] = "Mathematics", ["علوم"] = "Science", ["فيزياء"] = "Physics", ["لغة إنجليزية"] = "English",
+            ["شرح درس واحد"] = "One lesson", ["شرح وحدة كاملة"] = "Full unit", ["مراجعة عامة"] = "General revision",
+            ["جروب صغير (2–4)"] = "Small group (2–4)", ["جروب متوسط (5–9)"] = "Medium group (5–9)", ["جروب كبير (10–15)"] = "Large group (10–15)",
+            ["إنستاباي"] = "InstaPay", ["فودافون كاش"] = "Vodafone Cash",
+            ["التفاضل والتكامل — قواعد الاشتقاق"] = "Calculus — differentiation rules",
+            ["قوانين نيوتن للحركة"] = "Newton's laws of motion",
+            ["المعادلات من الدرجة الأولى"] = "First-degree equations",
+            ["مدرس تجريبي (بيانات تجريبية)"] = "Sample teacher (sample data)",
+        };
+        string[] ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس"];
+        for (var i = 0; i < ordinals.Length; i++)
+        {
+            names[$"الصف {ordinals[i]} الابتدائي"] = $"Primary {i + 1}";
+            names[$"الصف {ordinals[i]} الإعدادي"] = $"Preparatory {i + 1}";
+            names[$"الصف {ordinals[i]} الثانوي"] = $"Secondary {i + 1}";
+        }
+        string? En(string ar) => names.GetValueOrDefault(ar);
+
+        foreach (var x in await db.EducationalStages.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.PricingBands.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.Grades.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.StudyTracks.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.Subjects.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.PricingTiers.Where(x => x.NameEn == null).ToListAsync()) x.NameEn = En(x.NameAr);
+        foreach (var x in await db.Sessions.Where(x => x.ScopeTitleEn == null).ToListAsync()) x.ScopeTitleEn = En(x.ScopeTitleAr);
+        foreach (var x in await db.ServiceTypes.Where(x => x.NameEn == null).ToListAsync())
+        {
+            x.NameEn = En(x.NameAr);
+            x.DescriptionEn ??= x.Code switch
+            {
+                "one_lesson" => "A focused explanation of one lesson or a specific part of it.",
+                "chapter_package" => "One price for the whole unit; may be more than one session.",
+                "general_revision" => "Revision of a defined part of the curriculum, with the scope written before booking.",
+                _ => null,
+            };
+        }
+        foreach (var x in await db.PaymentMethods.Where(x => x.NameEn == null).ToListAsync())
+        {
+            x.NameEn = En(x.NameAr);
+            x.InstructionsEn ??= x.Code switch
+            {
+                "instapay" => "Transfer the amount, write the booking reference in the note, then upload a screenshot.",
+                "vodafone_cash" => "Transfer the amount, then upload a screenshot of the confirmation message.",
+                _ => null,
+            };
+        }
+        foreach (var x in await db.Teachers.Where(x => x.DisplayNameEn == null).ToListAsync())
+        {
+            x.DisplayNameEn = En(x.DisplayNameAr);
+            if (x.DisplayNameEn is not null) x.BioEn ??= "Development-only sample account. Replace it with a real teacher from the admin dashboard.";
+        }
+        await db.SaveChangesAsync();
+    }
+
     private static Session NewSession(
         string title, Grade grade, StudyTrack track, Subject subject, ServiceType service, Teacher teacher,
         DateTime start, int minutes, SessionMode mode, PricingPlanVersion version, PricingTier? tier) => new()

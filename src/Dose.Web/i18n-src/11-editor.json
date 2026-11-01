@@ -1,0 +1,50 @@
+{
+ "editor.add": [
+  "إضافة",
+  "Add"
+ ],
+ "editor.count": [
+  "{n} عنصر",
+  "{n} items"
+ ],
+ "editor.new": [
+  "جديد",
+  "New"
+ ],
+ "editor.inactive": [
+  "موقوف",
+  "Inactive"
+ ],
+ "editor.unpublished": [
+  "مش منشور",
+  "Not published"
+ ],
+ "editor.none": [
+  "— الكل —",
+  "— All —"
+ ],
+ "editor.photoSaveFirst": [
+  "احفظ الأول وبعدين ارفع الصورة.",
+  "Save first, then upload the photo."
+ ],
+ "editor.photoUpload": [
+  "ارفع صورة",
+  "Upload photo"
+ ],
+ "editor.photoReplace": [
+  "غيّر الصورة",
+  "Replace photo"
+ ],
+ "editor.photoRemove": [
+  "امسح الصورة",
+  "Remove photo"
+ ],
+ "editor.photoUploaded": [
+  "الصورة اترفعت ✓",
+  "Photo uploaded ✓"
+ ],
+ "editor.photoRemoved": [
+  "الصورة اتمسحت",
+  "Photo removed"
+ ]
+}

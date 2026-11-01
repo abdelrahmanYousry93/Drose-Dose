@@ -154,3 +154,7 @@ a {
 
 .btn-block { width: 100%; }
 .price { font-weight: 800; color: var(--dose-primary); font-size: 1.25rem; }
+
+/* Direction-aware "back" links: the arrow points toward the start edge in both Arabic (RTL) and English (LTR). */
+.back::before { content: '→ '; }
+html[dir='ltr'] .back::before { content: '← '; }

@@ -3,7 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api, BookingView, PaymentMethod } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime } from '../../core/format';
+import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
+import { escapeHtml } from '../../shared/group-terms';
 import { GroupTermsBox } from '../../shared/group-terms';
 import { TeacherCard } from '../../shared/teacher-card';
 
@@ -14,7 +16,7 @@ import { TeacherCard } from '../../shared/teacher-card';
  */
 @Component({
   selector: 'dose-booking-page',
-  imports: [FormsModule, RouterLink, TeacherCard, GroupTermsBox],
+  imports: [FormsModule, RouterLink, TeacherCard, GroupTermsBox, TranslatePipe],
   templateUrl: './booking-page.html',
   styleUrl: './booking-page.scss',
 })
@@ -47,6 +49,8 @@ export class BookingPage {
   protected acceptNoRefund = false;
 
   protected readonly fmt = { date: fmtDate, time: fmtTime, dateTime: fmtDateTime, duration: fmtDuration, money: fmtMoney };
+
+  protected bold(v: string) { return `<strong dir="auto">${escapeHtml(v)}</strong>`; }
 
   protected readonly deadline = computed(() => {
     const v = this.b();
@@ -107,7 +111,7 @@ export class BookingPage {
 
   protected async uploadProof() {
     if (!this.file || !this.methodId) {
-      this.actionError.set('اختار طريقة الدفع وارفع صورة التحويل.');
+      this.actionError.set(translate('booking.needFile'));
       return;
     }
     await this.act(() => this.api.uploadProof(this.token(), this.methodId, this.file!, this.senderReference));
@@ -129,7 +133,7 @@ export class BookingPage {
 
   protected async uploadTopUp() {
     if (!this.file || !this.methodId) {
-      this.actionError.set('اختار طريقة الدفع وارفع صورة التحويل.');
+      this.actionError.set(translate('booking.needFile'));
       return;
     }
     await this.act(() => this.api.uploadTopUpProof(this.token(), this.methodId, this.file!, ''));
@@ -137,7 +141,7 @@ export class BookingPage {
   }
 
   protected async cancelBooking() {
-    if (!confirm('متأكد إنك عايز تلغي الحجز؟')) return;
+    if (!confirm(translate('booking.confirmCancel'))) return;
     await this.act(() => this.api.cancelBooking(this.token(), this.acceptNoRefund));
   }
 

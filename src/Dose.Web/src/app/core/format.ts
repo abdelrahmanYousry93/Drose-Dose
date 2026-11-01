@@ -1,55 +1,46 @@
 import { ApiError } from './api';
+import { LANG, translate } from './i18n';
 
 /** Business time zone for display. Timestamps from the API are UTC. */
 export const BUSINESS_TZ = 'Africa/Cairo';
+// Latin digits in both languages, matching phone numbers and booking references.
+const LOCALE = LANG === 'en' ? 'en-GB' : 'ar-EG-u-nu-latn';
 
-const dateFmt = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: BUSINESS_TZ });
-const timeFmt = new Intl.DateTimeFormat('ar-EG', { hour: 'numeric', minute: '2-digit', timeZone: BUSINESS_TZ });
-const moneyFmt = new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 });
+const dateFmt = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', day: 'numeric', month: 'long', timeZone: BUSINESS_TZ });
+const timeFmt = new Intl.DateTimeFormat(LOCALE, { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: BUSINESS_TZ });
+const moneyFmt = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 });
+const numFmt = new Intl.NumberFormat(LOCALE);
 
 export const fmtDate = (utc: string | null | undefined) => (utc ? dateFmt.format(new Date(utc)) : '');
 export const fmtTime = (utc: string | null | undefined) => (utc ? timeFmt.format(new Date(utc)) : '');
 export const fmtDateTime = (utc: string | null | undefined) => (utc ? `${fmtDate(utc)} — ${fmtTime(utc)}` : '');
+export const fmtNumber = (n: number) => numFmt.format(n);
 export const fmtMoney = (amount: number, currency = 'EGP') =>
-  `${moneyFmt.format(amount)} ${currency === 'EGP' ? 'ج.م' : currency}`;
+  `${moneyFmt.format(amount)} ${currency === 'EGP' ? translate('common.egp') : currency}`;
 
 export function fmtDuration(minutes: number): string {
-  if (minutes === 60) return 'ساعة';
-  if (minutes === 90) return 'ساعة ونص';
-  if (minutes === 120) return 'ساعتين';
-  if (minutes < 60) return `${minutes} دقيقة`;
+  if (minutes === 60) return translate('duration.hour');
+  if (minutes === 90) return translate('duration.hourHalf');
+  if (minutes === 120) return translate('duration.twoHours');
+  if (minutes < 60) return translate('duration.minutes', { n: minutes });
   const h = Math.floor(minutes / 60), m = minutes % 60;
-  return m ? `${h} ساعة و${m} دقيقة` : `${h} ساعات`;
+  return m ? translate('duration.hoursMinutes', { h, m }) : translate('duration.hours', { h });
 }
 
-const messages: Record<string, string> = {
-  'booking.session_full': 'للأسف الأماكن خلصت في الجلسة دي.',
-  'booking.session_closed': 'الحجز في الجلسة دي اتقفل.',
-  'booking.session_not_found': 'الجلسة دي مش موجودة.',
-  'booking.duplicate': 'الرقم ده عنده حجز فعلاً في نفس الجلسة.',
-  'booking.not_found': 'الحجز مش موجود. اتأكد إنك فاتح اللينك الصح.',
-  'booking.expired': 'مدة حجز المقعد خلصت. ابدأ الحجز من جديد.',
-  'booking.invalid_state': 'حالة الحجز اتغيرت. حدّث الصفحة.',
-  'booking.guardian_required': 'اسم ورقم واتساب ولي الأمر مطلوبين للمرحلة دي.',
-  'booking.terms_required': 'لازم توافق على الشروط علشان تكمّل.',
-  'booking.price_changed': 'السعر اتغيّر. راجع السعر الجديد ووافق تاني.',
-  'booking.invalid_phone': 'رقم الواتساب مش صحيح. اكتبه بالشكل ده: 01xxxxxxxxx',
-  'booking.invalid_name': 'اكتب اسم الطالب (حرفين على الأقل).',
-  'booking.invalid_file': 'ارفع صورة بصيغة JPG أو PNG أو WebP وحجمها مناسب.',
-  'booking.join_not_available': 'رابط الجلسة لسه مش متاح.',
-  'payment.reason_required': 'اكتب سبب الرفض للطالب.',
-  'booking.no_topup': 'مفيش فرق مطلوب على الحجز ده.',
-  'booking.invalid_choice': 'اختار واحد من الاختيارات.',
-  'teacher.not_linked': 'حسابك مش مربوط بملف مدرس. كلّم الإدارة.',
-  'http.401': 'لازم تسجّل دخول.',
-  'http.403': 'مش مسموح لك بالصفحة دي.',
-  'http.429': 'محاولات كتير. استنى دقيقة وجرّب تاني.',
-  'http.0': 'مفيش اتصال بالسيرفر. اتأكد من الإنترنت.',
-};
-
+/**
+ * The API returns a stable `code` plus a `title` already written in the request's language (Accept-Language).
+ * We show the server's text; only transport-level failures (offline, 401, 429…) are worded here.
+ */
 export function errorMessage(e: unknown): string {
-  if (e instanceof ApiError) return messages[e.code] ?? e.message ?? 'حصل خطأ. جرّب تاني.';
-  return 'حصل خطأ. جرّب تاني.';
+  if (e instanceof ApiError) {
+    if (e.code.startsWith('http.')) {
+      const key = `errors.${e.code.replace('.', '_')}`;
+      const local = translate(key);
+      if (local !== key) return local;
+    }
+    return e.message || translate('errors.generic');
+  }
+  return translate('errors.generic');
 }
 
 /** Remembers booking links on this device only (per-viewer convenience; the link itself is the key). */

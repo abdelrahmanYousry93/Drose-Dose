@@ -2,38 +2,38 @@ import { Routes } from '@angular/router';
 import { Home } from './features/home/home';
 
 export const routes: Routes = [
-  { path: '', component: Home, title: 'Dose دروس — جرعتك المركزة من الفهم' },
+  { path: '', component: Home, title: '' },
   {
     path: 'sessions',
     loadComponent: () => import('./features/sessions/sessions-list').then((m) => m.SessionsList),
-    title: 'الجلسات المتاحة — Dose',
+    title: 'titles.sessions',
   },
   {
     path: 'sessions/:id',
     loadComponent: () => import('./features/sessions/session-details').then((m) => m.SessionDetailsPage),
-    title: 'تفاصيل الجلسة — Dose',
+    title: 'titles.details',
   },
   {
     path: 'open-groups',
     loadComponent: () => import('./features/sessions/sessions-list').then((m) => m.SessionsList),
     data: { fixedMode: 'Group' },
-    title: 'جلسات جماعية مفتوحة — Dose',
+    title: 'titles.openGroups',
   },
   {
     // Secret booking link: /b/<token>. The token is the only key to the booking.
     path: 'b/:token',
     loadComponent: () => import('./features/booking/booking-page').then((m) => m.BookingPage),
-    title: 'حجزي — Dose',
+    title: 'titles.booking',
   },
   {
     path: 'request-session',
     loadComponent: () => import('./features/request/request-session').then((m) => m.RequestSession),
-    title: 'طلب جلسة — Dose',
+    title: 'titles.request',
   },
   {
     path: 'login',
     loadComponent: () => import('./features/admin/admin').then((m) => m.AdminLogin),
-    title: 'دخول فريق Dose',
+    title: 'titles.login',
   },
   {
     path: 'teacher',

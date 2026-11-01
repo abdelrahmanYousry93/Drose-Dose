@@ -3,28 +3,28 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-// ---------- Models (mirror Dose.Contracts) ----------
-export interface Grade { id: string; nameAr: string; stageId: string; stageNameAr: string; requiresGuardianContact: boolean }
-export interface Stage { id: string; nameAr: string; requiresGuardianContact: boolean; grades: Grade[] }
-export interface Lookup { id: string; nameAr: string }
-export interface ServiceType { id: string; code: string; nameAr: string; descriptionAr: string | null }
+// ---------- Models (mirror Dose.Contracts; names arrive in the request language, Arabic fallback) ----------
+export interface Grade { id: string; name: string; stageId: string; stageName: string; requiresGuardianContact: boolean }
+export interface Stage { id: string; name: string; requiresGuardianContact: boolean; grades: Grade[] }
+export interface Lookup { id: string; name: string }
+export interface ServiceType { id: string; code: string; name: string; description: string | null }
 
 export interface TeacherPublic {
-  id: string; displayNameAr: string; photoUrl: string | null; bioAr: string | null;
-  qualificationsAr: string | null; yearsOfExperience: number | null;
+  id: string; displayName: string; photoUrl: string | null; bio: string | null;
+  qualifications: string | null; yearsOfExperience: number | null;
 }
 export interface GroupTerms {
-  targetTierNameAr: string; targetMin: number; targetMax: number;
+  targetTierName: string; targetMin: number; targetMax: number;
   worstCasePrice: number; maxExtraAmount: number; tierDecisionAtUtc: string | null;
 }
 export interface SessionSummary {
-  id: string; scopeTitleAr: string; subjectNameAr: string; gradeNameAr: string; studyTrackNameAr: string;
-  serviceTypeNameAr: string; mode: 'Private' | 'Group'; startUtc: string; endUtc: string; durationMinutes: number;
-  teacherNameAr: string; teacherPhotoUrl: string | null; pricePerStudent: number; currency: string;
+  id: string; scopeTitle: string; subjectName: string; gradeName: string; studyTrackName: string;
+  serviceTypeName: string; mode: 'Private' | 'Group'; startUtc: string; endUtc: string; durationMinutes: number;
+  teacherName: string; teacherPhotoUrl: string | null; pricePerStudent: number; currency: string;
   capacity: number; confirmedCount: number; remainingSeats: number; bookingDeadlineUtc: string;
 }
 export interface SessionDetails {
-  summary: SessionSummary; scopeDetailsAr: string | null; minParticipants: number; teacher: TeacherPublic;
+  summary: SessionSummary; scopeDetails: string | null; minParticipants: number; teacher: TeacherPublic;
   groupTerms: GroupTerms | null; requiresGuardianContact: boolean; isOpenForBooking: boolean;
 }
 export interface HoldResponse {
@@ -35,7 +35,7 @@ export interface DetailsRequest {
   studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null;
   acceptTerms: boolean; acceptTopUpTerms: boolean; expectedPrice: number;
 }
-export interface PaymentMethod { id: string; code: string; nameAr: string; receivingAccount: string; instructionsAr: string | null }
+export interface PaymentMethod { id: string; code: string; name: string; receivingAccount: string; instructions: string | null }
 export type BookingStatus =
   | 'PendingHold' | 'PendingPayment' | 'PaymentUnderReview' | 'Confirmed' | 'TopUpPending'
   | 'Cancelled' | 'Expired' | 'RefundPending' | 'Refunded' | 'Transferred' | 'Completed' | 'NoShow';
@@ -49,8 +49,9 @@ export interface BookingView {
 export interface TopUpView {
   amount: number; currency: string; respondByUtc: string | null; reason: string | null;
   choice: 'PayDifference' | 'Transfer' | 'Refund' | null; proofStatus: string | null; proofRejectionReason: string | null;
+  decisionCount: number; minParticipants: number;
 }
-export interface GroupOption { id: string; nameAr: string; minParticipants: number; maxParticipants: number; pricePerStudent: number }
+export interface GroupOption { id: string; name: string; minParticipants: number; maxParticipants: number; pricePerStudent: number }
 export interface PriceOptions { currency: string; privatePrice: number | null; groupOptions: GroupOption[] }
 export interface SessionRequestBody {
   studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null;

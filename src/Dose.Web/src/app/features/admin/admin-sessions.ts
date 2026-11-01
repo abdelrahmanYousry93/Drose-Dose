@@ -4,30 +4,28 @@ import {
   AdminApi, ChapterA, GradeA, LessonA, PricingPreview, ReissueLink, SessionA, SessionBookingA, SessionRequestA, SessionSave, cairoToUtc, utcToCairo,
 } from '../../core/admin-api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
-import { Option } from './entity-editor';
+import { TranslatePipe, translate as tr } from '../../core/i18n';
+import { Option, optName } from './entity-editor';
 
 interface Form {
   serviceTypeId: string; gradeId: string; studyTrackId: string; subjectId: string; chapterId: string | null; lessonId: string | null;
-  scopeTitleAr: string; scopeDetailsAr: string; teacherId: string; date: string; time: string; durationMinutes: number;
+  scopeTitleAr: string; scopeDetailsAr: string; scopeTitleEn: string; scopeDetailsEn: string; teacherId: string; date: string; time: string; durationMinutes: number;
   mode: 'Private' | 'Group'; targetTierId: string | null; meetingUrl: string;
 }
 
-const STATUS_AR: Record<string, string> = {
-  Draft: 'مسودة', Published: 'منشورة', TopUpRequired: 'مستنية رد الطلاب على الفرق', Confirmed: 'مؤكدة', InProgress: 'شغالة',
-  Completed: 'خلصت', Cancelled: 'ملغية',
-  PendingHold: 'حجز مؤقت', PendingPayment: 'منتظر الدفع', PaymentUnderReview: 'الدفع تحت المراجعة', TopUpPending: 'منتظر قرار الفرق',
-  Expired: 'انتهت المهلة', RefundPending: 'محتاج استرداد', Refunded: 'اترد', Transferred: 'اتنقل', NoShow: 'محضرش',
-};
+/** Session and booking status labels (shared by admin screens). */
+export const statusLabel = (s: string) => { const k = `status.${s}`; const t = tr(k); return t === k ? s : t; };
 
 @Component({
   selector: 'dose-admin-sessions',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './admin-sessions.html',
   styleUrl: './admin-sessions.scss',
 })
 export class AdminSessions {
   private readonly api = inject(AdminApi);
-  protected readonly statusAr = (s: string) => STATUS_AR[s] ?? s;
+  protected readonly statusAr = statusLabel;
+  protected readonly optName = optName;
   protected readonly dt = fmtDateTime;
   protected readonly money = fmtMoney;
 
@@ -72,11 +70,11 @@ export class AdminSessions {
     void this.load();
     Promise.all([this.api.serviceTypes(), this.api.grades(), this.api.tracks(), this.api.subjects(), this.api.teachers()])
       .then(([s, g, t, su, te]) => {
-        this.services.set(s.filter((x) => x.isActive).map((x) => ({ id: x.id, nameAr: x.nameAr })));
+        this.services.set(s.filter((x) => x.isActive).map((x) => ({ id: x.id, nameAr: x.nameAr, nameEn: x.nameEn })));
         this.grades.set(g.filter((x) => x.isActive));
-        this.tracks.set(t.filter((x) => x.isActive).map((x) => ({ id: x.id!, nameAr: x.nameAr })));
-        this.subjects.set(su.map((x) => ({ id: x.id!, nameAr: x.nameAr })));
-        this.teachers.set(te.map((x) => ({ id: x.id!, nameAr: x.displayNameAr, published: x.isPublished })));
+        this.tracks.set(t.filter((x) => x.isActive).map((x) => ({ id: x.id!, nameAr: x.nameAr, nameEn: x.nameEn })));
+        this.subjects.set(su.map((x) => ({ id: x.id!, nameAr: x.nameAr, nameEn: x.nameEn })));
+        this.teachers.set(te.map((x) => ({ id: x.id!, nameAr: x.displayNameAr, nameEn: x.displayNameEn, published: x.isPublished })));
         const r = this.fromRequest();
         if (r) void this.prefillFromRequest(r);
       })
@@ -98,7 +96,7 @@ export class AdminSessions {
     this.lockedPricing.set(false);
     this.form.set({
       serviceTypeId: this.services()[0]?.id ?? '', gradeId: '', studyTrackId: this.tracks()[0]?.id ?? '', subjectId: '',
-      chapterId: null, lessonId: null, scopeTitleAr: '', scopeDetailsAr: '', teacherId: this.teachers()[0]?.id ?? '',
+      chapterId: null, lessonId: null, scopeTitleAr: '', scopeDetailsAr: '', scopeTitleEn: '', scopeDetailsEn: '', teacherId: this.teachers()[0]?.id ?? '',
       date: local.date, time: '18:00', durationMinutes: 60, mode: 'Group', targetTierId: null, meetingUrl: '',
     });
     this.preview.set(null);
@@ -124,6 +122,7 @@ export class AdminSessions {
     this.form.set({
       serviceTypeId: s.serviceTypeId, gradeId: s.gradeId, studyTrackId: s.studyTrackId, subjectId: s.subjectId,
       chapterId: s.chapterId, lessonId: s.lessonId, scopeTitleAr: s.scopeTitleAr, scopeDetailsAr: s.scopeDetailsAr ?? '',
+      scopeTitleEn: s.scopeTitleEn ?? '', scopeDetailsEn: s.scopeDetailsEn ?? '',
       teacherId: s.teacherId, date: local.date, time: local.time, durationMinutes: s.durationMinutes, mode: s.mode,
       targetTierId: s.targetTierId, meetingUrl: s.meetingUrl ?? '',
     });
@@ -179,6 +178,7 @@ export class AdminSessions {
     const body: SessionSave = {
       serviceTypeId: f.serviceTypeId, gradeId: f.gradeId, studyTrackId: f.studyTrackId, subjectId: f.subjectId,
       chapterId: f.chapterId, lessonId: f.lessonId, scopeTitleAr: f.scopeTitleAr, scopeDetailsAr: f.scopeDetailsAr || null,
+      scopeTitleEn: f.scopeTitleEn || null, scopeDetailsEn: f.scopeDetailsEn || null,
       teacherId: f.teacherId, startUtc: cairoToUtc(f.date, f.time), durationMinutes: Number(f.durationMinutes),
       mode: f.mode, targetTierId: f.mode === 'Group' ? f.targetTierId : null, meetingUrl: f.meetingUrl || null,
     };
@@ -194,7 +194,7 @@ export class AdminSessions {
         await this.api.updateRequest(req.id, 'Fulfilled', req.adminNotes, id);
         this.fromRequest.set(null);
       }
-      this.notice.set(publish ? 'الجلسة اتحفظت واتنشرت للطلاب ✓' : 'الجلسة اتحفظت ✓');
+      this.notice.set(tr(publish ? 'sessionsAdmin.savedPublished' : 'sessionsAdmin.saved'));
       this.form.set(null);
       await this.load();
     } catch (e) {
@@ -206,22 +206,22 @@ export class AdminSessions {
 
   // ---------- Actions ----------
   protected async publish(s: SessionA) {
-    try { await this.api.publish(s.id); this.notice.set('اتنشرت ✓'); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
+    try { await this.api.publish(s.id); this.notice.set(tr('sessionsAdmin.published')); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
   }
 
   protected async cancel(s: SessionA) {
-    const reason = prompt(`سبب إلغاء "${s.scopeTitleAr}"؟ (الحجوزات المدفوعة هتتحول لـ "محتاج استرداد")`);
+    const reason = prompt(tr('sessionsAdmin.cancelPrompt', { title: s.scopeTitleAr }));
     if (!reason) return;
     try {
       const r = await this.api.cancel(s.id, reason);
-      this.notice.set(r.refundsPending ? `الجلسة اتلغت. فيه ${r.refundsPending} حجز محتاج استرداد — كلّمهم على واتساب.` : 'الجلسة اتلغت.');
+      this.notice.set(r.refundsPending ? tr('sessionsAdmin.cancelledRefunds', { n: r.refundsPending }) : tr('sessionsAdmin.cancelled'));
       await this.load();
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 
   protected async decide(s: SessionA) {
-    if (!confirm('حسم الجروب دلوقتي؟ لو العدد مكملش، كل طالب هيتطلب منه الفرق أو يختار ينقل أو يسترد. ده بيحصل تلقائي في ميعاد الحسم.')) return;
-    try { await this.api.decide(s.id); this.notice.set('اتحسم ✓ — شوف صفحة المتابعات.'); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
+    if (!confirm(tr('sessionsAdmin.decideConfirm'))) return;
+    try { await this.api.decide(s.id); this.notice.set(tr('sessionsAdmin.decided')); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
   }
 
   protected async showBookings(s: SessionA) {
@@ -231,7 +231,7 @@ export class AdminSessions {
   }
 
   protected async sendLink(b: SessionBookingA) {
-    if (!confirm(`هيتعمل لينك جديد لحجز ${b.reference} واللينك القديم هيبطل. تكمّل؟`)) return;
+    if (!confirm(tr('sessionsAdmin.reissueConfirm', { ref: b.reference }))) return;
     try {
       const r = await this.api.reissueLink(b.id);
       const url = `${window.location.origin}/b/${r.accessToken}`;

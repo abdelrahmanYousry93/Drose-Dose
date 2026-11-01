@@ -1,0 +1,214 @@
+{
+ "users.roleAdmin": [
+  "أدمن",
+  "Admin"
+ ],
+ "users.roleTeacher": [
+  "مدرس",
+  "Teacher"
+ ],
+ "users.lead": [
+  "حسابات فريق Dose: الأدمن بيدير كل حاجة، والمدرس بيشوف جلساته بس. كل حساب مدرس لازم يتربط بملف مدرس.",
+  "Dose team accounts: admins manage everything, teachers see only their own sessions. Every teacher account must be linked to a teacher profile."
+ ],
+ "users.new": [
+  "حساب جديد",
+  "New account"
+ ],
+ "users.tempPassword": [
+  "كلمة سر مؤقتة",
+  "Temporary password"
+ ],
+ "users.passwordHint": [
+  "10 حروف على الأقل. ابعتها للشخص وخليه يغيّرها.",
+  "At least 10 characters. Send it to the person and ask them to change it."
+ ],
+ "users.role": [
+  "الدور",
+  "Role"
+ ],
+ "users.teacherProfile": [
+  "ملف المدرس",
+  "Teacher profile"
+ ],
+ "users.create": [
+  "إنشاء الحساب",
+  "Create account"
+ ],
+ "users.notLinked": [
+  "— مش مربوط —",
+  "— Not linked —"
+ ],
+ "users.newPassword": [
+  "كلمة سر جديدة",
+  "New password"
+ ],
+ "availability.lead": [
+  "المواعيد المتوافق عليها هي اللي تبني عليها الجلسات الجديدة لكل مدرس.",
+  "Approved availability is what you build new sessions on for each teacher."
+ ],
+ "availability.range": [
+  "من {from} لـ {to}",
+  "from {from} to {to}"
+ ],
+ "availability.approve": [
+  "موافقة",
+  "Approve"
+ ],
+ "availability.empty": [
+  "مفيش مواعيد.",
+  "No availability."
+ ],
+ "users.created": [
+  "اتعمل الحساب ✓ — ابعت الإيميل وكلمة السر للشخص.",
+  "Account created ✓ — send the email and password to the person."
+ ],
+ "users.resetPrompt": [
+  "كلمة سر جديدة لـ {email} (10 حروف على الأقل):",
+  "New password for {email} (at least 10 characters):"
+ ],
+ "users.passwordChanged": [
+  "اتغيرت كلمة السر ✓",
+  "Password changed ✓"
+ ],
+ "users.disableConfirm": [
+  "إيقاف {email}؟ مش هيقدر يدخل تاني لحد ما تفعّله.",
+  "Disable {email}? They won't be able to sign in until re-enabled."
+ ],
+ "users.enabled": [
+  "اتفعّل ✓",
+  "Enabled ✓"
+ ],
+ "users.disabled": [
+  "اتوقف ✓",
+  "Disabled ✓"
+ ],
+ "users.linked": [
+  "اتربط ملف المدرس ✓",
+  "Teacher profile linked ✓"
+ ],
+ "users.enable": [
+  "تفعيل",
+  "Enable"
+ ],
+ "users.disable": [
+  "إيقاف",
+  "Disable"
+ ],
+ "availability.st.Submitted": [
+  "مستني موافقة",
+  "Awaiting approval"
+ ],
+ "availability.st.Approved": [
+  "متوافق عليه",
+  "Approved"
+ ],
+ "availability.st.Rejected": [
+  "مرفوض",
+  "Rejected"
+ ],
+ "availability.st.Withdrawn": [
+  "المدرس سحبه",
+  "Withdrawn by teacher"
+ ],
+ "availability.notePh": [
+  "ملاحظة للمدرس (اختياري)",
+  "Note for the teacher (optional)"
+ ],
+ "availability.note": [
+  "ملاحظة",
+  "Note"
+ ],
+ "dash.attention": [
+  "محتاج انتباهك",
+  "Needs your attention"
+ ],
+ "dash.proofs": [
+  "إيصال مستني مراجعة",
+  "receipts awaiting review"
+ ],
+ "dash.oldest": [
+  "أقدمهم من {age}",
+  "oldest: {age} ago"
+ ],
+ "dash.topUps": [
+  "فرق جروب مفتوح",
+  "open group top-ups"
+ ],
+ "dash.overdue": [
+  "{n} عدّى ميعاد ردهم",
+  "{n} past their reply deadline"
+ ],
+ "dash.refunds": [
+  "استرداد مطلوب",
+  "refunds to send"
+ ],
+ "dash.transfers": [
+  "+ {n} نقل",
+  "+ {n} transfers"
+ ],
+ "dash.requests": [
+  "طلب جلسة جديد",
+  "new session requests"
+ ],
+ "dash.availability": [
+  "ميعاد مدرس مستني موافقة",
+  "teacher slots awaiting approval"
+ ],
+ "dash.messages": [
+  "رسالة واتساب مستنية تتبعت",
+  "WhatsApp messages to send"
+ ],
+ "dash.upcoming": [
+  "جلسات خلال 48 ساعة",
+  "Sessions in the next 48 hours"
+ ],
+ "dash.noMeet": [
+  "مفيش لينك Meet",
+  "No Meet link"
+ ],
+ "dash.noUpcoming": [
+  "مفيش جلسات خلال اليومين الجايين.",
+  "No sessions in the next two days."
+ ],
+ "dash.nearDecision": [
+  "جروبات قرّب ميعاد حسمها",
+  "Groups close to their decision time"
+ ],
+ "dash.decisionLine": [
+  "الحسم {d} · الجلسة {s}",
+  "Decision {d} · Session {s}"
+ ],
+ "dash.ofNeeded": [
+  "{n} من {min} مطلوبين",
+  "{n} of {min} needed"
+ ],
+ "dash.noNear": [
+  "مفيش جروبات قرّب حسمها.",
+  "No groups close to a decision."
+ ],
+ "dash.period": [
+  "آخر {n} يوم",
+  "Last {n} days"
+ ],
+ "dash.confirmed": [
+  "حجز مؤكد",
+  "confirmed bookings"
+ ],
+ "dash.collected": [
+  "تحصيل مؤكد (شامل الفروق)",
+  "collected (incl. top-ups)"
+ ],
+ "dash.refunded": [
+  "استردادات اتحوّلت",
+  "refunds paid out"
+ ],
+ "dash.hours": [
+  "{n} ساعة",
+  "{n} h"
+ ],
+ "dash.days": [
+  "{n} يوم",
+  "{n} days"
+ ]
+}

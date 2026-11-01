@@ -66,6 +66,12 @@ dotnet test --solution Dose.slnx
 cd src/Dose.Web && npm run build && npm test -- --watch=false
 ```
 
+Interface texts (Arabic + English) are edited in `src/Dose.Web/i18n-src/*.json`, then:
+
+```bash
+cd src/Dose.Web && python3 i18n-src/build.py && python3 i18n-src/check.py
+```
+
 New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s src/Dose.Api -o Persistence/Migrations`
 
 ## Key URLs
@@ -77,7 +83,7 @@ New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s sr
 | `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join; group top-up choice; cancel |
 | `/request-session` | Request a new session |
 | `/login` | Team login (admins and teachers) |
-| `/admin` | Admin: dashboard, payments, follow-ups, requests, sessions, pricing, teachers, catalog, payment methods, teacher availability, users, settings |
+| `/admin` | Admin: dashboard, payments, follow-ups, WhatsApp messages & templates, requests, sessions, pricing, teachers (with photo upload), catalog, payment methods, teacher availability, users, settings |
 | `/teacher` | Teacher: my sessions (Meet link, attendance, end session), my availability |
 
 ## Configuration
@@ -98,4 +104,4 @@ never hard-coded.
 
 ## Status
 
-Phase 4 delivered — see `docs/phase0-assessment.md` sections 5–8. Next: Phase 5 (hardening, PWA, Azure deployment).
+Phase 4 plus Arabic/English, WhatsApp messages and teacher photos delivered — see `docs/phase0-assessment.md` sections 5–9. Next: Phase 5 (hardening, PWA, Azure deployment).

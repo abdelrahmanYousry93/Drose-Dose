@@ -2,55 +2,57 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, AvailabilityA, TeacherA, UserA } from '../../core/admin-api';
 import { errorMessage, fmtDate, fmtDateTime, fmtTime } from '../../core/format';
+import { TranslatePipe, translate as tr } from '../../core/i18n';
+import { optName } from './entity-editor';
 
 /** Admin and teacher accounts. Students never have accounts. */
 @Component({
   selector: 'dose-admin-users',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
-      <h1 class="page-title">المستخدمين</h1>
-      <p class="muted small">حسابات فريق Dose: الأدمن بيدير كل حاجة، والمدرس بيشوف جلساته بس. كل حساب مدرس لازم يتربط بملف مدرس.</p>
+      <h1 class="page-title">{{ 'titles.adminUsers' | t }}</h1>
+      <p class="muted small">{{ 'users.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
       @if (notice()) { <p class="alert alert--ok" role="status">{{ notice() }}</p> }
 
       <form class="dose-card box" (ngSubmit)="create()">
-        <h2>حساب جديد</h2>
+        <h2>{{ 'users.new' | t }}</h2>
         <div class="grid">
-          <label class="field"><span>الإيميل</span><input name="email" type="email" [(ngModel)]="email" dir="ltr" autocomplete="off" /></label>
-          <label class="field"><span>كلمة سر مؤقتة</span><input name="password" type="text" [(ngModel)]="password" dir="ltr" autocomplete="new-password" />
-            <span class="hint">10 حروف على الأقل. ابعتها للشخص وخليه يغيّرها.</span></label>
-          <label class="field"><span>الدور</span>
-            <select name="role" [(ngModel)]="role"><option value="Teacher">مدرس</option><option value="Admin">أدمن</option></select></label>
+          <label class="field"><span>{{ 'login.email' | t }}</span><input name="email" type="email" [(ngModel)]="email" dir="ltr" autocomplete="off" /></label>
+          <label class="field"><span>{{ 'users.tempPassword' | t }}</span><input name="password" type="text" [(ngModel)]="password" dir="ltr" autocomplete="new-password" />
+            <span class="hint">{{ 'users.passwordHint' | t }}</span></label>
+          <label class="field"><span>{{ 'users.role' | t }}</span>
+            <select name="role" [(ngModel)]="role"><option value="Teacher">{{ 'users.roleTeacher' | t }}</option><option value="Admin">{{ 'users.roleAdmin' | t }}</option></select></label>
           @if (role === 'Teacher') {
-            <label class="field"><span>ملف المدرس</span>
+            <label class="field"><span>{{ 'users.teacherProfile' | t }}</span>
               <select name="teacher" [(ngModel)]="teacherId">
-                <option [ngValue]="null">اختار</option>
-                @for (t of freeTeachers(); track t.id) { <option [ngValue]="t.id">{{ t.displayNameAr }}</option> }
+                <option [ngValue]="null">{{ 'request.choose' | t }}</option>
+                @for (t of freeTeachers(); track t.id) { <option [ngValue]="t.id">{{ optName({ nameAr: t.displayNameAr, nameEn: t.displayNameEn }) }}</option> }
               </select></label>
           }
         </div>
-        <button class="dose-btn dose-btn--primary" type="submit">إنشاء الحساب</button>
+        <button class="dose-btn dose-btn--primary" type="submit">{{ 'users.create' | t }}</button>
       </form>
 
       @for (u of users(); track u.id) {
         <article class="dose-card item" [class.off]="u.isDisabled">
           <div class="row">
             <strong dir="ltr">{{ u.email }}</strong>
-            @for (r of u.roles; track r) { <span class="badge">{{ r === 'Admin' ? 'أدمن' : 'مدرس' }}</span> }
-            @if (u.isDisabled) { <span class="badge badge--gray">موقوف</span> }
+            @for (r of u.roles; track r) { <span class="badge">{{ (r === 'Admin' ? 'users.roleAdmin' : 'users.roleTeacher') | t }}</span> }
+            @if (u.isDisabled) { <span class="badge badge--gray">{{ 'editor.inactive' | t }}</span> }
           </div>
           @if (u.roles.includes('Teacher')) {
-            <label class="inline">ملف المدرس:
-              <select [ngModel]="u.teacherId" (ngModelChange)="link(u, $event)" aria-label="ملف المدرس">
-                <option [ngValue]="null">— مش مربوط —</option>
-                @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ t.displayNameAr }}</option> }
+            <label class="inline">{{ 'users.teacherProfile' | t }}:
+              <select [ngModel]="u.teacherId" (ngModelChange)="link(u, $event)" [attr.aria-label]="'users.teacherProfile' | t">
+                <option [ngValue]="null">{{ 'users.notLinked' | t }}</option>
+                @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ optName({ nameAr: t.displayNameAr, nameEn: t.displayNameEn }) }}</option> }
               </select>
             </label>
           }
           <div class="actions">
-            <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="reset(u)">كلمة سر جديدة</button>
-            <button type="button" class="dose-btn small-btn" [class.danger]="!u.isDisabled" (click)="toggle(u)">{{ u.isDisabled ? 'تفعيل' : 'إيقاف' }}</button>
+            <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="reset(u)">{{ 'users.newPassword' | t }}</button>
+            <button type="button" class="dose-btn small-btn" [class.danger]="!u.isDisabled" (click)="toggle(u)">{{ (u.isDisabled ? 'users.enable' : 'users.disable') | t }}</button>
           </div>
         </article>
       }
@@ -73,6 +75,7 @@ import { errorMessage, fmtDate, fmtDateTime, fmtTime } from '../../core/format';
 })
 export class AdminUsers {
   private readonly api = inject(AdminApi);
+  protected readonly optName = optName;
   protected readonly users = signal<UserA[]>([]);
   protected readonly teachers = signal<TeacherA[]>([]);
   protected readonly error = signal('');
@@ -107,56 +110,56 @@ export class AdminUsers {
     return this.run(async () => {
       await this.api.createUser(this.email, this.password, this.role, this.role === 'Teacher' ? this.teacherId : null);
       this.email = ''; this.password = ''; this.teacherId = null;
-    }, 'اتعمل الحساب ✓ — ابعت الإيميل وكلمة السر للشخص.');
+    }, tr('users.created'));
   }
 
   protected reset(u: UserA) {
-    const pass = prompt(`كلمة سر جديدة لـ ${u.email} (10 حروف على الأقل):`);
-    if (pass) void this.run(() => this.api.resetPassword(u.id, pass), 'اتغيرت كلمة السر ✓');
+    const pass = prompt(tr('users.resetPrompt', { email: u.email }));
+    if (pass) void this.run(() => this.api.resetPassword(u.id, pass), tr('users.passwordChanged'));
   }
 
   protected toggle(u: UserA) {
-    if (!u.isDisabled && !confirm(`إيقاف ${u.email}؟ مش هيقدر يدخل تاني لحد ما تفعّله.`)) return;
-    void this.run(() => this.api.setDisabled(u.id, !u.isDisabled), u.isDisabled ? 'اتفعّل ✓' : 'اتوقف ✓');
+    if (!u.isDisabled && !confirm(tr('users.disableConfirm', { email: u.email }))) return;
+    void this.run(() => this.api.setDisabled(u.id, !u.isDisabled), tr(u.isDisabled ? 'users.enabled' : 'users.disabled'));
   }
 
   protected link(u: UserA, teacherId: string | null) {
-    void this.run(() => this.api.linkTeacher(u.id, teacherId), 'اتربط ملف المدرس ✓');
+    void this.run(() => this.api.linkTeacher(u.id, teacherId), tr('users.linked'));
   }
 }
 
-const AV_AR: Record<string, string> = { Submitted: 'مستني موافقة', Approved: 'متوافق عليه', Rejected: 'مرفوض', Withdrawn: 'المدرس سحبه' };
+const avStatus = (s: string) => { const k = `availability.st.${s}`; const t = tr(k); return t === k ? s : t; };
 
 /** Teachers submit availability; admins approve or reject (decision D11). */
 @Component({
   selector: 'dose-admin-availability',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
       <div class="row">
-        <h1 class="page-title">مواعيد المدرسين</h1>
-        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" aria-label="الحالة">
-          <option value="Submitted">مستنية موافقة</option><option value="Approved">متوافق عليها</option>
-          <option value="Rejected">مرفوضة</option><option value="">الكل</option>
+        <h1 class="page-title">{{ 'titles.adminAvailability' | t }}</h1>
+        <select [ngModel]="status()" (ngModelChange)="status.set($event); load()" [attr.aria-label]="'payments.status' | t">
+          <option value="Submitted">{{ 'availability.st.Submitted' | t }}</option><option value="Approved">{{ 'availability.st.Approved' | t }}</option>
+          <option value="Rejected">{{ 'availability.st.Rejected' | t }}</option><option value="">{{ 'sessions.all' | t }}</option>
         </select>
       </div>
-      <p class="muted small">المواعيد المتوافق عليها هي اللي تبني عليها الجلسات الجديدة لكل مدرس.</p>
+      <p class="muted small">{{ 'availability.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
       @for (a of items(); track a.id) {
         <article class="dose-card item">
           <div class="row"><strong>{{ a.teacherNameAr }}</strong><span class="badge" [class.badge--yellow]="a.status === 'Submitted'"
             [class.badge--green]="a.status === 'Approved'">{{ statusAr(a.status) }}</span></div>
-          <span>{{ date(a.startUtc) }} — من {{ time(a.startUtc) }} لـ {{ time(a.endUtc) }}</span>
+          <span>{{ date(a.startUtc) }} — {{ 'availability.range' | t: { from: time(a.startUtc), to: time(a.endUtc) } }}</span>
           @if (a.note) { <span class="muted small">{{ a.note }}</span> }
           @if (a.status === 'Submitted') {
             <div class="actions">
-              <input [(ngModel)]="notes[a.id]" placeholder="ملاحظة للمدرس (اختياري)" aria-label="ملاحظة" />
-              <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="review(a, true)">موافقة</button>
-              <button type="button" class="dose-btn small-btn danger" (click)="review(a, false)">رفض</button>
+              <input [(ngModel)]="notes[a.id]" [placeholder]="'availability.notePh' | t" [attr.aria-label]="'availability.note' | t" />
+              <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="review(a, true)">{{ 'availability.approve' | t }}</button>
+              <button type="button" class="dose-btn small-btn danger" (click)="review(a, false)">{{ 'payments.reject' | t }}</button>
             </div>
-          } @else if (a.reviewNote) { <span class="muted small">ملاحظة: {{ a.reviewNote }}</span> }
+          } @else if (a.reviewNote) { <span class="muted small">{{ 'availability.note' | t }}: {{ a.reviewNote }}</span> }
         </article>
-      } @empty { <p class="muted">مفيش مواعيد.</p> }
+      } @empty { <p class="muted">{{ 'availability.empty' | t }}</p> }
     </section>
   `,
   styles: `
@@ -178,7 +181,7 @@ export class AdminAvailability {
   protected readonly date = fmtDate;
   protected readonly time = fmtTime;
   protected readonly dt = fmtDateTime;
-  protected readonly statusAr = (s: string) => AV_AR[s] ?? s;
+  protected readonly statusAr = avStatus;
 
   constructor() { void this.load(); }
 

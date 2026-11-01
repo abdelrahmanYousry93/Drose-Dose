@@ -1,0 +1,262 @@
+{
+ "catalog.title": [
+  "الكتالوج الدراسي",
+  "Study catalog"
+ ],
+ "catalog.stagesHint": [
+  "\"ولي الأمر إجباري\" بيتحكم في طلب اسم ورقم ولي الأمر وقت الحجز لكل صفوف المرحلة.",
+  "\"Parent contact required\" controls whether a parent's name and number are asked for at booking, for every grade in the stage."
+ ],
+ "catalog.gradesHint": [
+  "اربط كل صف بالمواد اللي بتتدرّس فيه، وبشريحة التسعير بتاعته.",
+  "Link each grade to the subjects taught in it and to its pricing band."
+ ],
+ "catalog.bandsHint": [
+  "شرائح التسعير بتجمّع الصفوف اللي ليها نفس الأسعار. الصف بيتربط بشريحة من صفحة الصفوف.",
+  "Pricing bands group grades that share prices. A grade is linked to a band from the Grades tab."
+ ],
+ "catalog.chapters": [
+  "الوحدات",
+  "Units"
+ ],
+ "catalog.unitLessons": [
+  "دروس الوحدة",
+  "Lessons in unit"
+ ],
+ "catalog.chooseUnit": [
+  "اختار وحدة",
+  "Choose a unit"
+ ],
+ "catalog.pickFirst": [
+  "اختار الصف والمادة علشان تشوف الوحدات والدروس.",
+  "Choose a grade and subject to see units and lessons."
+ ],
+ "catalog.servicesHint": [
+  "أنواع الخدمات التلاتة ثابتة في النظام، وتقدر تعدّل أسماءها ووصفها أو توقف واحدة.",
+  "The three service types are fixed; you can edit their names and descriptions or deactivate one."
+ ],
+ "catalog.tabs.stages": [
+  "المراحل",
+  "Stages"
+ ],
+ "catalog.tabs.grades": [
+  "الصفوف",
+  "Grades"
+ ],
+ "catalog.tabs.tracks": [
+  "المناهج",
+  "Tracks"
+ ],
+ "catalog.tabs.bands": [
+  "شرائح التسعير",
+  "Pricing bands"
+ ],
+ "catalog.tabs.subjects": [
+  "المواد",
+  "Subjects"
+ ],
+ "catalog.tabs.chapters": [
+  "الوحدات والدروس",
+  "Units & lessons"
+ ],
+ "catalog.tabs.services": [
+  "أنواع الخدمات",
+  "Service types"
+ ],
+ "f.name": [
+  "الاسم",
+  "Name"
+ ],
+ "f.nameEn": [
+  "الاسم بالإنجليزي (اختياري)",
+  "Name in English (optional)"
+ ],
+ "f.sort": [
+  "الترتيب",
+  "Sort order"
+ ],
+ "f.active": [
+  "مفعّل",
+  "Active"
+ ],
+ "f.activeF": [
+  "مفعّلة",
+  "Active"
+ ],
+ "f.enHint": [
+  "لو فاضي، الموقع الإنجليزي هيعرض الاسم العربي.",
+  "If empty, the English site shows the Arabic name."
+ ],
+ "f.stageName": [
+  "اسم المرحلة",
+  "Stage name"
+ ],
+ "f.guardianRequired": [
+  "رقم ولي الأمر إجباري",
+  "Parent contact required"
+ ],
+ "add.stage": [
+  "مرحلة",
+  "Stage"
+ ],
+ "add.grade": [
+  "صف",
+  "Grade"
+ ],
+ "f.gradeName": [
+  "اسم الصف",
+  "Grade name"
+ ],
+ "f.stage": [
+  "المرحلة",
+  "Stage"
+ ],
+ "f.band": [
+  "شريحة التسعير",
+  "Pricing band"
+ ],
+ "f.curriculum": [
+  "النظام الدراسي (اختياري)",
+  "Curriculum system (optional)"
+ ],
+ "f.curriculumHint": [
+  "مثلاً نظام البكالوريا لتانية وتالتة ثانوي",
+  "e.g. the Baccalaureate system for secondary 2 and 3"
+ ],
+ "f.gradeSubjects": [
+  "المواد في الصف ده",
+  "Subjects in this grade"
+ ],
+ "add.track": [
+  "منهج",
+  "Track"
+ ],
+ "add.subject": [
+  "مادة",
+  "Subject"
+ ],
+ "add.band": [
+  "شريحة",
+  "Band"
+ ],
+ "f.code": [
+  "الكود",
+  "Code"
+ ],
+ "f.description": [
+  "الوصف للطالب",
+  "Description for students"
+ ],
+ "f.descriptionEn": [
+  "الوصف بالإنجليزي (اختياري)",
+  "Description in English (optional)"
+ ],
+ "add.unit": [
+  "وحدة",
+  "Unit"
+ ],
+ "f.unitName": [
+  "اسم الوحدة",
+  "Unit name"
+ ],
+ "f.allTracks": [
+  "كل المناهج",
+  "All tracks"
+ ],
+ "add.lesson": [
+  "درس",
+  "Lesson"
+ ],
+ "f.lessonName": [
+  "اسم الدرس",
+  "Lesson name"
+ ],
+ "teachers.hint": [
+  "الاسم والصورة والمؤهلات بتظهر للطالب قبل ما يحجز. الجلسة مينفعش تتنشر غير لو المدرس منشور.",
+  "Name, photo and qualifications are shown to students before they book. A session can only be published if its teacher is published."
+ ],
+ "add.teacher": [
+  "مدرس",
+  "Teacher"
+ ],
+ "f.photo": [
+  "صورة المدرس",
+  "Teacher photo"
+ ],
+ "f.photoHint": [
+  "JPG أو PNG أو WebP، لحد 2 ميجا. الصورة بتظهر للطلاب لما المدرس يكون منشور.",
+  "JPG, PNG or WebP, up to 2 MB. Shown to students once the teacher is published."
+ ],
+ "f.displayName": [
+  "الاسم المعروض",
+  "Display name"
+ ],
+ "f.displayNameHint": [
+  "مثلاً: أ. محمد صلاح",
+  "e.g. Mr. Mohamed Salah"
+ ],
+ "f.displayNameEn": [
+  "الاسم المعروض بالإنجليزي (اختياري)",
+  "Display name in English (optional)"
+ ],
+ "f.years": [
+  "سنين الخبرة",
+  "Years of experience"
+ ],
+ "f.photoUrl": [
+  "رابط صورة خارجي (https) — بديل للرفع",
+  "External photo URL (https) — alternative to uploading"
+ ],
+ "f.photoUrlHint": [
+  "الصورة المرفوعة ليها الأولوية.",
+  "An uploaded photo takes priority."
+ ],
+ "f.qualifications": [
+  "المؤهلات",
+  "Qualifications"
+ ],
+ "f.qualificationsEn": [
+  "المؤهلات بالإنجليزي (اختياري)",
+  "Qualifications in English (optional)"
+ ],
+ "f.bio": [
+  "نبذة قصيرة",
+  "Short bio"
+ ],
+ "f.bioEn": [
+  "النبذة بالإنجليزي (اختياري)",
+  "Bio in English (optional)"
+ ],
+ "f.published": [
+  "منشور (يظهر للطلاب)",
+  "Published (visible to students)"
+ ],
+ "pm.hint": [
+  "رقم أو عنوان الاستلام بيظهر للطالب في خطوة الدفع. اتأكد إنه صح قبل الإطلاق.",
+  "The receiving number or address is shown to students at the payment step. Make sure it is correct before launch."
+ ],
+ "add.pm": [
+  "طريقة دفع",
+  "Payment method"
+ ],
+ "f.pmCode": [
+  "الكود (إنجليزي)",
+  "Code (Latin letters)"
+ ],
+ "f.pmCodeHint": [
+  "مثلاً instapay",
+  "e.g. instapay"
+ ],
+ "f.receiving": [
+  "رقم / عنوان الاستلام",
+  "Receiving number / address"
+ ],
+ "f.instructions": [
+  "تعليمات للطالب",
+  "Instructions for students"
+ ],
+ "f.instructionsEn": [
+  "التعليمات بالإنجليزي (اختياري)",
+  "Instructions in English (optional)"
+ ]
+}

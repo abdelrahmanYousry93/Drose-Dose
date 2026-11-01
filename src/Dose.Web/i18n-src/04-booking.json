@@ -1,0 +1,318 @@
+{
+ "booking.notFound": [
+  "مش لاقيين الحجز ده",
+  "We couldn't find this booking"
+ ],
+ "booking.home": [
+  "الرئيسية",
+  "Home"
+ ],
+ "booking.reference": [
+  "رقم الحجز",
+  "Booking reference"
+ ],
+ "booking.copyLink": [
+  "انسخ لينك الحجز",
+  "Copy booking link"
+ ],
+ "booking.privateLink": [
+  "اللينك ده خاص بيك ومنه هتدخل الجلسة. احفظه ومتبعتهوش لحد.",
+  "This link is private to you and is how you'll join the session. Keep it safe and don't share it."
+ ],
+ "booking.steps": [
+  "خطوات الحجز",
+  "Booking steps"
+ ],
+ "booking.stepDetails": [
+  "البيانات",
+  "Details"
+ ],
+ "booking.stepPay": [
+  "الدفع",
+  "Payment"
+ ],
+ "booking.stepReview": [
+  "المراجعة",
+  "Review"
+ ],
+ "booking.stepConfirmed": [
+  "مؤكد",
+  "Confirmed"
+ ],
+ "booking.type": [
+  "النوع",
+  "Type"
+ ],
+ "booking.group": [
+  "جماعية",
+  "Group"
+ ],
+ "booking.private": [
+  "فردية",
+  "Private"
+ ],
+ "booking.amount": [
+  "المبلغ",
+  "Amount"
+ ],
+ "booking.detailsTitle": [
+  "بيانات الحجز",
+  "Booking details"
+ ],
+ "booking.heldFor": [
+  "مكانك محجوز لمدة {t}",
+  "Seat held for {t}"
+ ],
+ "booking.studentName": [
+  "اسم الطالب",
+  "Student name"
+ ],
+ "booking.whatsapp": [
+  "رقم واتساب",
+  "WhatsApp number"
+ ],
+ "booking.whatsappHint": [
+  "هنبعتلك عليه تأكيد الحجز وأي تحديث.",
+  "We'll send your confirmation and any updates here."
+ ],
+ "booking.guardianName": [
+  "اسم ولي الأمر",
+  "Parent's name"
+ ],
+ "booking.guardianPhone": [
+  "رقم واتساب ولي الأمر",
+  "Parent's WhatsApp number"
+ ],
+ "booking.acceptTopUp": [
+  "فاهم إن لو الجروب مكملش هتكلموني قبل الجلسة وأختار: أدفع الفرق، أو أنقل لميعاد تاني، أو أسترد فلوسي.",
+  "I understand that if the group doesn't fill, you'll contact me before the session and I choose: pay the difference, move to another time, or get a refund."
+ ],
+ "booking.acceptTerms": [
+  "موافق على شروط الحجز والإلغاء.",
+  "I agree to the booking and cancellation terms."
+ ],
+ "booking.toPayment": [
+  "كمّل للدفع",
+  "Continue to payment"
+ ],
+ "booking.payTitle": [
+  "ادفع وارفع صورة التحويل",
+  "Pay and upload the transfer screenshot"
+ ],
+ "booking.timeLeft": [
+  "فاضل {t}",
+  "{t} left"
+ ],
+ "booking.proofRejected": [
+  "الإيصال السابق اترفض: {reason}. ارفع صورة تانية.",
+  "Your previous receipt was rejected: {reason}. Please upload another one."
+ ],
+ "booking.transferHint": [
+  "حوّل {amount} واكتب رقم الحجز {ref} في الملاحظات لو ينفع.",
+  "Transfer {amount} and, if you can, write the booking reference {ref} in the transfer note."
+ ],
+ "booking.method": [
+  "طريقة الدفع",
+  "Payment method"
+ ],
+ "booking.screenshot": [
+  "صورة التحويل",
+  "Transfer screenshot"
+ ],
+ "booking.fileTypes": [
+  "JPG أو PNG أو WebP.",
+  "JPG, PNG or WebP."
+ ],
+ "booking.senderRef": [
+  "رقم العملية أو الرقم اللي حوّلت منه",
+  "Transaction number or the number you paid from"
+ ],
+ "booking.uploading": [
+  "جاري الرفع…",
+  "Uploading…"
+ ],
+ "booking.upload": [
+  "ارفع الإيصال",
+  "Upload receipt"
+ ],
+ "booking.orWhatsapp": [
+  "أو ابعت الإيصال على واتساب",
+  "Or send the receipt on WhatsApp"
+ ],
+ "booking.reviewTitle": [
+  "استلمنا الإيصال وبنراجعه",
+  "We've received your receipt and are checking it"
+ ],
+ "booking.reviewBody": [
+  "مكانك محجوز. أول ما نأكد الدفع الصفحة دي هتتحدث، وهنبعتلك على واتساب.",
+  "Your seat is held. As soon as we confirm the payment this page will update and we'll message you on WhatsApp."
+ ],
+ "booking.refreshStatus": [
+  "تحديث الحالة",
+  "Refresh status"
+ ],
+ "booking.confirmed": [
+  "تم تأكيد حجزك!",
+  "Your booking is confirmed!"
+ ],
+ "booking.joinNow": [
+  "ادخل الجلسة دلوقتي",
+  "Join the session now"
+ ],
+ "booking.joinOpens": [
+  "زرار دخول الجلسة هيتفعّل {when}.",
+  "The join button opens {when}."
+ ],
+ "booking.openSameLink": [
+  "افتح نفس اللينك ده في الميعاد.",
+  "Open this same link at the session time."
+ ],
+ "booking.topUpTitle": [
+  "الجروب مكملش العدد",
+  "The group didn't fill"
+ ],
+ "booking.topUpBody": [
+  "الجروب وصل {n} طلاب بس (أقل من {min}). علشان الجلسة تتم بنفس الميعاد، المطلوب فرق {amount}.",
+  "The group reached only {n} students (fewer than {min}). To keep the session at the same time, the difference is {amount}."
+ ],
+ "booking.respondBy": [
+  "ياريت ترد قبل {when}.",
+  "Please reply before {when}."
+ ],
+ "booking.topUpReview": [
+  "استلمنا إيصال الفرق وبنراجعه. أول ما يتأكد حجزك هيرجع مؤكد.",
+  "We've received the difference receipt and are checking it. Your booking will be confirmed again once approved."
+ ],
+ "booking.topUpRejected": [
+  "إيصال الفرق اترفض: {reason}",
+  "The difference receipt was rejected: {reason}"
+ ],
+ "booking.choose": [
+  "اختار",
+  "Choose"
+ ],
+ "booking.choicePay": [
+  "أدفع الفرق",
+  "Pay the difference"
+ ],
+ "booking.choicePayHint": [
+  "وأحضر في نفس الميعاد",
+  "and attend at the same time"
+ ],
+ "booking.choiceMove": [
+  "أنقل لميعاد تاني",
+  "Move to another time"
+ ],
+ "booking.choiceMoveHint": [
+  "هنكلمك على واتساب نرتّب",
+  "we'll arrange it with you on WhatsApp"
+ ],
+ "booking.choiceRefund": [
+  "أسترد فلوسي كاملة",
+  "Get a full refund"
+ ],
+ "booking.topUpScreenshot": [
+  "صورة تحويل الفرق",
+  "Screenshot of the difference transfer"
+ ],
+ "booking.uploadTopUp": [
+  "ارفع إيصال الفرق",
+  "Upload difference receipt"
+ ],
+ "booking.confirmRefund": [
+  "أكّد الاسترداد",
+  "Confirm refund"
+ ],
+ "booking.confirmMove": [
+  "أكّد النقل لميعاد تاني",
+  "Confirm moving to another time"
+ ],
+ "booking.refundPendingTitle": [
+  "طلب الاسترداد وصلنا",
+  "We've received your refund request"
+ ],
+ "booking.refundPendingBody": [
+  "هنرجّعلك فلوسك على نفس الرقم اللي حوّلت منه، وهنبلغك على واتساب أول ما تتحوّل.",
+  "We'll send the money back to the number you paid from and let you know on WhatsApp once it's done."
+ ],
+ "booking.refundedTitle": [
+  "فلوسك رجعت ✓",
+  "Refund completed ✓"
+ ],
+ "booking.anyHelp": [
+  "لو محتاج أي حاجة كلّمنا على واتساب.",
+  "If you need anything, message us on WhatsApp."
+ ],
+ "booking.transferTitle": [
+  "هننقلك لميعاد تاني",
+  "We'll move you to another time"
+ ],
+ "booking.transferBody": [
+  "هنكلمك على واتساب نتفق على الميعاد الجديد، وحجزك الجديد هيوصلك على لينك جديد.",
+  "We'll agree the new time with you on WhatsApp, and your new booking will come with a new link."
+ ],
+ "booking.cancelledTitle": [
+  "الحجز اتلغى",
+  "Booking cancelled"
+ ],
+ "booking.cancelledBody": [
+  "تقدر تحجز جلسة تانية في أي وقت.",
+  "You can book another session any time."
+ ],
+ "booking.expiredTitle": [
+  "مدة الحجز خلصت",
+  "This booking expired"
+ ],
+ "booking.expiredBody": [
+  "المقعد اتفك علشان البيانات أو الإيصال موصلوش في الوقت. تقدر تحجز تاني لو لسه فيه أماكن.",
+  "The seat was released because the details or receipt didn't arrive in time. You can book again if seats are left."
+ ],
+ "booking.backToSession": [
+  "ارجع للجلسة",
+  "Back to the session"
+ ],
+ "booking.statusIs": [
+  "حالة الحجز: {s}",
+  "Booking status: {s}"
+ ],
+ "booking.anyQuestion": [
+  "لو عندك أي سؤال كلّمنا على واتساب.",
+  "If you have any questions, message us on WhatsApp."
+ ],
+ "booking.needCancel": [
+  "محتاج تلغي الحجز؟",
+  "Need to cancel?"
+ ],
+ "booking.cancelFull": [
+  "لو لغيت دلوقتي هترجعلك فلوسك كاملة (الإلغاء المجاني لحد {until}).",
+  "Cancel now for a full refund (free cancellation until {until})."
+ ],
+ "booking.cancelNoRefund": [
+  "فاضل وقت قليل على الجلسة، فالإلغاء دلوقتي <strong>مش بيرجّع الفلوس</strong>.",
+  "The session is close, so cancelling now is <strong>not refunded</strong>."
+ ],
+ "booking.acceptNoRefund": [
+  "موافق ألغي من غير استرداد",
+  "I agree to cancel without a refund"
+ ],
+ "booking.cancelUnpaid": [
+  "لسه مدفعتش، فالإلغاء هيفك المقعد بس.",
+  "You haven't paid yet, so cancelling just releases the seat."
+ ],
+ "booking.cancel": [
+  "إلغاء الحجز",
+  "Cancel booking"
+ ],
+ "booking.help": [
+  "محتاج مساعدة؟ كلّمنا على واتساب",
+  "Need help? Message us on WhatsApp"
+ ],
+ "booking.needFile": [
+  "اختار طريقة الدفع وارفع صورة التحويل.",
+  "Choose a payment method and upload the transfer screenshot."
+ ],
+ "booking.confirmCancel": [
+  "متأكد إنك عايز تلغي الحجز؟",
+  "Are you sure you want to cancel this booking?"
+ ]
+}

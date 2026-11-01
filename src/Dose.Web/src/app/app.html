@@ -1,10 +1,11 @@
 <header class="bar">
   <div class="bar__inner">
     <a class="home-link" routerLink="/"><dose-logo /></a>
-    <nav aria-label="روابط رئيسية">
-      <a routerLink="/open-groups">جلسات جماعية</a>
-      <a routerLink="/request-session">اطلب جلسة</a>
+    <nav [attr.aria-label]="'nav.main' | t">
+      <a routerLink="/open-groups">{{ 'nav.openGroups' | t }}</a>
+      <a routerLink="/request-session">{{ 'nav.request' | t }}</a>
     </nav>
+    <dose-lang-switch />
   </div>
 </header>
 
@@ -14,9 +15,9 @@
 
 <footer class="foot">
   <div class="foot__inner">
-    <p>Dose دروس — معاك في كل خطوة.</p>
+    <p>{{ 'brand.tagline' | t }}</p>
     @if (publicSettings.whatsAppLink(); as link) {
-      <a class="dose-btn dose-btn--whatsapp" [href]="link" target="_blank" rel="noopener">تواصل معانا على واتساب</a>
+      <a class="dose-btn dose-btn--whatsapp" [href]="link" target="_blank" rel="noopener">{{ 'nav.whatsapp' | t }}</a>
     }
   </div>
 </footer>

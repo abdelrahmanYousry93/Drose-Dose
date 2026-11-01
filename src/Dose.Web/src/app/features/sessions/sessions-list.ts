@@ -2,22 +2,23 @@ import { Component, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, SessionSummary } from '../../core/api';
 import { errorMessage } from '../../core/format';
+import { TranslatePipe } from '../../core/i18n';
 import { SessionCard } from './session-card';
 
 /** Available sessions (spec 9.3) and the open-groups page (9.7, via route data fixedMode = 'Group'). */
 @Component({
   selector: 'dose-sessions-list',
-  imports: [SessionCard, RouterLink],
+  imports: [SessionCard, RouterLink, TranslatePipe],
   template: `
     <section class="page">
-      <h1 class="page-title">{{ fixedMode() === 'Group' ? 'الجلسات الجماعية المفتوحة' : 'الجلسات المتاحة' }}</h1>
+      <h1 class="page-title">{{ (fixedMode() === 'Group' ? 'sessions.openGroupsTitle' : 'sessions.title') | t }}</h1>
       @if (fixedMode() === 'Group') {
-        <p class="muted">جروبات بتتكوّن دلوقتي — انضم بسعر الجروب، ولو العدد مكملش هنكلمك قبل الجلسة وتختار.</p>
+        <p class="muted">{{ 'sessions.openGroupsLead' | t }}</p>
       } @else {
         <div class="tabs" role="tablist">
-          <button role="tab" [attr.aria-selected]="!mode()" (click)="setMode(null)">الكل</button>
-          <button role="tab" [attr.aria-selected]="mode() === 'Private'" (click)="setMode('Private')">جلسات فردية</button>
-          <button role="tab" [attr.aria-selected]="mode() === 'Group'" (click)="setMode('Group')">جلسات جماعية</button>
+          <button role="tab" [attr.aria-selected]="!mode()" (click)="setMode(null)">{{ 'sessions.all' | t }}</button>
+          <button role="tab" [attr.aria-selected]="mode() === 'Private'" (click)="setMode('Private')">{{ 'sessions.private' | t }}</button>
+          <button role="tab" [attr.aria-selected]="mode() === 'Group'" (click)="setMode('Group')">{{ 'sessions.group' | t }}</button>
         </div>
       }
 
@@ -27,15 +28,15 @@ import { SessionCard } from './session-card';
         <p class="alert alert--error">{{ error() }}</p>
       } @else if (sessions().length === 0) {
         <div class="dose-card empty">
-          <strong>مفيش جلسات مناسبة دلوقتي</strong>
-          <p class="muted">اطلب جلسة جديدة وإحنا هنرتّبها لك في أقرب وقت.</p>
-          <a class="dose-btn dose-btn--primary" routerLink="/request-session">اطلب جلسة جديدة</a>
+          <strong>{{ 'sessions.empty' | t }}</strong>
+          <p class="muted">{{ 'sessions.emptyHint' | t }}</p>
+          <a class="dose-btn dose-btn--primary" routerLink="/request-session">{{ 'sessions.requestNew' | t }}</a>
         </div>
       } @else {
         <div class="grid">
           @for (s of sessions(); track s.id) { <dose-session-card [session]="s" /> }
         </div>
-        <p class="muted small center">مش لاقي اللي محتاجه؟ <a routerLink="/request-session">اطلب جلسة جديدة</a></p>
+        <p class="muted small center">{{ 'sessions.notFound' | t }} <a routerLink="/request-session">{{ 'sessions.requestNew' | t }}</a></p>
       }
     </section>
   `,

@@ -1,0 +1,206 @@
+{
+ "login.hint": [
+  "للإدارة والمدرسين. الطلاب مش محتاجين حساب — بيدخلوا من لينك الحجز.",
+  "For admins and teachers. Students don't need an account — they use their booking link."
+ ],
+ "login.email": [
+  "البريد الإلكتروني",
+  "Email"
+ ],
+ "login.password": [
+  "كلمة السر",
+  "Password"
+ ],
+ "login.submit": [
+  "دخول",
+  "Sign in"
+ ],
+ "login.invalid": [
+  "بيانات الدخول غير صحيحة.",
+  "Incorrect email or password."
+ ],
+ "adminNav.dashboard": [
+  "الرئيسية",
+  "Dashboard"
+ ],
+ "adminNav.payments": [
+  "المدفوعات",
+  "Payments"
+ ],
+ "adminNav.followUps": [
+  "المتابعات",
+  "Follow-ups"
+ ],
+ "adminNav.requests": [
+  "الطلبات",
+  "Requests"
+ ],
+ "adminNav.messages": [
+  "الرسائل",
+  "Messages"
+ ],
+ "adminNav.sessions": [
+  "الجلسات",
+  "Sessions"
+ ],
+ "adminNav.pricing": [
+  "الأسعار",
+  "Pricing"
+ ],
+ "adminNav.teachers": [
+  "المدرسين",
+  "Teachers"
+ ],
+ "adminNav.catalog": [
+  "الكتالوج",
+  "Catalog"
+ ],
+ "adminNav.paymentMethods": [
+  "طرق الدفع",
+  "Payment methods"
+ ],
+ "adminNav.availability": [
+  "مواعيد المدرسين",
+  "Availability"
+ ],
+ "adminNav.users": [
+  "المستخدمين",
+  "Users"
+ ],
+ "adminNav.settings": [
+  "الإعدادات",
+  "Settings"
+ ],
+ "adminNav.logout": [
+  "خروج",
+  "Sign out"
+ ],
+ "payments.status": [
+  "الحالة",
+  "Status"
+ ],
+ "payments.st.Submitted": [
+  "في انتظار المراجعة",
+  "Awaiting review"
+ ],
+ "payments.filterApproved": [
+  "مقبولة",
+  "Approved"
+ ],
+ "payments.filterRejected": [
+  "مرفوضة",
+  "Rejected"
+ ],
+ "payments.empty": [
+  "مفيش إيصالات هنا.",
+  "No receipts here."
+ ],
+ "payments.topUp": [
+  "فرق جروب",
+  "Group difference"
+ ],
+ "payments.st.Approved": [
+  "مقبول",
+  "Approved"
+ ],
+ "payments.st.Rejected": [
+  "مرفوض",
+  "Rejected"
+ ],
+ "admin.student": [
+  "الطالب",
+  "Student"
+ ],
+ "admin.whatsapp": [
+  "واتساب",
+  "WhatsApp"
+ ],
+ "admin.guardian": [
+  "ولي الأمر",
+  "Parent"
+ ],
+ "admin.session": [
+  "الجلسة",
+  "Session"
+ ],
+ "payments.senderRef": [
+  "رقم العملية",
+  "Transaction no."
+ ],
+ "payments.age": [
+  "من",
+  "Waiting"
+ ],
+ "payments.hide": [
+  "إخفاء الإيصال",
+  "Hide receipt"
+ ],
+ "payments.show": [
+  "عرض الإيصال",
+  "Show receipt"
+ ],
+ "payments.image": [
+  "صورة الإيصال",
+  "Receipt image"
+ ],
+ "payments.approve": [
+  "تأكيد الدفع",
+  "Approve payment"
+ ],
+ "payments.reasonPh": [
+  "سبب الرفض (هيظهر للطالب)",
+  "Rejection reason (shown to the student)"
+ ],
+ "payments.reason": [
+  "سبب الرفض",
+  "Rejection reason"
+ ],
+ "payments.reject": [
+  "رفض",
+  "Reject"
+ ],
+ "settings.lead": [
+  "المدد والمهل دي بتتطبق على الحجوزات الجديدة فوراً.",
+  "These durations and deadlines apply to new bookings immediately."
+ ],
+ "settings.saved": [
+  "اتحفظت الإعدادات.",
+  "Settings saved."
+ ],
+ "settings.keys.booking_hold_minutes": [
+  "مدة حجز المقعد مؤقتاً لحد ما الطالب يكتب بياناته (بالدقائق)",
+  "How long a seat is held while the student enters details (minutes)"
+ ],
+ "settings.keys.booking_payment_proof_deadline_minutes": [
+  "المهلة لرفع إيصال الدفع بعد إدخال البيانات (بالدقائق)",
+  "Time to upload the payment receipt after entering details (minutes)"
+ ],
+ "settings.keys.booking_proof_resubmit_minutes": [
+  "مهلة إعادة رفع الإيصال بعد رفضه (بالدقائق)",
+  "Time to re-upload a rejected receipt (minutes)"
+ ],
+ "settings.keys.session_join_opens_minutes_before_start": [
+  "زر دخول الجلسة يتفعّل قبل الميعاد بكام دقيقة",
+  "Join button opens this many minutes before start"
+ ],
+ "settings.keys.group_tier_decision_hours_before_start": [
+  "موعد حسم اكتمال الجروب قبل الجلسة (بالساعات)",
+  "When the group size is decided before the session (hours)"
+ ],
+ "settings.keys.payment_max_proof_file_size_kb": [
+  "أقصى حجم لصورة الإيصال (كيلوبايت)",
+  "Maximum receipt image size (KB)"
+ ],
+ "settings.keys.session_private_booking_deadline_hours": [
+  "آخر ميعاد لحجز الجلسة الفردية قبل بدايتها (بالساعات)",
+  "Private session booking closes this many hours before start"
+ ],
+ "settings.keys.group_topup_response_hours": [
+  "مهلة رد الطالب لو الجروب مكملش (بالساعات)",
+  "Time for the student to reply if the group doesn't fill (hours)"
+ ],
+ "settings.keys.booking_full_refund_cancellation_hours": [
+  "الطالب يسترد فلوسه كاملة لو لغى قبل الجلسة بكام ساعة",
+  "Full refund if the student cancels at least this many hours before"
+ ]
+}

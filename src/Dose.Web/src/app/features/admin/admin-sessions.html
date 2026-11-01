@@ -1,117 +1,120 @@
 <section class="page">
   <div class="row">
-    <h1 class="page-title">الجلسات</h1>
-    <button type="button" class="dose-btn dose-btn--primary" (click)="newSession()">+ جلسة جديدة</button>
+    <h1 class="page-title">{{ 'titles.adminSessions' | t }}</h1>
+    <button type="button" class="dose-btn dose-btn--primary" (click)="newSession()">+ {{ 'sessionsAdmin.new' | t }}</button>
   </div>
   @if (notice()) { <p class="alert alert--ok" role="status">{{ notice() }}</p> }
   @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
   @if (form(); as f) {
     <form class="dose-card editor" (ngSubmit)="save(false)">
-      <h2>{{ editingId() ? 'تعديل الجلسة' : 'جلسة جديدة' }}</h2>
+      <h2>{{ (editingId() ? 'sessionsAdmin.edit' : 'sessionsAdmin.new') | t }}</h2>
       @if (fromRequest(); as r) {
-        <p class="alert alert--info small">من طلب {{ r.reference }}: {{ r.studentName }} — المواعيد المناسبة: {{ r.preferredDays }} ({{ r.preferredTimes }}).
-          بعد الحفظ الطلب هيتعلّم إنه اتعملّه جلسة، وابعت للطالب رابط الجلسة على واتساب.</p>
+        <p class="alert alert--info small">{{ 'sessionsAdmin.fromRequest' | t: { ref: r.reference, name: r.studentName, days: r.preferredDays, times: r.preferredTimes } }}</p>
       }
       @if (lockedPricing()) {
-        <p class="alert alert--info small">فيه حجوزات في الجلسة دي: تقدر تغيّر الميعاد والمدرس والعنوان والرابط بس. لو غيّرت الميعاد بلّغ الطلاب على واتساب.</p>
+        <p class="alert alert--info small">{{ 'sessionsAdmin.locked' | t }}</p>
       }
 
       <div class="grid">
-        <label class="field"><span>نوع الخدمة</span>
+        <label class="field"><span>{{ 'pricing.service' | t }}</span>
           <select name="service" [(ngModel)]="f.serviceTypeId" (ngModelChange)="refreshPreview()" [disabled]="lockedPricing()">
-            @for (o of services(); track o.id) { <option [ngValue]="o.id">{{ o.nameAr }}</option> }
+            @for (o of services(); track o.id) { <option [ngValue]="o.id">{{ optName(o) }}</option> }
           </select></label>
-        <label class="field"><span>الصف</span>
+        <label class="field"><span>{{ 'common.grade' | t }}</span>
           <select name="grade" [(ngModel)]="f.gradeId" (ngModelChange)="onScopeChange(true)" [disabled]="lockedPricing()">
-            <option value="">اختار</option>
-            @for (g of grades(); track g.id) { <option [ngValue]="g.id">{{ g.nameAr }}</option> }
+            <option value="">{{ 'request.choose' | t }}</option>
+            @for (g of grades(); track g.id) { <option [ngValue]="g.id">{{ optName(g) }}</option> }
           </select></label>
-        <label class="field"><span>المنهج</span>
+        <label class="field"><span>{{ 'common.track' | t }}</span>
           <select name="track" [(ngModel)]="f.studyTrackId" (ngModelChange)="onScopeChange()" [disabled]="lockedPricing()">
-            @for (o of tracks(); track o.id) { <option [ngValue]="o.id">{{ o.nameAr }}</option> }
+            @for (o of tracks(); track o.id) { <option [ngValue]="o.id">{{ optName(o) }}</option> }
           </select></label>
-        <label class="field"><span>المادة</span>
+        <label class="field"><span>{{ 'common.subject' | t }}</span>
           <select name="subject" [(ngModel)]="f.subjectId" (ngModelChange)="onScopeChange(true)" [disabled]="lockedPricing() || !f.gradeId">
-            <option value="">اختار</option>
-            @for (o of gradeSubjects(); track o.id) { <option [ngValue]="o.id">{{ o.nameAr }}</option> }
+            <option value="">{{ 'request.choose' | t }}</option>
+            @for (o of gradeSubjects(); track o.id) { <option [ngValue]="o.id">{{ optName(o) }}</option> }
           </select></label>
-        <label class="field"><span>الوحدة (اختياري)</span>
+        <label class="field"><span>{{ 'sessionsAdmin.unit' | t }}</span>
           <select name="chapter" [(ngModel)]="f.chapterId" (ngModelChange)="onChapter()">
             <option [ngValue]="null">—</option>
-            @for (c of chapters(); track c.id) { <option [ngValue]="c.id">{{ c.nameAr }}</option> }
+            @for (c of chapters(); track c.id) { <option [ngValue]="c.id">{{ optName(c) }}</option> }
           </select></label>
-        <label class="field"><span>الدرس (اختياري)</span>
+        <label class="field"><span>{{ 'sessionsAdmin.lesson' | t }}</span>
           <select name="lesson" [(ngModel)]="f.lessonId" [disabled]="!f.chapterId">
             <option [ngValue]="null">—</option>
-            @for (l of lessons(); track l.id) { <option [ngValue]="l.id">{{ l.nameAr }}</option> }
+            @for (l of lessons(); track l.id) { <option [ngValue]="l.id">{{ optName(l) }}</option> }
           </select></label>
 
-        <label class="field wide"><span>عنوان الجلسة (اللي هيشوفه الطالب)</span>
-          <input name="title" [(ngModel)]="f.scopeTitleAr" placeholder="مثلاً: التفاضل والتكامل — قواعد الاشتقاق" /></label>
-        <label class="field wide"><span>تفاصيل النطاق (اختياري)</span>
-          <textarea name="details" [(ngModel)]="f.scopeDetailsAr" placeholder="إيه بالظبط اللي هيتشرح"></textarea></label>
+        <label class="field wide"><span>{{ 'sessionsAdmin.title' | t }}</span>
+          <input name="title" [(ngModel)]="f.scopeTitleAr" [placeholder]="'sessionsAdmin.titlePh' | t" /></label>
+        <label class="field wide"><span>{{ 'sessionsAdmin.titleEn' | t }}</span>
+          <input name="titleEn" [(ngModel)]="f.scopeTitleEn" dir="ltr" /></label>
+        <label class="field wide"><span>{{ 'sessionsAdmin.details' | t }}</span>
+          <textarea name="details" [(ngModel)]="f.scopeDetailsAr" [placeholder]="'sessionsAdmin.detailsPh' | t"></textarea></label>
+        <label class="field wide"><span>{{ 'sessionsAdmin.detailsEn' | t }}</span>
+          <textarea name="detailsEn" [(ngModel)]="f.scopeDetailsEn" dir="ltr"></textarea></label>
 
-        <label class="field"><span>المدرس</span>
+        <label class="field"><span>{{ 'common.teacher' | t }}</span>
           <select name="teacher" [(ngModel)]="f.teacherId">
-            @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ t.nameAr }}{{ t.published ? '' : ' (مش منشور)' }}</option> }
+            @for (t of teachers(); track t.id) { <option [ngValue]="t.id">{{ optName(t) }}{{ t.published ? '' : ' (' + ('editor.unpublished' | t) + ')' }}</option> }
           </select></label>
-        <label class="field"><span>التاريخ</span><input name="date" type="date" [(ngModel)]="f.date" /></label>
-        <label class="field"><span>الساعة (بتوقيت القاهرة)</span><input name="time" type="time" [(ngModel)]="f.time" /></label>
-        <label class="field"><span>المدة</span>
+        <label class="field"><span>{{ 'sessionsAdmin.date' | t }}</span><input name="date" type="date" [(ngModel)]="f.date" /></label>
+        <label class="field"><span>{{ 'sessionsAdmin.time' | t }}</span><input name="time" type="time" [(ngModel)]="f.time" /></label>
+        <label class="field"><span>{{ 'details.duration' | t }}</span>
           <select name="duration" [(ngModel)]="f.durationMinutes">
-            @for (m of [45, 60, 90, 120, 150, 180]; track m) { <option [ngValue]="m">{{ m }} دقيقة</option> }
+            @for (m of [45, 60, 90, 120, 150, 180]; track m) { <option [ngValue]="m">{{ 'duration.minutes' | t: { n: m } }}</option> }
           </select></label>
-        <label class="field wide"><span>رابط Google Meet (ممكن تضيفه بعدين)</span>
+        <label class="field wide"><span>{{ 'sessionsAdmin.meet' | t }}</span>
           <input name="meet" [(ngModel)]="f.meetingUrl" dir="ltr" placeholder="https://meet.google.com/..." />
-          <span class="hint">مش بيظهر لحد غير الحجوزات المؤكدة، ومن صفحة الحجز في ميعاد الجلسة بس.</span></label>
+          <span class="hint">{{ 'sessionsAdmin.meetHint' | t }}</span></label>
       </div>
 
       <fieldset class="mode" [disabled]="lockedPricing()">
-        <legend>نوع الجلسة</legend>
-        <label class="check"><input type="radio" name="mode" value="Group" [(ngModel)]="f.mode" (ngModelChange)="refreshPreview()" /><span>جماعية</span></label>
-        <label class="check"><input type="radio" name="mode" value="Private" [(ngModel)]="f.mode" (ngModelChange)="refreshPreview()" /><span>فردية</span></label>
+        <legend>{{ 'sessionsAdmin.mode' | t }}</legend>
+        <label class="check"><input type="radio" name="mode" value="Group" [(ngModel)]="f.mode" (ngModelChange)="refreshPreview()" /><span>{{ 'booking.group' | t }}</span></label>
+        <label class="check"><input type="radio" name="mode" value="Private" [(ngModel)]="f.mode" (ngModelChange)="refreshPreview()" /><span>{{ 'booking.private' | t }}</span></label>
       </fieldset>
 
       @if (previewError()) { <p class="alert alert--error">{{ previewError() }}</p> }
       @if (preview(); as p) {
         <div class="pricing">
-          <span class="muted small">التسعير من خطة: <strong>{{ p.planName }}</strong> (نسخة {{ p.versionNo }})</span>
+          <span class="muted small">{{ 'sessionsAdmin.fromPlan' | t }} <strong>{{ p.planName }}</strong> ({{ 'pricing.version' | t: { n: p.versionNo } }})</span>
           @if (f.mode === 'Group') {
-            <span class="label">حجم الجروب</span>
+            <span class="label">{{ 'sessionsAdmin.groupSize' | t }}</span>
             <div class="tiers" role="radiogroup">
               @for (t of p.tiers; track t.id) {
                 <label class="tier" [class.on]="f.targetTierId === t.id">
                   <input type="radio" name="tier" [value]="t.id" [(ngModel)]="f.targetTierId" [disabled]="lockedPricing()" />
-                  <strong>{{ t.nameAr }}</strong>
-                  <span>{{ t.minParticipants }}–{{ t.maxParticipants }} طلاب</span>
+                  <strong>{{ optName(t) }}</strong>
+                  <span>{{ 'request.studentsRange' | t: { min: t.minParticipants, max: t.maxParticipants } }}</span>
                   <span class="price">{{ money(t.pricePerStudent, p.currency) }}</span>
                 </label>
               }
             </div>
           } @else {
-            <span>سعر الجلسة الفردية: <strong class="price">{{ money(p.privatePrice ?? 0, p.currency) }}</strong></span>
+            <span>{{ 'sessionsAdmin.privatePrice' | t }} <strong class="price">{{ money(p.privatePrice ?? 0, p.currency) }}</strong></span>
           }
         </div>
       }
 
       @if (formError()) { <p class="alert alert--error" role="alert">{{ formError() }}</p> }
       <div class="actions">
-        <button class="dose-btn dose-btn--ghost" type="submit" [disabled]="busy()">حفظ كمسودة</button>
-        <button class="dose-btn dose-btn--primary" type="button" (click)="save(true)" [disabled]="busy()">حفظ ونشر</button>
-        <button class="dose-btn" type="button" (click)="form.set(null)">إلغاء</button>
+        <button class="dose-btn dose-btn--ghost" type="submit" [disabled]="busy()">{{ 'sessionsAdmin.saveDraft' | t }}</button>
+        <button class="dose-btn dose-btn--primary" type="button" (click)="save(true)" [disabled]="busy()">{{ 'sessionsAdmin.savePublish' | t }}</button>
+        <button class="dose-btn" type="button" (click)="form.set(null)">{{ 'common.cancel' | t }}</button>
       </div>
     </form>
   }
 
   <div class="filters">
-    <select [ngModel]="filter()" (ngModelChange)="filter.set($event); load()" aria-label="الحالة">
-      <option value="">كل الحالات</option>
-      <option value="Draft">مسودة</option>
-      <option value="Published">منشورة</option>
-      <option value="Cancelled">ملغية</option>
+    <select [ngModel]="filter()" (ngModelChange)="filter.set($event); load()" [attr.aria-label]="'payments.status' | t">
+      <option value="">{{ 'sessionsAdmin.allStatuses' | t }}</option>
+      <option value="Draft">{{ 'status.Draft' | t }}</option>
+      <option value="Published">{{ 'status.Published' | t }}</option>
+      <option value="Cancelled">{{ 'status.Cancelled' | t }}</option>
     </select>
-    <label class="check"><input type="checkbox" [ngModel]="includePast()" (ngModelChange)="includePast.set($event); load()" /><span>اعرض القديمة</span></label>
+    <label class="check"><input type="checkbox" [ngModel]="includePast()" (ngModelChange)="includePast.set($event); load()" /><span>{{ 'sessionsAdmin.showPast' | t }}</span></label>
   </div>
 
   @for (s of sessions(); track s.id) {
@@ -121,49 +124,49 @@
         <span class="badge" [class.badge--green]="s.status === 'Published'" [class.badge--yellow]="s.status === 'Draft'"
               [class.badge--gray]="s.status === 'Cancelled'">{{ statusAr(s.status) }}</span>
       </div>
-      <p class="muted small">{{ s.gradeNameAr }} · {{ s.studyTrackNameAr }} · {{ s.serviceTypeNameAr }} · {{ s.mode === 'Group' ? (s.targetTierNameAr ?? 'جماعية') : 'فردية' }}</p>
+      <p class="muted small">{{ s.gradeNameAr }} · {{ s.studyTrackNameAr }} · {{ s.serviceTypeNameAr }} · {{ s.mode === 'Group' ? (s.targetTierNameAr ?? ('booking.group' | t)) : ('booking.private' | t) }}</p>
       <ul class="info-list small">
-        <li><span>الميعاد</span><span>{{ dt(s.startUtc) }} · {{ s.durationMinutes }} دقيقة</span></li>
-        <li><span>المدرس</span><span>{{ s.teacherNameAr }}</span></li>
-        <li><span>السعر</span><span>{{ money(s.pricePerStudent, s.currency) }}</span></li>
-        <li><span>الحجوزات</span><span>{{ s.confirmedCount }} مؤكد · {{ s.occupiedCount }} من {{ s.capacity }} مقعد</span></li>
-        <li><span>آخر حجز</span><span>{{ dt(s.bookingDeadlineUtc) }}</span></li>
-        @if (s.tierDecisionAtUtc) { <li><span>حسم الجروب</span><span>{{ dt(s.tierDecisionAtUtc) }}</span></li> }
-        <li><span>رابط الجلسة</span><span>{{ s.meetingUrl ? 'موجود ✓' : 'لسه' }}</span></li>
+        <li><span>{{ 'details.when' | t }}</span><span>{{ dt(s.startUtc) }} · {{ 'duration.minutes' | t: { n: s.durationMinutes } }}</span></li>
+        <li><span>{{ 'common.teacher' | t }}</span><span>{{ s.teacherNameAr }}</span></li>
+        <li><span>{{ 'pricing.priceA' | t }}</span><span>{{ money(s.pricePerStudent, s.currency) }}</span></li>
+        <li><span>{{ 'sessionsAdmin.bookings' | t }}</span><span>{{ 'sessionsAdmin.bookingsLine' | t: { c: s.confirmedCount, o: s.occupiedCount, cap: s.capacity } }}</span></li>
+        <li><span>{{ 'sessionsAdmin.deadline' | t }}</span><span>{{ dt(s.bookingDeadlineUtc) }}</span></li>
+        @if (s.tierDecisionAtUtc) { <li><span>{{ 'sessionsAdmin.decision' | t }}</span><span>{{ dt(s.tierDecisionAtUtc) }}</span></li> }
+        <li><span>{{ 'sessionsAdmin.link' | t }}</span><span>{{ (s.meetingUrl ? 'sessionsAdmin.linkYes' : 'sessionsAdmin.linkNo') | t }}</span></li>
       </ul>
       <div class="actions">
         @if (s.status !== 'Cancelled' && s.status !== 'Completed') {
-          <button type="button" class="dose-btn dose-btn--ghost" (click)="edit(s)">تعديل</button>
+          <button type="button" class="dose-btn dose-btn--ghost" (click)="edit(s)">{{ 'sessionsAdmin.editBtn' | t }}</button>
         }
-        @if (s.status === 'Draft') { <button type="button" class="dose-btn dose-btn--primary" (click)="publish(s)">نشر</button> }
-        @if (s.status === 'Published' && s.mode === 'Group') { <button type="button" class="dose-btn dose-btn--ghost" (click)="decide(s)">حسم الجروب الآن</button> }
-        <button type="button" class="dose-btn dose-btn--ghost" (click)="showBookings(s)">الحجوزات</button>
+        @if (s.status === 'Draft') { <button type="button" class="dose-btn dose-btn--primary" (click)="publish(s)">{{ 'sessionsAdmin.publish' | t }}</button> }
+        @if (s.status === 'Published' && s.mode === 'Group') { <button type="button" class="dose-btn dose-btn--ghost" (click)="decide(s)">{{ 'sessionsAdmin.decideNow' | t }}</button> }
+        <button type="button" class="dose-btn dose-btn--ghost" (click)="showBookings(s)">{{ 'sessionsAdmin.bookings' | t }}</button>
         @if (s.status !== 'Cancelled' && s.status !== 'Completed') {
-          <button type="button" class="dose-btn danger" (click)="cancel(s)">إلغاء الجلسة</button>
+          <button type="button" class="dose-btn danger" (click)="cancel(s)">{{ 'sessionsAdmin.cancel' | t }}</button>
         }
       </div>
 
       @if (bookingsFor()?.id === s.id) {
         <div class="bookings">
-          @if (bookings().length === 0) { <p class="muted">مفيش حجوزات.</p> }
+          @if (bookings().length === 0) { <p class="muted">{{ 'sessionsAdmin.noBookings' | t }}</p> }
           @for (b of bookings(); track b.id) {
             <div class="booking">
               <div class="row"><strong dir="ltr">{{ b.reference }}</strong><span class="badge badge--gray">{{ statusAr(b.status) }}</span></div>
               <span class="small">{{ b.studentName ?? '—' }} · <span dir="ltr">{{ b.contactPhone ?? '' }}</span>
-                @if (b.guardianPhone) { · ولي الأمر <span dir="ltr">{{ b.guardianPhone }}</span> }</span>
+                @if (b.guardianPhone) { · {{ 'admin.guardian' | t }} <span dir="ltr">{{ b.guardianPhone }}</span> }</span>
               @if (b.contactPhone) {
-                <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="sendLink(b)">ابعت لينك الحجز</button>
+                <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="sendLink(b)">{{ 'sessionsAdmin.sendLink' | t }}</button>
               }
             </div>
           }
           @if (link(); as l) {
             <div class="link-box">
-              <p class="small">ابعت الرسالة دي للطالب على واتساب. اللينك ده سري وبيفتح صفحة حجزه.</p>
-              <textarea readonly [value]="l.full" aria-label="رسالة الحجز"></textarea>
+              <p class="small">{{ 'sessionsAdmin.linkHint' | t }}</p>
+              <textarea readonly [value]="l.full" [attr.aria-label]="'sessionsAdmin.linkMsg' | t"></textarea>
               <div class="actions">
-                <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="copy(l.full)">{{ copied() ? 'اتنسخت ✓' : 'انسخ الرسالة' }}</button>
+                <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="copy(l.full)">{{ (copied() ? 'common.copied' : 'messages.copy') | t }}</button>
                 @if (chatUrl(l.contactPhone); as chat) {
-                  <a class="dose-btn dose-btn--whatsapp small-btn" [href]="chat" target="_blank" rel="noopener">افتح شات الطالب</a>
+                  <a class="dose-btn dose-btn--whatsapp small-btn" [href]="chat" target="_blank" rel="noopener">{{ 'messages.openChat' | t }}</a>
                 }
               </div>
             </div>
@@ -172,6 +175,6 @@
       }
     </article>
   } @empty {
-    <p class="muted">مفيش جلسات.</p>
+    <p class="muted">{{ 'sessionsAdmin.empty' | t }}</p>
   }
 </section>

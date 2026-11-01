@@ -348,3 +348,22 @@ Next (Phase 4): teacher area (login, availability, assigned sessions, attendance
 | Tests | 80 passing (4 new Phase 4 integration tests incl. user safeguards) + browser walkthrough (admin creates teacher account → teacher logs in → availability → admin approves; teacher blocked from admin pages) |
 
 Not yet: notification log with message templates; teacher photo upload; deployment (Phase 5).
+
+## 9. Arabic + English, WhatsApp messages, teacher photos — delivered
+
+| Area | What works |
+|---|---|
+| Two languages | Every screen (student, teacher, admin) in Arabic (RTL) and English (LTR). Language button in the header; the choice is remembered on the device. Default follows the browser (Arabic unless the browser is English) |
+| Where texts live | **Interface texts** in the frontend: `src/Dose.Web/i18n-src/*.json` (Arabic and English side by side; `python3 i18n-src/build.py` regenerates `src/app/i18n/ar.ts`/`en.ts`; `python3 i18n-src/check.py` fails if a key used in the app is missing). The English dictionary is type-checked against the Arabic one, so a missing translation fails the build. **Content** (catalog, teachers, payment methods, tiers, session titles, message templates) comes from the database with optional English fields — empty English falls back to Arabic. **Errors**: the API returns a stable `code` plus a title already in the request's language (`Accept-Language`); the frontend shows it and words only connection-level failures itself |
+| Design | Direction-aware layout (logical CSS properties; step markers, back arrows and form fields flip with the language), mixed Arabic/English content uses `dir="auto"`, numbers use Latin digits in both languages, dates and amounts are formatted per language (`ج.م` / `EGP`) |
+| Admin English fields | Catalog (stages, grades, tracks, bands, subjects, units, lessons, service types + descriptions), teachers (name, qualifications, bio), payment methods (name, instructions), pricing tiers, session title and details |
+| WhatsApp messages | New **Messages** page: events (payment approved/rejected, top-up needed, refund sent, session cancelled, request received, 3-hour reminders) queue a message in the language the student booked in. The admin opens it ("Prepare" fills the secret link — never stored in the log), copies it, opens the student's or parent's chat, and marks it sent or skips it. Sent/skipped tabs are the log. Dashboard tile shows messages waiting |
+| Templates | Editable Arabic + English text per message type with the allowed placeholders listed; unknown placeholders are rejected; a template can be switched off |
+| Teacher photo | Upload/replace/remove from the teacher card (JPG/PNG/WebP up to 2 MB, content checked, stored privately). Served publicly only for published teachers, with a versioned URL |
+| Follow-up messages | Messages written from the Follow-ups page use the student's booking language, not the admin's |
+| Development data | English names for the SAMPLE catalog are filled in development only, so the English site can be previewed |
+| Tests | 88 backend tests passing (messages, templates, photo validation, language fallback, follow-up language) + browser walkthrough in both languages (English and Arabic bookings, admin approval, Messages compose with link, templates, photo upload, language switch) |
+
+Admin-only lists (payments, follow-ups, requests, dashboard) show content names in Arabic as entered; the admin interface itself is translated.
+Not yet: optional admin page to override interface texts; Phase 5 (hardening, PWA, Azure deployment).
+

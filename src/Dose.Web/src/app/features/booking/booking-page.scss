@@ -9,7 +9,7 @@
   padding-top: 30px; position: relative; font-weight: 600;
 }
 .steps li::before {
-  content: counter(step); position: absolute; top: 0; inset-inline-start: 50%; transform: translateX(50%);
+  content: counter(step); position: absolute; top: 0; inset-inline: 0; margin-inline: auto;
   width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
   background: var(--dose-border); color: var(--dose-text-muted); font-weight: 800;
 }

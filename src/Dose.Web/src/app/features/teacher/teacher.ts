@@ -7,10 +7,11 @@ import { environment } from '../../../environments/environment';
 import { cairoToUtc } from '../../core/admin-api';
 import { Api, ApiError } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtTime } from '../../core/format';
+import { TranslatePipe, translate as tr } from '../../core/i18n';
 
 // ---------- API ----------
 export interface TeacherSession {
-  id: string; titleAr: string; detailsAr: string | null; subjectNameAr: string; gradeNameAr: string; studyTrackNameAr: string;
+  id: string; title: string; details: string | null; subjectName: string; gradeName: string; studyTrackName: string;
   startUtc: string; endUtc: string; mode: string; status: string; confirmedCount: number; capacity: number;
   meetingUrl: string | null; canMarkAttendance: boolean; attendanceMarked: number;
 }
@@ -30,7 +31,7 @@ export class TeacherApi {
       throw e;
     }
   }
-  me() { return this.run(firstValueFrom(this.http.get<{ teacherId: string; displayNameAr: string; email: string }>(`${this.base}/me`))); }
+  me() { return this.run(firstValueFrom(this.http.get<{ teacherId: string; displayName: string; email: string }>(`${this.base}/me`))); }
   sessions(past: boolean) { return this.run(firstValueFrom(this.http.get<TeacherSession[]>(`${this.base}/sessions`, { params: past ? { past: 'true' } : {} }))); }
   session(id: string) { return this.run(firstValueFrom(this.http.get<{ session: TeacherSession; students: TeacherStudent[] }>(`${this.base}/sessions/${id}`))); }
   attendance(id: string, items: { bookingId: string; attended: boolean }[]) {
@@ -55,24 +56,22 @@ export const teacherGuard: CanActivateFn = async () => {
   }
 };
 
-const STATUS_AR: Record<string, string> = {
-  Published: 'مفتوحة للحجز', TopUpRequired: 'مستنية رد الطلاب', Confirmed: 'مؤكدة', InProgress: 'شغالة', Completed: 'خلصت', Cancelled: 'ملغية',
-};
-const statusAr = (s: string) => STATUS_AR[s] ?? s;
+const label = (prefix: string) => (s: string) => { const k = `${prefix}.${s}`; const t = tr(k); return t === k ? s : t; };
+const statusAr = label('teacher.st');
 
 // ---------- Shell ----------
 @Component({
   selector: 'dose-teacher-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   template: `
     <div class="hello">
-      @if (name()) { <span>أهلاً {{ name() }}</span> }
+      @if (name()) { <span>{{ 'teacher.hello' | t: { name: name() } }}</span> }
       @if (error()) { <p class="alert alert--error">{{ error() }}</p> }
     </div>
     <nav class="tnav">
-      <a routerLink="/teacher/sessions" routerLinkActive="on">جلساتي</a>
-      <a routerLink="/teacher/availability" routerLinkActive="on">مواعيدي</a>
-      <button type="button" (click)="logout()">خروج</button>
+      <a routerLink="/teacher/sessions" routerLinkActive="on">{{ 'titles.teacherSessions' | t }}</a>
+      <a routerLink="/teacher/availability" routerLinkActive="on">{{ 'titles.teacherAvailability' | t }}</a>
+      <button type="button" (click)="logout()">{{ 'adminNav.logout' | t }}</button>
     </nav>
     <router-outlet />
   `,
@@ -89,36 +88,36 @@ export class TeacherShell {
   private readonly router = inject(Router);
   protected readonly name = signal('');
   protected readonly error = signal('');
-  constructor() { this.api.me().then((m) => this.name.set(m.displayNameAr)).catch((e) => this.error.set(errorMessage(e))); }
+  constructor() { this.api.me().then((m) => this.name.set(m.displayName)).catch((e) => this.error.set(errorMessage(e))); }
   protected async logout() { await this.auth.logout().catch(() => undefined); await this.router.navigateByUrl('/login'); }
 }
 
 // ---------- Dashboard: my sessions ----------
 @Component({
   selector: 'dose-teacher-sessions',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <section class="page">
       <div class="row">
-        <h1 class="page-title">{{ past() ? 'جلسات قديمة' : 'جلساتي الجاية' }}</h1>
-        <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="past.set(!past()); load()">{{ past() ? 'الجاية' : 'القديمة' }}</button>
+        <h1 class="page-title">{{ (past() ? 'teacher.past' : 'teacher.upcoming') | t }}</h1>
+        <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="past.set(!past()); load()">{{ (past() ? 'teacher.showUpcoming' : 'teacher.showPast') | t }}</button>
       </div>
       @if (!past() && sessions().length) {
         <div class="stats">
-          <div class="dose-card stat"><span class="num">{{ sessions().length }}</span><span>جلسة</span></div>
-          <div class="dose-card stat"><span class="num">{{ students() }}</span><span>طالب مؤكد</span></div>
-          <div class="dose-card stat"><span class="num">{{ needsAttendance() }}</span><span>محتاجة تسجيل حضور</span></div>
+          <div class="dose-card stat"><span class="num">{{ sessions().length }}</span><span>{{ 'teacher.statSessions' | t }}</span></div>
+          <div class="dose-card stat"><span class="num">{{ students() }}</span><span>{{ 'teacher.statStudents' | t }}</span></div>
+          <div class="dose-card stat"><span class="num">{{ needsAttendance() }}</span><span>{{ 'teacher.statAttendance' | t }}</span></div>
         </div>
       }
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
       @for (s of sessions(); track s.id) {
         <a class="dose-card item" [routerLink]="['/teacher/sessions', s.id]" [class.cancelled]="s.status === 'Cancelled'">
-          <div class="row"><strong>{{ s.subjectNameAr }} — {{ s.titleAr }}</strong><span class="badge">{{ statusAr(s.status) }}</span></div>
-          <span class="muted small">{{ s.gradeNameAr }} · {{ s.studyTrackNameAr }} · {{ s.mode === 'Group' ? 'جماعية' : 'فردية' }}</span>
-          <span>{{ date(s.startUtc) }} — {{ time(s.startUtc) }} لـ {{ time(s.endUtc) }}</span>
-          <span class="small">{{ s.confirmedCount }} طالب مؤكد @if (s.canMarkAttendance) { · <strong class="hot">سجّل الحضور</strong> }</span>
+          <div class="row"><strong>{{ s.subjectName }} — {{ s.title }}</strong><span class="badge">{{ statusAr(s.status) }}</span></div>
+          <span class="muted small">{{ s.gradeName }} · {{ s.studyTrackName }} · {{ (s.mode === 'Group' ? 'booking.group' : 'booking.private') | t }}</span>
+          <span>{{ date(s.startUtc) }} — {{ 'availability.range' | t: { from: time(s.startUtc), to: time(s.endUtc) } }}</span>
+          <span class="small">{{ 'teacher.confirmedN' | t: { n: s.confirmedCount } }} @if (s.canMarkAttendance) { · <strong class="hot">{{ 'teacher.markAttendance' | t }}</strong> }</span>
         </a>
-      } @empty { <p class="muted">مفيش جلسات.</p> }
+      } @empty { <p class="muted">{{ 'sessionsAdmin.empty' | t }}</p> }
     </section>
   `,
   styles: `
@@ -152,50 +151,50 @@ export class TeacherSessions {
 // ---------- Session: link, students (first names), attendance, complete ----------
 @Component({
   selector: 'dose-teacher-session',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <section class="page">
-      <a routerLink="/teacher/sessions" class="back">→ جلساتي</a>
+      <a routerLink="/teacher/sessions" class="back">{{ 'titles.teacherSessions' | t }}</a>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
       @if (notice()) { <p class="alert alert--ok" role="status">{{ notice() }}</p> }
       @if (s(); as s) {
         <div class="dose-card box">
           <span class="badge">{{ statusAr(s.status) }}</span>
-          <h1 class="page-title">{{ s.subjectNameAr }} — {{ s.titleAr }}</h1>
-          <span class="muted">{{ s.gradeNameAr }} · {{ s.studyTrackNameAr }}</span>
-          <span>{{ dt(s.startUtc) }} لـ {{ time(s.endUtc) }}</span>
-          @if (s.detailsAr) { <p class="small">{{ s.detailsAr }}</p> }
+          <h1 class="page-title" dir="auto">{{ s.subjectName }} — {{ s.title }}</h1>
+          <span class="muted">{{ s.gradeName }} · {{ s.studyTrackName }}</span>
+          <span>{{ dt(s.startUtc) }} – {{ time(s.endUtc) }}</span>
+          @if (s.details) { <p class="small">{{ s.details }}</p> }
           @if (s.meetingUrl) {
-            <a class="dose-btn dose-btn--primary" [href]="s.meetingUrl" target="_blank" rel="noopener">افتح Google Meet</a>
+            <a class="dose-btn dose-btn--primary" [href]="s.meetingUrl" target="_blank" rel="noopener">{{ 'teacher.openMeet' | t }}</a>
           } @else if (s.status !== 'Cancelled') {
-            <p class="alert small">لينك الجلسة لسه متضافش. الإدارة هتضيفه قبل الميعاد.</p>
+            <p class="alert small">{{ 'teacher.noLink' | t }}</p>
           }
         </div>
 
         <div class="dose-card box">
-          <h2>الطلاب ({{ students().length }})</h2>
-          <p class="muted small">بتظهر الأسماء الأولى بس. أي تواصل مع الطلاب بيكون عن طريق الإدارة.</p>
+          <h2>{{ 'teacher.students' | t: { n: students().length } }}</h2>
+          <p class="muted small">{{ 'teacher.studentsHint' | t }}</p>
           @for (st of students(); track st.bookingId) {
             <div class="student">
               <span>{{ st.firstName }}</span>
               @if (s.canMarkAttendance && s.status !== 'Completed') {
-                <div class="toggle" role="radiogroup" [attr.aria-label]="'حضور ' + st.firstName">
-                  <button type="button" [class.on]="marks[st.bookingId] === true" (click)="marks[st.bookingId] = true">حاضر</button>
-                  <button type="button" [class.on]="marks[st.bookingId] === false" (click)="marks[st.bookingId] = false">غايب</button>
+                <div class="toggle" role="radiogroup" [attr.aria-label]="'teacher.attendanceOf' | t: { name: st.firstName }">
+                  <button type="button" [class.on]="marks[st.bookingId] === true" (click)="marks[st.bookingId] = true">{{ 'teacher.present' | t }}</button>
+                  <button type="button" [class.on]="marks[st.bookingId] === false" (click)="marks[st.bookingId] = false">{{ 'teacher.absent' | t }}</button>
                 </div>
               } @else if (st.attendance) {
-                <span class="badge" [class.badge--green]="st.attendance === 'Attended'">{{ st.attendance === 'Attended' ? 'حاضر' : 'غايب' }}</span>
+                <span class="badge" [class.badge--green]="st.attendance === 'Attended'">{{ (st.attendance === 'Attended' ? 'teacher.present' : 'teacher.absent') | t }}</span>
               }
             </div>
-          } @empty { <p class="muted small">مفيش طلاب مؤكدين لسه.</p> }
+          } @empty { <p class="muted small">{{ 'teacher.noStudents' | t }}</p> }
 
           @if (s.canMarkAttendance && s.status !== 'Completed' && students().length) {
             <div class="actions">
-              <button type="button" class="dose-btn dose-btn--ghost" (click)="save()">حفظ الحضور</button>
-              <button type="button" class="dose-btn dose-btn--primary" (click)="complete()">إنهاء الجلسة</button>
+              <button type="button" class="dose-btn dose-btn--ghost" (click)="save()">{{ 'teacher.saveAttendance' | t }}</button>
+              <button type="button" class="dose-btn dose-btn--primary" (click)="complete()">{{ 'teacher.complete' | t }}</button>
             </div>
           } @else if (!s.canMarkAttendance && s.status !== 'Completed' && s.status !== 'Cancelled') {
-            <p class="muted small">تسجيل الحضور بيتفتح قبل الجلسة بربع ساعة.</p>
+            <p class="muted small">{{ 'teacher.attendanceOpens' | t }}</p>
           }
         </div>
       }
@@ -243,58 +242,58 @@ export class TeacherSessionPage {
 
   protected async save() {
     this.error.set(''); this.notice.set('');
-    try { await this.api.attendance(this.id(), this.items()); this.notice.set('اتحفظ الحضور ✓'); await this.load(); }
+    try { await this.api.attendance(this.id(), this.items()); this.notice.set(tr('teacher.attendanceSaved')); await this.load(); }
     catch (e) { this.error.set(errorMessage(e)); }
   }
 
   protected async complete() {
-    if (!confirm('إنهاء الجلسة؟ اتأكد إنك سجلت حضور كل الطلاب.')) return;
+    if (!confirm(tr('teacher.completeConfirm'))) return;
     this.error.set(''); this.notice.set('');
     try {
       await this.api.attendance(this.id(), this.items());
       await this.api.complete(this.id());
-      this.notice.set('الجلسة اتقفلت ✓ شكراً!');
+      this.notice.set(tr('teacher.completed'));
       await this.load();
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 }
 
 // ---------- Availability ----------
-const AV_AR: Record<string, string> = { Submitted: 'مستني موافقة', Approved: 'اتوافق عليه', Rejected: 'مرفوض', Withdrawn: 'اتسحب' };
+const avAr = label('teacher.av');
 
 @Component({
   selector: 'dose-teacher-availability',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <section class="page">
-      <h1 class="page-title">مواعيدي المتاحة</h1>
-      <p class="muted small">ضيف الأوقات اللي تقدر تشرح فيها، والإدارة هتوافق عليها وتبني عليها الجلسات. المواعيد بتوقيت القاهرة.</p>
+      <h1 class="page-title">{{ 'teacher.avTitle' | t }}</h1>
+      <p class="muted small">{{ 'teacher.avLead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
       <form class="dose-card box" (ngSubmit)="add()">
         <div class="grid">
-          <label class="field"><span>اليوم</span><input name="date" type="date" [(ngModel)]="date" /></label>
-          <label class="field"><span>من</span><input name="from" type="time" [(ngModel)]="from" /></label>
-          <label class="field"><span>لـ</span><input name="to" type="time" [(ngModel)]="to" /></label>
+          <label class="field"><span>{{ 'teacher.day' | t }}</span><input name="date" type="date" [(ngModel)]="date" /></label>
+          <label class="field"><span>{{ 'pricing.min' | t }}</span><input name="from" type="time" [(ngModel)]="from" /></label>
+          <label class="field"><span>{{ 'pricing.max' | t }}</span><input name="to" type="time" [(ngModel)]="to" /></label>
         </div>
-        <label class="field"><span>ملاحظة <span class="hint">(اختياري)</span></span><input name="note" [(ngModel)]="note" maxlength="300" /></label>
-        <button class="dose-btn dose-btn--primary" type="submit">إضافة الميعاد</button>
+        <label class="field"><span>{{ 'availability.note' | t }} <span class="hint">{{ 'common.optional' | t }}</span></span><input name="note" [(ngModel)]="note" maxlength="300" /></label>
+        <button class="dose-btn dose-btn--primary" type="submit">{{ 'teacher.addSlot' | t }}</button>
       </form>
 
       @for (a of items(); track a.id) {
         <div class="dose-card item">
-          <div><strong>{{ fmtDate(a.startUtc) }}</strong> — {{ fmtTime(a.startUtc) }} لـ {{ fmtTime(a.endUtc) }}
+          <div><strong>{{ fmtDate(a.startUtc) }}</strong> — {{ 'availability.range' | t: { from: fmtTime(a.startUtc), to: fmtTime(a.endUtc) } }}
             @if (a.note) { <span class="muted small"> · {{ a.note }}</span> }
-            @if (a.reviewNote) { <div class="muted small">ملاحظة الإدارة: {{ a.reviewNote }}</div> }</div>
+            @if (a.reviewNote) { <div class="muted small">{{ 'teacher.adminNote' | t: { note: a.reviewNote } }}</div> }</div>
           <div class="meta">
             <span class="badge" [class.badge--yellow]="a.status === 'Submitted'" [class.badge--green]="a.status === 'Approved'"
                   [class.badge--gray]="a.status === 'Rejected' || a.status === 'Withdrawn'">{{ avAr(a.status) }}</span>
             @if (a.status === 'Submitted' || a.status === 'Approved') {
-              <button type="button" class="x" (click)="withdraw(a)">سحب</button>
+              <button type="button" class="x" (click)="withdraw(a)">{{ 'teacher.withdraw' | t }}</button>
             }
           </div>
         </div>
-      } @empty { <p class="muted">لسه مضفتش مواعيد.</p> }
+      } @empty { <p class="muted">{{ 'teacher.noSlots' | t }}</p> }
     </section>
   `,
   styles: `
@@ -315,7 +314,7 @@ export class TeacherAvailability {
   protected note = '';
   protected readonly fmtDate = fmtDate;
   protected readonly fmtTime = fmtTime;
-  protected readonly avAr = (s: string) => AV_AR[s] ?? s;
+  protected readonly avAr = avAr;
 
   constructor() { void this.load(); }
   private async load() {
@@ -329,7 +328,7 @@ export class TeacherAvailability {
     } catch (e) { this.error.set(errorMessage(e)); }
   }
   protected async withdraw(a: Availability) {
-    if (!confirm('سحب الميعاد ده؟')) return;
+    if (!confirm(tr('teacher.withdrawConfirm'))) return;
     try { await this.api.withdraw(a.id); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
   }
 }

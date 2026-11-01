@@ -5,24 +5,30 @@ import { environment } from '../../environments/environment';
 import { ApiError } from './api';
 
 // ---------- Models (mirror Dose.Contracts.Admin) ----------
-export interface StageA { id: string | null; nameAr: string; requiresGuardianContact: boolean; sortOrder: number; isActive: boolean }
-export interface LookupA { id: string | null; nameAr: string; sortOrder: number; isActive: boolean }
-export interface BandA { id: string | null; nameAr: string; sortOrder: number }
+// Admin edits both languages: *Ar is required, *En is optional (the public site falls back to Arabic).
+export interface StageA { id: string | null; nameAr: string; nameEn?: string | null; requiresGuardianContact: boolean; sortOrder: number; isActive: boolean }
+export interface LookupA { id: string | null; nameAr: string; nameEn?: string | null; sortOrder: number; isActive: boolean }
+export interface BandA { id: string | null; nameAr: string; nameEn?: string | null; sortOrder: number }
 export interface GradeA {
-  id: string | null; nameAr: string; stageId: string; pricingBandId: string; curriculumSystem: string | null;
+  id: string | null; nameAr: string; nameEn?: string | null; stageId: string; pricingBandId: string; curriculumSystem: string | null;
   sortOrder: number; isActive: boolean; subjectIds: string[];
 }
-export interface ChapterA { id: string | null; nameAr: string; subjectId: string; gradeId: string; studyTrackId: string | null; sortOrder: number; isActive: boolean }
-export interface LessonA { id: string | null; nameAr: string; chapterId: string; sortOrder: number; isActive: boolean }
-export interface ServiceTypeA { id: string; code: string; nameAr: string; descriptionAr: string | null; sortOrder: number; isActive: boolean }
+export interface ChapterA { id: string | null; nameAr: string; nameEn?: string | null; subjectId: string; gradeId: string; studyTrackId: string | null; sortOrder: number; isActive: boolean }
+export interface LessonA { id: string | null; nameAr: string; nameEn?: string | null; chapterId: string; sortOrder: number; isActive: boolean }
+export interface ServiceTypeA {
+  id: string; code: string; nameAr: string; nameEn?: string | null; descriptionAr: string | null; descriptionEn?: string | null;
+  sortOrder: number; isActive: boolean;
+}
 export interface TeacherA {
-  id: string | null; displayNameAr: string; photoUrl: string | null; bioAr: string | null; qualificationsAr: string | null;
-  yearsOfExperience: number | null; isPublished: boolean;
+  id: string | null; displayNameAr: string; displayNameEn?: string | null; photoUrl: string | null; bioAr: string | null;
+  bioEn?: string | null; qualificationsAr: string | null; qualificationsEn?: string | null; yearsOfExperience: number | null;
+  isPublished: boolean; hasUploadedPhoto?: boolean; photoPreviewUrl?: string | null;
 }
 export interface PaymentMethodA {
-  id: string | null; code: string; nameAr: string; receivingAccount: string; instructionsAr: string | null; sortOrder: number; isActive: boolean;
+  id: string | null; code: string; nameAr: string; nameEn?: string | null; receivingAccount: string; instructionsAr: string | null;
+  instructionsEn?: string | null; sortOrder: number; isActive: boolean;
 }
-export interface TierA { id: string | null; nameAr: string; minParticipants: number; maxParticipants: number; pricePerStudent: number; sortOrder: number }
+export interface TierA { id: string | null; nameAr: string; nameEn?: string | null; minParticipants: number; maxParticipants: number; pricePerStudent: number; sortOrder: number }
 export interface VersionA { id: string; versionNo: number; privatePrice: number | null; isLocked: boolean; tiers: TierA[] }
 export interface PlanA {
   id: string | null; name: string; serviceTypeId: string; mode: 'Private' | 'Group'; pricingBandId: string | null;
@@ -36,6 +42,7 @@ export interface SessionSave {
   serviceTypeId: string; gradeId: string; studyTrackId: string; subjectId: string; chapterId: string | null; lessonId: string | null;
   scopeTitleAr: string; scopeDetailsAr: string | null; teacherId: string; startUtc: string; durationMinutes: number;
   mode: 'Private' | 'Group'; targetTierId: string | null; meetingUrl: string | null;
+  scopeTitleEn: string | null; scopeDetailsEn: string | null;
 }
 export interface SessionA {
   id: string; status: string; scopeTitleAr: string; scopeDetailsAr: string | null;
@@ -45,6 +52,7 @@ export interface SessionA {
   targetTierId: string | null; targetTierNameAr: string | null; pricePerStudent: number; currency: string; planName: string;
   bookingDeadlineUtc: string; tierDecisionAtUtc: string | null; meetingUrl: string | null;
   confirmedCount: number; occupiedCount: number; activeBookingCount: number;
+  scopeTitleEn: string | null; scopeDetailsEn: string | null;
 }
 export interface SessionBookingA {
   id: string; reference: string; status: string; studentName: string | null; contactPhone: string | null;
@@ -55,6 +63,7 @@ export interface FollowUp {
   studentName: string | null; contactPhone: string | null; guardianPhone: string | null; sessionId: string; sessionTitleAr: string;
   sessionStartUtc: string; paidAmount: number; currency: string; topUpAmount: number | null; respondByUtc: string | null;
   studentChoice: string | null; topUpProofStatus: string | null; reason: string | null; overdue: boolean;
+  language: 'ar' | 'en'; sessionTitleEn: string | null;
 }
 export interface SessionRequestA {
   id: string; reference: string; status: string; studentName: string; contactPhone: string; guardianName: string | null;
@@ -71,12 +80,22 @@ export interface Dashboard {
   pendingProofs: number; oldestPendingProofMinutes: number | null; openTopUps: number; overdueTopUps: number; pendingRefunds: number;
   pendingTransfers: number; newRequests: number; pendingAvailability: number; upcomingSessions: DashSession[];
   groupsNearDecision: DashSession[]; periodDays: number; periodConfirmedBookings: number; periodCollected: number;
-  periodRefunded: number; currency: string;
+  periodRefunded: number; currency: string; pendingMessages: number;
 }
 export interface UserA { id: string; email: string; roles: string[]; isDisabled: boolean; teacherId: string | null; teacherNameAr: string | null }
 export interface AvailabilityA {
   id: string; teacherId: string; teacherNameAr: string; startUtc: string; endUtc: string; note: string | null; status: string;
   reviewNote: string | null; createdAtUtc: string;
+}
+export type MessageStatus = 'Pending' | 'Sent' | 'Skipped';
+export interface MessageA {
+  id: string; templateCode: string; templateTitle: string; status: MessageStatus; recipientName: string; recipientPhone: string;
+  guardianPhone: string | null; language: string; preview: string; bookingReference: string | null; createdAtUtc: string;
+  dueAtUtc: string; handledAtUtc: string | null; handledBy: string | null;
+}
+export interface ComposedMessage { text: string; chatUrl: string; guardianChatUrl: string | null }
+export interface TemplateA {
+  code: string; titleAr: string; titleEn: string; bodyAr: string; bodyEn: string; isActive: boolean; placeholders: string[];
 }
 export interface ReissueLink { reference: string; accessToken: string; contactPhone: string | null; message: string }
 
@@ -123,6 +142,12 @@ export class AdminApi {
   // Teachers & payment methods
   teachers() { return this.get<TeacherA[]>('/teachers'); }
   saveTeacher(d: TeacherA) { return this.post<{ id: string }>('/teachers', d); }
+  uploadTeacherPhoto(id: string, file: File) {
+    const form = new FormData();
+    form.append('photo', file);
+    return this.post<void>(`/teachers/${id}/photo`, form);
+  }
+  removeTeacherPhoto(id: string) { return this.run(firstValueFrom(this.http.delete<void>(`${this.base}/teachers/${id}/photo`))); }
   paymentMethods() { return this.get<PaymentMethodA[]>('/payment-methods'); }
   savePaymentMethod(d: PaymentMethodA) { return this.post<{ id: string }>('/payment-methods', d); }
 
@@ -159,6 +184,16 @@ export class AdminApi {
   linkTeacher(id: string, teacherId: string | null) { return this.post<void>(`/users/${id}/teacher`, { teacherId }); }
   availability(status: string | null) { return this.get<AvailabilityA[]>('/availability', { status }); }
   reviewAvailability(id: string, approve: boolean, note: string | null) { return this.post<void>(`/availability/${id}/review`, { approve, note }); }
+
+  // Messages (WhatsApp outbox/log) & templates
+  messages(status: MessageStatus | null) { return this.get<MessageA[]>('/messages', { status }); }
+  composeMessage(id: string) { return this.get<ComposedMessage>(`/messages/${id}/compose`); }
+  markMessageSent(id: string) { return this.post<void>(`/messages/${id}/sent`, {}); }
+  skipMessage(id: string) { return this.post<void>(`/messages/${id}/skip`, {}); }
+  templates() { return this.get<TemplateA[]>('/message-templates'); }
+  saveTemplate(code: string, bodyAr: string, bodyEn: string, isActive: boolean) {
+    return this.put<void>(`/message-templates/${code}`, { bodyAr, bodyEn, isActive });
+  }
 
   // Follow-ups & requests
   followUps() { return this.get<FollowUp[]>('/follow-ups'); }

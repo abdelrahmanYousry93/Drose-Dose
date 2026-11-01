@@ -2,70 +2,74 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminApi, Dashboard } from '../../core/admin-api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
+import { TranslatePipe, translate as tr } from '../../core/i18n';
 
 /** Admin home (spec 9.8): what needs attention, what's coming up, and numbers for the period. */
 @Component({
   selector: 'dose-admin-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <section class="page">
       <div class="row">
-        <h1 class="page-title">الرئيسية</h1>
-        <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="load()">تحديث</button>
+        <h1 class="page-title">{{ 'titles.adminDashboard' | t }}</h1>
+        <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="load()">{{ 'common.refresh' | t }}</button>
       </div>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
       @if (d(); as d) {
-        <h2 class="sub">محتاج انتباهك</h2>
+        <h2 class="sub">{{ 'dash.attention' | t }}</h2>
         <div class="tiles">
           <a class="dose-card tile" routerLink="/admin/payments" [class.hot]="d.pendingProofs > 0">
-            <span class="num">{{ d.pendingProofs }}</span><span>إيصال مستني مراجعة</span>
-            @if (d.oldestPendingProofMinutes !== null) { <span class="muted small">أقدمهم من {{ age(d.oldestPendingProofMinutes) }}</span> }
+            <span class="num">{{ d.pendingProofs }}</span><span>{{ 'dash.proofs' | t }}</span>
+            @if (d.oldestPendingProofMinutes !== null) { <span class="muted small">{{ 'dash.oldest' | t: { age: age(d.oldestPendingProofMinutes) } }}</span> }
           </a>
           <a class="dose-card tile" routerLink="/admin/follow-ups" [class.hot]="d.overdueTopUps > 0">
-            <span class="num">{{ d.openTopUps }}</span><span>فرق جروب مفتوح</span>
-            @if (d.overdueTopUps) { <span class="small warn">{{ d.overdueTopUps }} عدّى ميعاد ردهم</span> }
+            <span class="num">{{ d.openTopUps }}</span><span>{{ 'dash.topUps' | t }}</span>
+            @if (d.overdueTopUps) { <span class="small warn">{{ 'dash.overdue' | t: { n: d.overdueTopUps } }}</span> }
           </a>
           <a class="dose-card tile" routerLink="/admin/follow-ups" [class.hot]="d.pendingRefunds > 0">
-            <span class="num">{{ d.pendingRefunds }}</span><span>استرداد مطلوب</span>
-            @if (d.pendingTransfers) { <span class="muted small">+ {{ d.pendingTransfers }} نقل</span> }
+            <span class="num">{{ d.pendingRefunds }}</span><span>{{ 'dash.refunds' | t }}</span>
+            @if (d.pendingTransfers) { <span class="muted small">{{ 'dash.transfers' | t: { n: d.pendingTransfers } }}</span> }
           </a>
           <a class="dose-card tile" routerLink="/admin/requests" [class.hot]="d.newRequests > 0">
-            <span class="num">{{ d.newRequests }}</span><span>طلب جلسة جديد</span>
+            <span class="num">{{ d.newRequests }}</span><span>{{ 'dash.requests' | t }}</span>
           </a>
           <a class="dose-card tile" routerLink="/admin/availability" [class.hot]="d.pendingAvailability > 0">
-            <span class="num">{{ d.pendingAvailability }}</span><span>ميعاد مدرس مستني موافقة</span>
+            <span class="num">{{ d.pendingAvailability }}</span><span>{{ 'dash.availability' | t }}</span>
+          </a>
+          <a class="dose-card tile" routerLink="/admin/messages" [class.hot]="d.pendingMessages > 0">
+            <span class="num">{{ d.pendingMessages }}</span><span>{{ 'dash.messages' | t }}</span>
           </a>
         </div>
 
-        <h2 class="sub">جلسات خلال 48 ساعة</h2>
+        <h2 class="sub">{{ 'dash.upcoming' | t }}</h2>
         @for (s of d.upcomingSessions; track s.id) {
           <div class="dose-card line">
             <div><strong>{{ s.subjectNameAr }} — {{ s.titleAr }}</strong>
               <span class="muted small">{{ dt(s.startUtc) }} · {{ s.teacherNameAr }}</span></div>
             <div class="meta">
               <span class="badge" [class.badge--green]="s.confirmedCount >= s.minParticipants">{{ s.confirmedCount }}/{{ s.capacity }}</span>
-              @if (!s.hasMeetingUrl) { <span class="badge badge--yellow">مفيش لينك Meet</span> }
+              @if (!s.hasMeetingUrl) { <span class="badge badge--yellow">{{ 'dash.noMeet' | t }}</span> }
             </div>
           </div>
-        } @empty { <p class="muted small">مفيش جلسات خلال اليومين الجايين.</p> }
+        } @empty { <p class="muted small">{{ 'dash.noUpcoming' | t }}</p> }
 
-        <h2 class="sub">جروبات قرّب ميعاد حسمها</h2>
+        <h2 class="sub">{{ 'dash.nearDecision' | t }}</h2>
         @for (s of d.groupsNearDecision; track s.id) {
           <div class="dose-card line">
             <div><strong>{{ s.subjectNameAr }} — {{ s.titleAr }}</strong>
-              <span class="muted small">الحسم {{ dt(s.tierDecisionAtUtc) }} · الجلسة {{ dt(s.startUtc) }}</span></div>
+              <span class="muted small">{{ 'dash.decisionLine' | t: { d: dt(s.tierDecisionAtUtc), s: dt(s.startUtc) } }}</span></div>
             <div class="meta">
               <span class="badge" [class.badge--green]="s.confirmedCount >= s.minParticipants" [class.badge--yellow]="s.confirmedCount < s.minParticipants">
-                {{ s.confirmedCount }} من {{ s.minParticipants }} مطلوبين</span>
+                {{ 'dash.ofNeeded' | t: { n: s.confirmedCount, min: s.minParticipants } }}</span>
             </div>
           </div>
-        } @empty { <p class="muted small">مفيش جروبات قرّب حسمها.</p> }
+        } @empty { <p class="muted small">{{ 'dash.noNear' | t }}</p> }
 
-        <h2 class="sub">آخر {{ d.periodDays }} يوم</h2>
+        <h2 class="sub">{{ 'dash.period' | t: { n: d.periodDays } }}</h2>
         <div class="tiles">
-          <div class="dose-card tile"><span class="num">{{ d.periodConfirmedBookings }}</span><span>حجز مؤكد</span></div>
-          <div class="dose-card tile"><span class="num money">{{ money(d.periodCollected, d.currency) }}</span><span>تحصيل مؤكد (شامل الفروق)</span></div>
-          <div class="dose-card tile"><span class="num money">{{ money(d.periodRefunded, d.currency) }}</span><span>استردادات اتحوّلت</span></div>
+          <div class="dose-card tile"><span class="num">{{ d.periodConfirmedBookings }}</span><span>{{ 'dash.confirmed' | t }}</span></div>
+          <div class="dose-card tile"><span class="num money">{{ money(d.periodCollected, d.currency) }}</span><span>{{ 'dash.collected' | t }}</span></div>
+          <div class="dose-card tile"><span class="num money">{{ money(d.periodRefunded, d.currency) }}</span><span>{{ 'dash.refunded' | t }}</span></div>
         </div>
       } @else if (!error()) {
         <div class="skeleton"></div>
@@ -101,8 +105,8 @@ export class AdminDashboard {
   }
 
   protected age(min: number) {
-    if (min < 60) return `${min} دقيقة`;
-    if (min < 1440) return `${Math.round(min / 60)} ساعة`;
-    return `${Math.round(min / 1440)} يوم`;
+    if (min < 60) return tr('duration.minutes', { n: Math.round(min) });
+    if (min < 1440) return tr('dash.hours', { n: Math.round(min / 60) });
+    return tr('dash.days', { n: Math.round(min / 1440) });
   }
 }

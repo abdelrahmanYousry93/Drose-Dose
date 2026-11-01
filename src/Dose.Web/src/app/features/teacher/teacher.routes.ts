@@ -8,9 +8,9 @@ export const teacherRoutes: Routes = [
     canActivate: [teacherGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'sessions' },
-      { path: 'sessions', component: TeacherSessions, title: 'جلساتي — Dose' },
-      { path: 'sessions/:id', component: TeacherSessionPage, title: 'الجلسة — Dose' },
-      { path: 'availability', component: TeacherAvailability, title: 'مواعيدي — Dose' },
+      { path: 'sessions', component: TeacherSessions, title: 'titles.teacherSessions' },
+      { path: 'sessions/:id', component: TeacherSessionPage, title: 'titles.teacherSession' },
+      { path: 'availability', component: TeacherAvailability, title: 'titles.teacherAvailability' },
     ],
   },
 ];
