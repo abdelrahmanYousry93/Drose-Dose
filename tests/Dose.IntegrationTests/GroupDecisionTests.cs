@@ -239,7 +239,7 @@ public sealed class GroupDecisionTests(DatabaseFixture fx)
         var subject = await db.GradeSubjects.Where(x => x.GradeId == prep.Id).Select(x => x.SubjectId).FirstAsync();
         var track = await db.StudyTracks.FirstAsync();
         var service = await db.ServiceTypes.SingleAsync(s => s.Code == "one_lesson");
-        var svc = new SessionRequestService(db, clock);
+        var svc = fx.Requests(db, clock);
 
         var options = await svc.PriceOptionsAsync(service.Id, prep.Id, track.Id, subject, default);
         Assert.NotNull(options);

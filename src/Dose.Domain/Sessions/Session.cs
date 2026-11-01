@@ -38,7 +38,9 @@ public sealed class Session : Entity
     public Lesson? Lesson { get; set; }
     /// <summary>Human-readable scope, e.g. the lesson title or revision coverage.</summary>
     public required string ScopeTitleAr { get; set; }
+    public string? ScopeTitleEn { get; set; }
     public string? ScopeDetailsAr { get; set; }
+    public string? ScopeDetailsEn { get; set; }
 
     public Guid TeacherId { get; set; }
     public Teacher? Teacher { get; set; }

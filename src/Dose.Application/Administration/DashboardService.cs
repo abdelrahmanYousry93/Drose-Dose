@@ -47,7 +47,8 @@ public sealed class DashboardService(IDoseDbContext db, IClock clock)
 
         return new AdminDashboardDto(pendingCount, oldest is null ? null : Math.Round((now - oldest.Value).TotalMinutes),
             openTopUps, overdue, refunds, transfers, requests, availability, upcoming, nearDecision,
-            periodDays, confirmedInPeriod, collectedMain + collectedTopUps, refunded, "EGP");
+            periodDays, confirmedInPeriod, collectedMain + collectedTopUps, refunded, "EGP",
+            await db.Notifications.CountAsync(n => n.Status == Domain.Notifications.NotificationStatus.Pending && n.DueAtUtc <= now.AddHours(1), ct));
     }
 
     private async Task<List<DashboardSessionDto>> Sessions(System.Linq.Expressions.Expression<Func<Session, bool>> filter, CancellationToken ct)

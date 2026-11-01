@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Dose.Application.Sessions;
 
 /// <summary>"No suitable session? Request one" (spec 7). Admins review requests and create sessions manually.</summary>
-public sealed class SessionRequestService(IDoseDbContext db, IClock clock)
+public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequestLanguage lang, Notifications.NotificationService notifications)
 {
     private static readonly string[] Days = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "أي يوم"];
     private static readonly string[] Times = ["صباحاً", "بعد الظهر", "مساءً", "أي وقت"];
@@ -35,7 +35,7 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock)
         var currency = (groupPlan ?? privatePlan)!.Currency;
         return new PriceOptionsDto(currency, privatePlan?.CurrentVersion?.PrivatePrice,
             groupPlan?.CurrentVersion?.Tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants)
-                .Select(t => new GroupOptionDto(t.Id, t.NameAr, t.MinParticipants, t.MaxParticipants, t.PricePerStudent)).ToList() ?? []);
+                .Select(t => new GroupOptionDto(t.Id, lang.Pick(t.NameAr, t.NameEn), t.MinParticipants, t.MaxParticipants, t.PricePerStudent)).ToList() ?? []);
     }
 
     public async Task<CreateSessionRequestResponse> CreateAsync(CreateSessionRequest req, CancellationToken ct)
@@ -73,11 +73,14 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock)
             ScopeText = AdminGuard.Name(req.ScopeText, Fields.Scope, 1000),
             PreferredDays = string.Join("، ", days), PreferredTimes = string.Join("، ", times),
             Mode = mode, PreferredTierId = mode == SessionMode.Group ? req.PreferredTierId : null,
-            Notes = AdminGuard.Optional(req.Notes, 1000), CreatedAtUtc = clock.UtcNow,
+            Notes = AdminGuard.Optional(req.Notes, 1000), CreatedAtUtc = clock.UtcNow, Language = lang.Code,
         };
         db.SessionRequests.Add(entity);
+        await notifications.QueueForRequestAsync(entity, Domain.Notifications.TemplateCodes.RequestReceived, ct);
         await db.SaveChangesAsync(ct);
-        return new CreateSessionRequestResponse(entity.Reference, $"مرحباً Dose، بعت طلب جلسة جديدة رقم {entity.Reference}");
+        return new CreateSessionRequestResponse(entity.Reference, lang.IsEnglish
+            ? $"Hello Dose, I sent a new session request: {entity.Reference}"
+            : $"مرحباً Dose، بعت طلب جلسة جديدة رقم {entity.Reference}");
     }
 
     public async Task<IReadOnlyList<SessionRequestAdminDto>> ListAsync(string? status, CancellationToken ct)

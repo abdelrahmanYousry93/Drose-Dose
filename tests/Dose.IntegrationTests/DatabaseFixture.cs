@@ -3,6 +3,7 @@ using Dose.Application.Administration;
 using Dose.Application.Bookings;
 using Dose.Application.Payments;
 using Dose.Application.Sessions;
+using Dose.Application.Notifications;
 using Dose.Domain.Catalog;
 using Dose.Domain.Pricing;
 using Dose.Domain.Sessions;
@@ -38,6 +39,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         await using var db = NewDb();
         await db.Database.MigrateAsync();
         await DevelopmentSeeder.SeedSampleDataAsync(db, SeedTime);
+        await TemplateDefaults.EnsureAsync(db);
     }
 
     public async ValueTask DisposeAsync()
@@ -53,15 +55,33 @@ public sealed class DatabaseFixture : IAsyncLifetime
 
     public LocalFileStorage Storage => new(_storageRoot);
 
-    public BookingService Bookings(DoseDbContext db, IClock clock) =>
-        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock));
+    public static readonly ITokenProtector Tokens =
+        new Dose.Infrastructure.Security.DataProtectionTokenProtector(new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+
+    public sealed class TestLinks : IAppLinks
+    {
+        public string BookingLink(string token) => $"https://dose.test/b/{token}";
+    }
+
+    public NotificationService Notify(DoseDbContext db, IClock clock) => new(db, clock, Tokens, new TestLinks());
+
+    public BookingService Bookings(DoseDbContext db, IClock clock, IRequestLanguage? lang = null) =>
+        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock), lang ?? FixedLanguage.Arabic, Tokens);
 
     public PaymentReviewService Payments(DoseDbContext db, IClock clock) =>
-        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock));
+        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock), Notify(db, clock));
 
-    public GroupDecisionService Decisions(DoseDbContext db, IClock clock) => new(db, clock, new SettingsService(db, clock));
+    public GroupDecisionService Decisions(DoseDbContext db, IClock clock) => new(db, clock, new SettingsService(db, clock), Notify(db, clock));
 
-    public FollowUpService FollowUps(DoseDbContext db, IClock clock) => new(db, clock, Decisions(db, clock));
+    public FollowUpService FollowUps(DoseDbContext db, IClock clock) => new(db, clock, Decisions(db, clock), Notify(db, clock));
+
+    public AdminSessionService AdminSessions(DoseDbContext db, IClock clock) =>
+        new(db, clock, new SettingsService(db, clock), Notify(db, clock), Tokens);
+
+    public AdminCatalogService Catalog(DoseDbContext db, IClock clock) => new(db, clock, Storage);
+
+    public SessionRequestService Requests(DoseDbContext db, IClock clock, IRequestLanguage? lang = null) =>
+        new(db, clock, lang ?? FixedLanguage.Arabic, Notify(db, clock));
 
     /// <summary>Creates a fresh published session so tests don't share seats.</summary>
     public async Task<Session> CreateSessionAsync(

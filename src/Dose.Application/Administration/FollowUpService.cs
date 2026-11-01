@@ -11,7 +11,7 @@ namespace Dose.Application.Administration;
 /// Admin follow-ups after a group decision or a cancellation: students who owe a top-up, refunds to pay back,
 /// and transfers to arrange. Money moves outside the platform (InstaPay / Vodafone Cash); the platform records it.
 /// </summary>
-public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisionService decisions)
+public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisionService decisions, Notifications.NotificationService notify)
 {
     public async Task<IReadOnlyList<FollowUpDto>> ListAsync(CancellationToken ct)
     {
@@ -99,6 +99,8 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
         booking.Status = BookingStatus.Refunded;
         booking.FollowUpResolvedAtUtc = now;
         db.Audit(clock, actor, nameof(Booking), bookingId, "Refunded", new { amount, note });
+        await notify.QueueForBookingAsync(bookingId, Domain.Notifications.TemplateCodes.RefundCompleted, $"refund:{bookingId}", ct,
+            new Dictionary<string, string> { ["amount"] = amount.ToString(System.Globalization.CultureInfo.InvariantCulture) });
         await FinishAsync(booking.SessionId, tx, ct);
     }
 

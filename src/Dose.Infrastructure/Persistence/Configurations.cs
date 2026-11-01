@@ -51,6 +51,7 @@ internal sealed class ServiceTypeConfig : IEntityTypeConfiguration<ServiceType>
         e.Property(x => x.Code).HasMaxLength(50);
         e.HasIndex(x => x.Code).IsUnique();
         e.Property(x => x.DescriptionAr).HasMaxLength(1000);
+        e.Property(x => x.DescriptionEn).HasMaxLength(1000);
     }
 }
 
@@ -60,6 +61,10 @@ internal sealed class TeacherConfig : IEntityTypeConfiguration<Teacher>
     {
         e.Property(x => x.BioAr).HasMaxLength(2000);
         e.Property(x => x.QualificationsAr).HasMaxLength(2000);
+        e.Property(x => x.BioEn).HasMaxLength(2000);
+        e.Property(x => x.QualificationsEn).HasMaxLength(2000);
+        e.Property(x => x.PhotoFileKey).HasMaxLength(200);
+        e.Property(x => x.PhotoContentType).HasMaxLength(50);
         e.Property(x => x.UserId).HasMaxLength(450);
         e.HasIndex(x => x.UserId).IsUnique().HasFilter("[UserId] IS NOT NULL");
     }
@@ -117,6 +122,7 @@ internal sealed class SessionConfig : IEntityTypeConfiguration<Session>
     {
         e.Property(x => x.RowVersion).IsRowVersion();
         e.Property(x => x.ScopeDetailsAr).HasMaxLength(2000);
+        e.Property(x => x.ScopeDetailsEn).HasMaxLength(2000);
         e.Property(x => x.MeetingUrl).HasMaxLength(500);
         e.Property(x => x.MeetingProvider).HasMaxLength(50);
         e.HasOne(x => x.ServiceType).WithMany().HasForeignKey(x => x.ServiceTypeId).OnDelete(DeleteBehavior.Restrict);
@@ -155,9 +161,11 @@ internal sealed class BookingConfig : IEntityTypeConfiguration<Booking>
     public void Configure(EntityTypeBuilder<Booking> e)
     {
         e.Property(x => x.RowVersion).IsRowVersion();
+        e.Property(x => x.Language).HasMaxLength(5);
         e.Property(x => x.Reference).HasMaxLength(16);
         e.HasIndex(x => x.Reference).IsUnique();
         e.Property(x => x.AccessTokenHash).HasMaxLength(32).IsFixedLength();
+        e.Property(x => x.AccessTokenProtected).HasMaxLength(1000);
         e.HasIndex(x => x.AccessTokenHash).IsUnique();
         e.Property(x => x.Currency).HasMaxLength(3).IsFixedLength();
         e.Property(x => x.ContactPhoneE164).HasMaxLength(16);
@@ -182,6 +190,7 @@ internal sealed class PaymentMethodConfig : IEntityTypeConfiguration<PaymentMeth
         e.Property(x => x.Code).HasMaxLength(50);
         e.HasIndex(x => x.Code).IsUnique();
         e.Property(x => x.InstructionsAr).HasMaxLength(1000);
+        e.Property(x => x.InstructionsEn).HasMaxLength(1000);
     }
 }
 
@@ -246,6 +255,7 @@ internal sealed class SessionRequestConfig : IEntityTypeConfiguration<SessionReq
         e.Property(x => x.ScopeText).HasMaxLength(1000);
         e.Property(x => x.Notes).HasMaxLength(1000);
         e.Property(x => x.AdminNotes).HasMaxLength(1000);
+        e.Property(x => x.Language).HasMaxLength(5);
         e.Property(x => x.PreferredDays).HasMaxLength(200);
         e.Property(x => x.PreferredTimes).HasMaxLength(200);
         e.HasOne<Grade>().WithMany().HasForeignKey(x => x.GradeId).OnDelete(DeleteBehavior.Restrict);
@@ -277,5 +287,37 @@ internal sealed class AttendanceConfig : IEntityTypeConfiguration<Attendance>
     {
         e.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
         e.HasIndex(x => x.BookingId).IsUnique();
+    }
+}
+
+internal sealed class MessageTemplateConfig : IEntityTypeConfiguration<Dose.Domain.Notifications.MessageTemplate>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Notifications.MessageTemplate> e)
+    {
+        e.HasKey(x => x.Code);
+        e.Property(x => x.Code).HasMaxLength(50);
+        e.Property(x => x.TitleAr).HasMaxLength(100);
+        e.Property(x => x.TitleEn).HasMaxLength(100);
+        e.Property(x => x.BodyAr).HasMaxLength(2000);
+        e.Property(x => x.BodyEn).HasMaxLength(2000);
+    }
+}
+
+internal sealed class NotificationConfig : IEntityTypeConfiguration<Dose.Domain.Notifications.Notification>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Notifications.Notification> e)
+    {
+        e.Property(x => x.TemplateCode).HasMaxLength(50);
+        e.Property(x => x.RecipientName).HasMaxLength(100);
+        e.Property(x => x.RecipientPhoneE164).HasMaxLength(16);
+        e.Property(x => x.GuardianPhoneE164).HasMaxLength(16);
+        e.Property(x => x.Language).HasMaxLength(5);
+        e.Property(x => x.Body).HasMaxLength(3000);
+        e.Property(x => x.DedupKey).HasMaxLength(150);
+        e.HasIndex(x => x.DedupKey).IsUnique();
+        e.HasIndex(x => new { x.Status, x.DueAtUtc });
+        e.HasIndex(x => x.BookingId);
+        e.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
+        e.HasOne<SessionRequest>().WithMany().HasForeignKey(x => x.SessionRequestId).OnDelete(DeleteBehavior.Restrict);
     }
 }

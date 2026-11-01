@@ -36,6 +36,8 @@ public interface IDoseDbContext
     DbSet<SessionRequest> SessionRequests { get; }
     DbSet<TeacherAvailability> TeacherAvailabilities { get; }
     DbSet<Attendance> Attendances { get; }
+    DbSet<Domain.Notifications.MessageTemplate> MessageTemplates { get; }
+    DbSet<Domain.Notifications.Notification> Notifications { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
@@ -80,4 +82,17 @@ public sealed class FixedLanguage(string code) : IRequestLanguage
     public static readonly FixedLanguage Arabic = new("ar");
     public static readonly FixedLanguage English = new("en");
     public string Code { get; } = code;
+}
+
+/// <summary>Encrypts booking access tokens so links can be re-sent (ASP.NET Core Data Protection in production).</summary>
+public interface ITokenProtector
+{
+    string Protect(string token);
+    string? Unprotect(string protectedToken);
+}
+
+/// <summary>Absolute links into the web app (configured base URL).</summary>
+public interface IAppLinks
+{
+    string BookingLink(string token);
 }

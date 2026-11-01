@@ -6,6 +6,8 @@ namespace Dose.Domain.Catalog;
 public sealed class EducationalStage : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public bool RequiresGuardianContact { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
@@ -15,6 +17,8 @@ public sealed class EducationalStage : Entity
 public sealed class StudyTrack : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }
@@ -23,12 +27,16 @@ public sealed class StudyTrack : Entity
 public sealed class PricingBand : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public int SortOrder { get; set; }
 }
 
 public sealed class Grade : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public Guid StageId { get; set; }
     public EducationalStage? Stage { get; set; }
     public Guid PricingBandId { get; set; }
@@ -42,6 +50,8 @@ public sealed class Grade : Entity
 public sealed class Subject : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }
@@ -57,6 +67,8 @@ public sealed class GradeSubject : Entity
 public sealed class Chapter : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public Guid SubjectId { get; set; }
     public Guid GradeId { get; set; }
     public Guid? StudyTrackId { get; set; }
@@ -67,6 +79,8 @@ public sealed class Chapter : Entity
 public sealed class Lesson : Entity
 {
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public Guid ChapterId { get; set; }
     public Chapter? Chapter { get; set; }
     public int SortOrder { get; set; }
@@ -78,7 +92,10 @@ public sealed class ServiceType : Entity
 {
     public required string Code { get; set; }
     public required string NameAr { get; set; }
+    /// <summary>Optional English name; Arabic is used when empty.</summary>
+    public string? NameEn { get; set; }
     public string? DescriptionAr { get; set; }
+    public string? DescriptionEn { get; set; }
     public bool RequiresPackage { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;

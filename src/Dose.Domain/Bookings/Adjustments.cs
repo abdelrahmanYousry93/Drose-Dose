@@ -79,6 +79,7 @@ public sealed class SessionRequest : Entity
     public Sessions.SessionMode Mode { get; init; }
     public Guid? PreferredTierId { get; init; }
     public string? Notes { get; init; }
+    public string Language { get; init; } = "ar";
     public SessionRequestStatus Status { get; set; } = SessionRequestStatus.New;
     public string? AdminNotes { get; set; }
     public Guid? FulfilledBySessionId { get; set; }

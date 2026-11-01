@@ -12,12 +12,12 @@ namespace Dose.Application.Administration;
 /// Admin management of catalog data, teachers and payment methods. Records are never hard-deleted:
 /// they are deactivated so history (sessions, bookings) stays intact. Every change is audited.
 /// </summary>
-public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
+public sealed class AdminCatalogService(IDoseDbContext db, IClock clock, IFileStorage files)
 {
     // ---------- Stages ----------
     public async Task<IReadOnlyList<StageAdminDto>> StagesAsync(CancellationToken ct) =>
         await db.EducationalStages.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new StageAdminDto(x.Id, x.NameAr, x.RequiresGuardianContact, x.SortOrder, x.IsActive)).ToListAsync(ct);
+            .Select(x => new StageAdminDto(x.Id, x.NameAr, x.RequiresGuardianContact, x.SortOrder, x.IsActive, x.NameEn)).ToListAsync(ct);
 
     public async Task<Guid> SaveStageAsync(StageAdminDto dto, string actor, CancellationToken ct)
     {
@@ -25,6 +25,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.EducationalStages.FindAsync([id], ct), Fields.Stage)
             : new EducationalStage { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.RequiresGuardianContact = dto.RequiresGuardianContact;
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
@@ -37,7 +38,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     // ---------- Study tracks ----------
     public async Task<IReadOnlyList<LookupAdminDto>> StudyTracksAsync(CancellationToken ct) =>
         await db.StudyTracks.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new LookupAdminDto(x.Id, x.NameAr, x.SortOrder, x.IsActive)).ToListAsync(ct);
+            .Select(x => new LookupAdminDto(x.Id, x.NameAr, x.SortOrder, x.IsActive, x.NameEn)).ToListAsync(ct);
 
     public async Task<Guid> SaveStudyTrackAsync(LookupAdminDto dto, string actor, CancellationToken ct)
     {
@@ -45,6 +46,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.StudyTracks.FindAsync([id], ct), Fields.StudyTrack)
             : new StudyTrack { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
         if (dto.Id is null) db.StudyTracks.Add(e);
@@ -56,7 +58,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     // ---------- Pricing bands ----------
     public async Task<IReadOnlyList<PricingBandAdminDto>> PricingBandsAsync(CancellationToken ct) =>
         await db.PricingBands.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new PricingBandAdminDto(x.Id, x.NameAr, x.SortOrder)).ToListAsync(ct);
+            .Select(x => new PricingBandAdminDto(x.Id, x.NameAr, x.SortOrder, x.NameEn)).ToListAsync(ct);
 
     public async Task<Guid> SavePricingBandAsync(PricingBandAdminDto dto, string actor, CancellationToken ct)
     {
@@ -64,6 +66,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.PricingBands.FindAsync([id], ct), Fields.PricingBand)
             : new PricingBand { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.SortOrder = dto.SortOrder;
         if (dto.Id is null) db.PricingBands.Add(e);
         db.Audit(clock, actor, nameof(PricingBand), e.Id, dto.Id is null ? "Create" : "Update", dto);
@@ -74,7 +77,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     // ---------- Subjects ----------
     public async Task<IReadOnlyList<LookupAdminDto>> SubjectsAsync(CancellationToken ct) =>
         await db.Subjects.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new LookupAdminDto(x.Id, x.NameAr, x.SortOrder, x.IsActive)).ToListAsync(ct);
+            .Select(x => new LookupAdminDto(x.Id, x.NameAr, x.SortOrder, x.IsActive, x.NameEn)).ToListAsync(ct);
 
     public async Task<Guid> SaveSubjectAsync(LookupAdminDto dto, string actor, CancellationToken ct)
     {
@@ -82,6 +85,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.Subjects.FindAsync([id], ct), Fields.Subject)
             : new Subject { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
         if (dto.Id is null) db.Subjects.Add(e);
@@ -96,7 +100,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
         var grades = await db.Grades.AsNoTracking().OrderBy(x => x.SortOrder).ToListAsync(ct);
         var links = await db.GradeSubjects.AsNoTracking().ToListAsync(ct);
         return grades.Select(g => new GradeAdminDto(g.Id, g.NameAr, g.StageId, g.PricingBandId, g.CurriculumSystem, g.SortOrder,
-            g.IsActive, links.Where(l => l.GradeId == g.Id).Select(l => l.SubjectId).ToList())).ToList();
+            g.IsActive, links.Where(l => l.GradeId == g.Id).Select(l => l.SubjectId).ToList(), g.NameEn)).ToList();
     }
 
     public async Task<Guid> SaveGradeAsync(GradeAdminDto dto, string actor, CancellationToken ct)
@@ -113,6 +117,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.Grades.FindAsync([id], ct), Fields.Grade)
             : new Grade { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.StageId = dto.StageId;
         e.PricingBandId = dto.PricingBandId;
         e.CurriculumSystem = AdminGuard.Optional(dto.CurriculumSystem, 100);
@@ -137,7 +142,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
         if (gradeId is { } g) q = q.Where(c => c.GradeId == g);
         if (subjectId is { } s) q = q.Where(c => c.SubjectId == s);
         return await q.OrderBy(c => c.SortOrder)
-            .Select(c => new ChapterAdminDto(c.Id, c.NameAr, c.SubjectId, c.GradeId, c.StudyTrackId, c.SortOrder, c.IsActive)).ToListAsync(ct);
+            .Select(c => new ChapterAdminDto(c.Id, c.NameAr, c.SubjectId, c.GradeId, c.StudyTrackId, c.SortOrder, c.IsActive, c.NameEn)).ToListAsync(ct);
     }
 
     public async Task<Guid> SaveChapterAsync(ChapterAdminDto dto, string actor, CancellationToken ct)
@@ -148,6 +153,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.Chapters.FindAsync([id], ct), Fields.Chapter)
             : new Chapter { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr, Fields.ChapterName, 200);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.GradeId = dto.GradeId;
         e.SubjectId = dto.SubjectId;
         e.StudyTrackId = dto.StudyTrackId;
@@ -161,7 +167,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
 
     public async Task<IReadOnlyList<LessonAdminDto>> LessonsAsync(Guid chapterId, CancellationToken ct) =>
         await db.Lessons.AsNoTracking().Where(l => l.ChapterId == chapterId).OrderBy(l => l.SortOrder)
-            .Select(l => new LessonAdminDto(l.Id, l.NameAr, l.ChapterId, l.SortOrder, l.IsActive)).ToListAsync(ct);
+            .Select(l => new LessonAdminDto(l.Id, l.NameAr, l.ChapterId, l.SortOrder, l.IsActive, l.NameEn)).ToListAsync(ct);
 
     public async Task<Guid> SaveLessonAsync(LessonAdminDto dto, string actor, CancellationToken ct)
     {
@@ -171,6 +177,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.Lessons.FindAsync([id], ct), Fields.Lesson)
             : new Lesson { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr, Fields.LessonName, 200);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.ChapterId = dto.ChapterId;
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
@@ -183,13 +190,15 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     // ---------- Service types (codes are fixed; names/descriptions/activation are editable) ----------
     public async Task<IReadOnlyList<ServiceTypeAdminDto>> ServiceTypesAsync(CancellationToken ct) =>
         await db.ServiceTypes.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new ServiceTypeAdminDto(x.Id, x.Code, x.NameAr, x.DescriptionAr, x.SortOrder, x.IsActive)).ToListAsync(ct);
+            .Select(x => new ServiceTypeAdminDto(x.Id, x.Code, x.NameAr, x.DescriptionAr, x.SortOrder, x.IsActive, x.NameEn, x.DescriptionEn)).ToListAsync(ct);
 
     public async Task SaveServiceTypeAsync(ServiceTypeAdminDto dto, string actor, CancellationToken ct)
     {
         var e = AdminGuard.Found(await db.ServiceTypes.FindAsync([dto.Id], ct), Fields.ServiceType);
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.DescriptionAr = AdminGuard.Optional(dto.DescriptionAr, 1000);
+        e.DescriptionEn = AdminGuard.Optional(dto.DescriptionEn, 1000);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
         db.Audit(clock, actor, nameof(ServiceType), e.Id, "Update", dto);
@@ -198,9 +207,10 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
 
     // ---------- Teachers ----------
     public async Task<IReadOnlyList<TeacherAdminDto>> TeachersAsync(CancellationToken ct) =>
-        await db.Teachers.AsNoTracking().OrderBy(x => x.DisplayNameAr)
-            .Select(x => new TeacherAdminDto(x.Id, x.DisplayNameAr, x.PhotoUrl, x.BioAr, x.QualificationsAr, x.YearsOfExperience, x.IsPublished))
-            .ToListAsync(ct);
+        (await db.Teachers.AsNoTracking().OrderBy(x => x.DisplayNameAr).ToListAsync(ct))
+            .Select(x => new TeacherAdminDto(x.Id, x.DisplayNameAr, x.PhotoUrl, x.BioAr, x.QualificationsAr, x.YearsOfExperience, x.IsPublished,
+                x.DisplayNameEn, x.BioEn, x.QualificationsEn, x.PhotoFileKey != null, Sessions.SessionQueries.PhotoUrl(x)))
+            .ToList();
 
     public async Task<Guid> SaveTeacherAsync(TeacherAdminDto dto, string actor, CancellationToken ct)
     {
@@ -209,9 +219,12 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             ? AdminGuard.Found(await db.Teachers.FindAsync([id], ct), Fields.Teacher)
             : new Teacher { DisplayNameAr = "" };
         e.DisplayNameAr = AdminGuard.Name(dto.DisplayNameAr, Fields.TeacherName);
+        e.DisplayNameEn = AdminGuard.Optional(dto.DisplayNameEn, 100);
         e.PhotoUrl = AdminGuard.Url(dto.PhotoUrl);
         e.BioAr = AdminGuard.Optional(dto.BioAr, 2000);
         e.QualificationsAr = AdminGuard.Optional(dto.QualificationsAr, 2000);
+        e.BioEn = AdminGuard.Optional(dto.BioEn, 2000);
+        e.QualificationsEn = AdminGuard.Optional(dto.QualificationsEn, 2000);
         e.YearsOfExperience = dto.YearsOfExperience;
         e.IsPublished = dto.IsPublished;
         if (dto.Id is null) db.Teachers.Add(e);
@@ -223,7 +236,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     // ---------- Payment methods ----------
     public async Task<IReadOnlyList<PaymentMethodAdminDto>> PaymentMethodsAsync(CancellationToken ct) =>
         await db.PaymentMethods.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new PaymentMethodAdminDto(x.Id, x.Code, x.NameAr, x.ReceivingAccount, x.InstructionsAr, x.SortOrder, x.IsActive))
+            .Select(x => new PaymentMethodAdminDto(x.Id, x.Code, x.NameAr, x.ReceivingAccount, x.InstructionsAr, x.SortOrder, x.IsActive, x.NameEn, x.InstructionsEn))
             .ToListAsync(ct);
 
     public async Task<Guid> SavePaymentMethodAsync(PaymentMethodAdminDto dto, string actor, CancellationToken ct)
@@ -239,13 +252,56 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
             : new PaymentMethod { Code = code, NameAr = "", ReceivingAccount = "" };
         e.Code = code;
         e.NameAr = AdminGuard.Name(dto.NameAr);
+        e.NameEn = AdminGuard.Optional(dto.NameEn, 200);
         e.ReceivingAccount = AdminGuard.Name(dto.ReceivingAccount, Fields.ReceivingAccount);
         e.InstructionsAr = AdminGuard.Optional(dto.InstructionsAr, 1000);
+        e.InstructionsEn = AdminGuard.Optional(dto.InstructionsEn, 1000);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
         if (dto.Id is null) db.PaymentMethods.Add(e);
         db.Audit(clock, actor, nameof(PaymentMethod), e.Id, dto.Id is null ? "Create" : "Update", dto);
         await db.SaveChangesAsync(ct);
         return e.Id;
+    }
+
+    // ---------- Teacher photo ----------
+
+    public const int MaxPhotoKb = 2048;
+
+    /// <summary>Stores an uploaded JPG/PNG/WebP (checked by content) as the teacher's photo.</summary>
+    public async Task UploadTeacherPhotoAsync(Guid teacherId, Stream content, long length, string actor, CancellationToken ct)
+    {
+        var teacher = AdminGuard.Found(await db.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId, ct), Fields.Teacher);
+        if (length <= 0 || length > MaxPhotoKb * 1024L)
+            throw new DomainException(AdminErrors.Invalid, "الصورة لازم تكون أصغر من 2 ميجا.", "The photo must be smaller than 2 MB.");
+        using var buffer = new MemoryStream();
+        await content.CopyToAsync(buffer, ct);
+        var kind = Bookings.ImageSniffer.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)))
+                   ?? throw new DomainException(AdminErrors.Invalid, "ارفع صورة بصيغة JPG أو PNG أو WebP.", "Only JPG, PNG or WebP images are accepted.");
+        buffer.Position = 0;
+        teacher.PhotoFileKey = await files.SaveAsync(buffer, kind.Extension, ct);
+        teacher.PhotoContentType = kind.ContentType;
+        teacher.PhotoVersion++;
+        db.Audit(clock, actor, nameof(Teacher), teacherId, "UploadPhoto");
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task RemoveTeacherPhotoAsync(Guid teacherId, string actor, CancellationToken ct)
+    {
+        var teacher = AdminGuard.Found(await db.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId, ct), Fields.Teacher);
+        teacher.PhotoFileKey = null;
+        teacher.PhotoContentType = null;
+        teacher.PhotoVersion++;
+        db.Audit(clock, actor, nameof(Teacher), teacherId, "RemovePhoto");
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Public: photos of published teachers only.</summary>
+    public async Task<(Stream Content, string ContentType)?> OpenTeacherPhotoAsync(Guid teacherId, CancellationToken ct)
+    {
+        var t = await db.Teachers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == teacherId && x.IsPublished && x.PhotoFileKey != null, ct);
+        if (t is null) return null;
+        var stream = await files.OpenAsync(t.PhotoFileKey!, ct);
+        return stream is null ? null : (stream, t.PhotoContentType ?? "image/jpeg");
     }
 }

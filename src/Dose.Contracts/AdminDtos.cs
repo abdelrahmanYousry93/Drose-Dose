@@ -1,24 +1,24 @@
 namespace Dose.Contracts.Admin;
 
 // ---------- Catalog ----------
-public sealed record StageAdminDto(Guid? Id, string NameAr, bool RequiresGuardianContact, int SortOrder, bool IsActive);
-public sealed record LookupAdminDto(Guid? Id, string NameAr, int SortOrder, bool IsActive);
-public sealed record PricingBandAdminDto(Guid? Id, string NameAr, int SortOrder);
+public sealed record StageAdminDto(Guid? Id, string NameAr, bool RequiresGuardianContact, int SortOrder, bool IsActive, string? NameEn = null);
+public sealed record LookupAdminDto(Guid? Id, string NameAr, int SortOrder, bool IsActive, string? NameEn = null);
+public sealed record PricingBandAdminDto(Guid? Id, string NameAr, int SortOrder, string? NameEn = null);
 public sealed record GradeAdminDto(
     Guid? Id, string NameAr, Guid StageId, Guid PricingBandId, string? CurriculumSystem, int SortOrder, bool IsActive,
-    IReadOnlyList<Guid> SubjectIds);
-public sealed record ChapterAdminDto(Guid? Id, string NameAr, Guid SubjectId, Guid GradeId, Guid? StudyTrackId, int SortOrder, bool IsActive);
-public sealed record LessonAdminDto(Guid? Id, string NameAr, Guid ChapterId, int SortOrder, bool IsActive);
-public sealed record ServiceTypeAdminDto(Guid Id, string Code, string NameAr, string? DescriptionAr, int SortOrder, bool IsActive);
+    IReadOnlyList<Guid> SubjectIds, string? NameEn = null);
+public sealed record ChapterAdminDto(Guid? Id, string NameAr, Guid SubjectId, Guid GradeId, Guid? StudyTrackId, int SortOrder, bool IsActive, string? NameEn = null);
+public sealed record LessonAdminDto(Guid? Id, string NameAr, Guid ChapterId, int SortOrder, bool IsActive, string? NameEn = null);
+public sealed record ServiceTypeAdminDto(Guid Id, string Code, string NameAr, string? DescriptionAr, int SortOrder, bool IsActive, string? NameEn = null, string? DescriptionEn = null);
 
 // ---------- Teachers & payment methods ----------
 public sealed record TeacherAdminDto(
-    Guid? Id, string DisplayNameAr, string? PhotoUrl, string? BioAr, string? QualificationsAr, int? YearsOfExperience, bool IsPublished);
+    Guid? Id, string DisplayNameAr, string? PhotoUrl, string? BioAr, string? QualificationsAr, int? YearsOfExperience, bool IsPublished, string? DisplayNameEn = null, string? BioEn = null, string? QualificationsEn = null, bool HasUploadedPhoto = false, string? PhotoPreviewUrl = null);
 public sealed record PaymentMethodAdminDto(
-    Guid? Id, string Code, string NameAr, string ReceivingAccount, string? InstructionsAr, int SortOrder, bool IsActive);
+    Guid? Id, string Code, string NameAr, string ReceivingAccount, string? InstructionsAr, int SortOrder, bool IsActive, string? NameEn = null, string? InstructionsEn = null);
 
 // ---------- Pricing ----------
-public sealed record TierAdminDto(Guid? Id, string NameAr, int MinParticipants, int MaxParticipants, decimal PricePerStudent, int SortOrder);
+public sealed record TierAdminDto(Guid? Id, string NameAr, int MinParticipants, int MaxParticipants, decimal PricePerStudent, int SortOrder, string? NameEn = null);
 public sealed record PricingVersionAdminDto(Guid Id, int VersionNo, decimal? PrivatePrice, bool IsLocked, IReadOnlyList<TierAdminDto> Tiers);
 public sealed record PricingPlanAdminDto(
     Guid? Id, string Name, Guid ServiceTypeId, string Mode, Guid? PricingBandId, Guid? StudyTrackId, Guid? SubjectId,
@@ -34,7 +34,7 @@ public sealed record PricingPreviewDto(
 public sealed record SessionSaveRequest(
     Guid ServiceTypeId, Guid GradeId, Guid StudyTrackId, Guid SubjectId, Guid? ChapterId, Guid? LessonId,
     string ScopeTitleAr, string? ScopeDetailsAr, Guid TeacherId, DateTime StartUtc, int DurationMinutes,
-    string Mode, Guid? TargetTierId, string? MeetingUrl);
+    string Mode, Guid? TargetTierId, string? MeetingUrl, string? ScopeTitleEn = null, string? ScopeDetailsEn = null);
 
 public sealed record SessionAdminDto(
     Guid Id, string Status, string ScopeTitleAr, string? ScopeDetailsAr,
@@ -43,7 +43,7 @@ public sealed record SessionAdminDto(
     DateTime StartUtc, DateTime EndUtc, int DurationMinutes, string Mode, int Capacity, int MinParticipants,
     Guid? TargetTierId, string? TargetTierNameAr, decimal PricePerStudent, string Currency, string PlanName,
     DateTime BookingDeadlineUtc, DateTime? TierDecisionAtUtc, string? MeetingUrl,
-    int ConfirmedCount, int OccupiedCount, int ActiveBookingCount);
+    int ConfirmedCount, int OccupiedCount, int ActiveBookingCount, string? ScopeTitleEn = null, string? ScopeDetailsEn = null);
 
 public sealed record SessionBookingAdminDto(
     Guid Id, string Reference, string Status, string? StudentName, string? ContactPhone, string? GuardianName,
@@ -74,7 +74,7 @@ public sealed record AdminDashboardDto(
     int PendingProofs, double? OldestPendingProofMinutes, int OpenTopUps, int OverdueTopUps, int PendingRefunds,
     int PendingTransfers, int NewRequests, int PendingAvailability,
     IReadOnlyList<DashboardSessionDto> UpcomingSessions, IReadOnlyList<DashboardSessionDto> GroupsNearDecision,
-    int PeriodDays, int PeriodConfirmedBookings, decimal PeriodCollected, decimal PeriodRefunded, string Currency);
+    int PeriodDays, int PeriodConfirmedBookings, decimal PeriodCollected, decimal PeriodRefunded, string Currency, int PendingMessages = 0);
 
 // ---------- Users ----------
 public sealed record UserAdminDto(string Id, string Email, IReadOnlyList<string> Roles, bool IsDisabled, Guid? TeacherId, string? TeacherNameAr);

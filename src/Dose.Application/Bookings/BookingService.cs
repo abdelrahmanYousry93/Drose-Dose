@@ -13,7 +13,9 @@ namespace Dose.Application.Bookings;
 /// Student booking workflow (spec 8): hold → details → payment proof. Every seat-affecting step
 /// runs in a transaction holding an update lock on the session row, so capacity can't be oversold.
 /// </summary>
-public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, GroupDecisionService decisions)
+public sealed class BookingService(
+    IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, GroupDecisionService decisions,
+    IRequestLanguage lang, ITokenProtector tokens)
 {
     public async Task<CreateHoldResponse> CreateHoldAsync(Guid sessionId, CancellationToken ct)
     {
@@ -46,6 +48,8 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
             QuotedWorstCasePrice = terms?.WorstCasePrice,
             Currency = session.PricingPlanVersion!.Plan!.Currency,
             AccessTokenHash = hash,
+            AccessTokenProtected = tokens.Protect(token),
+            Language = lang.Code,
         };
         db.Bookings.Add(booking);
         await db.SaveChangesAsync(ct);
@@ -206,15 +210,16 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
 
         return new BookingViewDto(
             booking.Reference, status.ToString(),
-            SessionQueries.ToSummary(session, counts.GetValueOrDefault(session.Id)),
-            SessionQueries.ToTeacher(session), SessionPricing.GroupTerms(session),
+            SessionQueries.ToSummary(session, counts.GetValueOrDefault(session.Id), lang),
+            SessionQueries.ToTeacher(session, lang), SessionPricing.GroupTerms(session, lang),
             session.Grade!.Stage!.RequiresGuardianContact,
             booking.QuotedPrice, booking.Currency, booking.HoldExpiresAtUtc, booking.PaymentDueAtUtc,
             booking.Student?.Name, latestProof?.Status.ToString(), latestProof?.RejectionReason,
             canJoin, status == BookingStatus.Confirmed ? joinOpens : null,
-            $"مرحباً Dose، رقم حجزي {booking.Reference}",
+            lang.IsEnglish ? $"Hello Dose, my booking reference is {booking.Reference}" : $"مرحباً Dose، رقم حجزي {booking.Reference}",
             topUp is null ? null : new TopUpViewDto(topUp.Amount, topUp.Currency, topUp.RespondByUtc, topUp.Reason,
-                topUp.StudentChoice?.ToString(), topUpProof?.Status.ToString(), topUpProof?.RejectionReason),
+                topUp.StudentChoice?.ToString(), topUpProof?.Status.ToString(), topUpProof?.RejectionReason,
+                session.DecisionConfirmedCount ?? 0, session.MinParticipants),
             session.StartUtc.AddHours(-cfg.FullRefundCancellationHours),
             CanCancel(status, session, now));
     }

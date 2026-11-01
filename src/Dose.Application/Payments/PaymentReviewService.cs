@@ -11,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Dose.Application.Payments;
 
 /// <summary>Admin review of payment proofs. A booking is confirmed only here (spec 8.1).</summary>
-public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, Sessions.GroupDecisionService decisions)
+public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, Sessions.GroupDecisionService decisions,
+    Notifications.NotificationService notify)
 {
     public async Task<IReadOnlyList<PaymentProofAdminDto>> ListAsync(PaymentProofStatus? status, CancellationToken ct)
     {
@@ -99,6 +100,7 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
         await db.PricingPlanVersions.Where(v => v.Id == version.Id)
             .ExecuteUpdateAsync(u => u.SetProperty(v => v.IsLocked, true), ct);
 
+        await notify.QueueForBookingAsync(booking.Id, Domain.Notifications.TemplateCodes.BookingConfirmed, $"confirmed:{booking.Id}", ct);
         db.AuditLogs.Add(new AuditLog
         {
             Actor = actor, Entity = nameof(Booking), EntityId = booking.Id.ToString(), Action = "PaymentApproved",
@@ -165,6 +167,8 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
             proof.Booking!.Status = BookingStatus.PendingPayment;
             proof.Booking.PaymentDueAtUtc = now.AddMinutes(cfg.ProofResubmitMinutes);
         }
+        await notify.QueueForBookingAsync(proof.BookingId, Domain.Notifications.TemplateCodes.PaymentRejected, $"rejected:{proofId}", ct,
+            new Dictionary<string, string> { ["reason"] = reason });
         db.AuditLogs.Add(new AuditLog
         {
             Actor = actor, Entity = nameof(Booking), EntityId = proof.BookingId.ToString(), Action = "PaymentRejected",

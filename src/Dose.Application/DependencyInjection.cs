@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<SettingsService>();
         services.AddScoped<CatalogQueries>();
         services.AddScoped<SessionQueries>();
+        services.AddScoped<Notifications.NotificationService>();
         services.AddScoped<GroupDecisionService>();
         services.AddScoped<BookingService>();
         services.AddScoped<PaymentReviewService>();

@@ -1,17 +1,17 @@
 namespace Dose.Contracts;
 
 // ---------- Catalog ----------
-public sealed record GradeDto(Guid Id, string NameAr, Guid StageId, string StageNameAr, bool RequiresGuardianContact);
-public sealed record StageDto(Guid Id, string NameAr, bool RequiresGuardianContact, IReadOnlyList<GradeDto> Grades);
-public sealed record LookupDto(Guid Id, string NameAr);
-public sealed record ServiceTypeDto(Guid Id, string Code, string NameAr, string? DescriptionAr);
+public sealed record GradeDto(Guid Id, string Name, Guid StageId, string StageName, bool RequiresGuardianContact);
+public sealed record StageDto(Guid Id, string Name, bool RequiresGuardianContact, IReadOnlyList<GradeDto> Grades);
+public sealed record LookupDto(Guid Id, string Name);
+public sealed record ServiceTypeDto(Guid Id, string Code, string Name, string? Description);
 
 // ---------- Sessions ----------
 public sealed record TeacherPublicDto(
-    Guid Id, string DisplayNameAr, string? PhotoUrl, string? BioAr, string? QualificationsAr, int? YearsOfExperience);
+    Guid Id, string DisplayName, string? PhotoUrl, string? Bio, string? Qualifications, int? YearsOfExperience);
 
 public sealed record GroupTermsDto(
-    string TargetTierNameAr,
+    string TargetTierName,
     int TargetMin,
     int TargetMax,
     decimal WorstCasePrice,
@@ -20,16 +20,16 @@ public sealed record GroupTermsDto(
 
 public sealed record SessionSummaryDto(
     Guid Id,
-    string ScopeTitleAr,
-    string SubjectNameAr,
-    string GradeNameAr,
-    string StudyTrackNameAr,
-    string ServiceTypeNameAr,
+    string ScopeTitle,
+    string SubjectName,
+    string GradeName,
+    string StudyTrackName,
+    string ServiceTypeName,
     string Mode,
     DateTime StartUtc,
     DateTime EndUtc,
     int DurationMinutes,
-    string TeacherNameAr,
+    string TeacherName,
     string? TeacherPhotoUrl,
     decimal PricePerStudent,
     string Currency,
@@ -40,7 +40,7 @@ public sealed record SessionSummaryDto(
 
 public sealed record SessionDetailsDto(
     SessionSummaryDto Summary,
-    string? ScopeDetailsAr,
+    string? ScopeDetails,
     int MinParticipants,
     TeacherPublicDto Teacher,
     GroupTermsDto? GroupTerms,
@@ -68,7 +68,7 @@ public sealed record SubmitDetailsRequest(
     bool AcceptTopUpTerms,
     decimal ExpectedPrice);
 
-public sealed record PaymentMethodDto(Guid Id, string Code, string NameAr, string ReceivingAccount, string? InstructionsAr);
+public sealed record PaymentMethodDto(Guid Id, string Code, string Name, string ReceivingAccount, string? Instructions);
 
 public sealed record BookingViewDto(
     string Reference,
@@ -93,7 +93,7 @@ public sealed record BookingViewDto(
 
 public sealed record TopUpViewDto(
     decimal Amount, string Currency, DateTime? RespondByUtc, string? Reason, string? Choice,
-    string? ProofStatus, string? ProofRejectionReason);
+    string? ProofStatus, string? ProofRejectionReason, int DecisionCount, int MinParticipants);
 
 public sealed record TopUpChoiceRequest(string Choice);
 public sealed record CancelBookingRequest(bool AcceptNoRefund);
@@ -128,7 +128,7 @@ public sealed record UpdateSettingsRequest(IReadOnlyList<SettingDto> Settings);
 public sealed record PublicSettingsDto(string WhatsAppBusinessNumber, string BusinessTimeZone, int FullRefundCancellationHours);
 
 // ---------- Session requests (public) ----------
-public sealed record GroupOptionDto(Guid Id, string NameAr, int MinParticipants, int MaxParticipants, decimal PricePerStudent);
+public sealed record GroupOptionDto(Guid Id, string Name, int MinParticipants, int MaxParticipants, decimal PricePerStudent);
 public sealed record PriceOptionsDto(string Currency, decimal? PrivatePrice, IReadOnlyList<GroupOptionDto> GroupOptions);
 public sealed record CreateSessionRequest(
     string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone,
@@ -137,9 +137,9 @@ public sealed record CreateSessionRequest(
 public sealed record CreateSessionRequestResponse(string Reference, string WhatsAppMessage);
 
 // ---------- Teacher area ----------
-public sealed record TeacherMeDto(Guid TeacherId, string DisplayNameAr, string Email);
+public sealed record TeacherMeDto(Guid TeacherId, string DisplayName, string Email);
 public sealed record TeacherSessionDto(
-    Guid Id, string TitleAr, string? DetailsAr, string SubjectNameAr, string GradeNameAr, string StudyTrackNameAr,
+    Guid Id, string Title, string? Details, string SubjectName, string GradeName, string StudyTrackName,
     DateTime StartUtc, DateTime EndUtc, string Mode, string Status, int ConfirmedCount, int Capacity, string? MeetingUrl,
     bool CanMarkAttendance, int AttendanceMarked);
 public sealed record TeacherStudentDto(Guid BookingId, string FirstName, string? Attendance);

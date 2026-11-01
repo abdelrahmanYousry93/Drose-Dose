@@ -61,7 +61,7 @@ public sealed class AdminTests(DatabaseFixture fx)
         Assert.Equal(140, v1b.CurrentVersion.Tiers[0].PricePerStudent);
 
         await using var db2 = fx.NewDb();
-        var sessions = new AdminSessionService(db2, clock, new SettingsService(db2, clock));
+        var sessions = fx.AdminSessions(db2, clock);
         var preview = await sessions.PreviewPricingAsync(new PricingPreviewRequest(c.ServiceTypeId, c.GradeId, c.TrackId, c.SubjectId, "Group"), default);
         Assert.Equal(planId, preview.PlanId);
         var smallTier = preview.Tiers.Single(t => t.NameAr == "صغير").Id!.Value;
@@ -73,7 +73,7 @@ public sealed class AdminTests(DatabaseFixture fx)
         Assert.Equal(2, v2.CurrentVersion!.VersionNo); // v1 was locked by the session
 
         await using var db4 = fx.NewDb();
-        var created = await new AdminSessionService(db4, clock, new SettingsService(db4, clock)).GetAsync(sessionId, default);
+        var created = await fx.AdminSessions(db4, clock).GetAsync(sessionId, default);
         Assert.Equal(140, created.PricePerStudent); // session keeps the price it was created with
         Assert.Equal(4, created.Capacity);
         Assert.Equal(2, created.MinParticipants);
@@ -119,7 +119,7 @@ public sealed class AdminTests(DatabaseFixture fx)
         var otherTrack = await db.StudyTracks.Where(t => t.Id != c.TrackId).Select(t => t.Id).FirstAsync();
         var otherBandGrade = await db.Grades.Where(g => g.PricingBandId != c.BandId)
             .Where(g => db.GradeSubjects.Any(gs => gs.GradeId == g.Id && gs.SubjectId == c.SubjectId)).Select(g => g.Id).FirstAsync();
-        var svc = new AdminSessionService(db, clock, new SettingsService(db, clock));
+        var svc = fx.AdminSessions(db, clock);
         var ex = await Assert.ThrowsAsync<DomainException>(() => svc.CreateAsync(
             NewSession(c, null, "Private") with { GradeId = otherBandGrade, StudyTrackId = otherTrack }, Actor, default));
         Assert.Equal(PricingErrors.NotConfigured, ex.Code);
@@ -140,7 +140,7 @@ public sealed class AdminTests(DatabaseFixture fx)
                 { StudyTrackId = c.TrackId }, Actor, default);
             var dto = await pricing.SavePricesAsync(planId, new SavePricesRequest(250, [T("صغير", 2, 3, 180)]), Actor, default);
             tierId = dto.CurrentVersion!.Tiers[0].Id!.Value;
-            var svc = new AdminSessionService(db, clock, new SettingsService(db, clock));
+            var svc = fx.AdminSessions(db, clock);
             sessionId = await svc.CreateAsync(NewSession(c, tierId, daysAhead: 8), Actor, default);
             await svc.PublishAsync(sessionId, Actor, default);
         }
@@ -158,7 +158,7 @@ public sealed class AdminTests(DatabaseFixture fx)
 
         await using (var db = fx.NewDb())
         {
-            var svc = new AdminSessionService(db, clock, new SettingsService(db, clock));
+            var svc = fx.AdminSessions(db, clock);
             var blocked = await Assert.ThrowsAsync<DomainException>(() =>
                 svc.UpdateAsync(sessionId, NewSession(c, tierId, "Private", 8), Actor, default));
             Assert.Equal(AdminErrors.Conflict, blocked.Code);
@@ -172,8 +172,8 @@ public sealed class AdminTests(DatabaseFixture fx)
 
         await using (var db = fx.NewDb())
         {
-            var bookings = await new AdminSessionService(db, clock, new SettingsService(db, clock)).BookingsAsync(sessionId, default);
-            var reissued = await new AdminSessionService(db, clock, new SettingsService(db, clock)).ReissueLinkAsync(bookings[0].Id, Actor, default);
+            var bookings = await fx.AdminSessions(db, clock).BookingsAsync(sessionId, default);
+            var reissued = await fx.AdminSessions(db, clock).ReissueLinkAsync(bookings[0].Id, Actor, default);
             Assert.True(AccessTokens.LooksValid(reissued.AccessToken));
             Assert.Equal("+201091112223", reissued.ContactPhone);
             var old = await Assert.ThrowsAsync<DomainException>(() => fx.Bookings(db, clock).GetViewAsync(token, default));
@@ -183,7 +183,7 @@ public sealed class AdminTests(DatabaseFixture fx)
 
         await using (var db = fx.NewDb())
         {
-            var refunds = await new AdminSessionService(db, clock, new SettingsService(db, clock)).CancelAsync(sessionId, "المدرس اعتذر", Actor, default);
+            var refunds = await fx.AdminSessions(db, clock).CancelAsync(sessionId, "المدرس اعتذر", Actor, default);
             Assert.Equal(0, refunds); // the only booking was unpaid → cancelled, nothing to refund
             var view = await fx.Bookings(db, clock).GetViewAsync(token, default);
             Assert.Equal(nameof(BookingStatus.Cancelled), view.Status);
@@ -198,7 +198,7 @@ public sealed class AdminTests(DatabaseFixture fx)
         RequireDb();
         var clock = new FakeClock(fx.SeedTime);
         await using var db = fx.NewDb();
-        var svc = new AdminCatalogService(db, clock);
+        var svc = fx.Catalog(db, clock);
 
         var stageId = await svc.SaveStageAsync(new StageAdminDto(null, "مرحلة تجريبية", true, 99, true), Actor, default);
         var band = (await svc.PricingBandsAsync(default))[0];

@@ -14,14 +14,14 @@ namespace Dose.Application.Administration;
 /// Admin session management. Pricing is resolved from the configured plans when the session is saved and
 /// the price version is locked, so later price edits never change an existing session (spec 6.5, 7).
 /// </summary>
-public sealed class AdminSessionService(IDoseDbContext db, IClock clock, SettingsService settings)
+public sealed class AdminSessionService(IDoseDbContext db, IClock clock, SettingsService settings, Notifications.NotificationService notify, ITokenProtector tokens)
 {
     public async Task<PricingPreviewDto> PreviewPricingAsync(PricingPreviewRequest req, CancellationToken ct)
     {
         var (plan, version) = await ResolvePricingAsync(req.ServiceTypeId, req.GradeId, req.StudyTrackId, req.SubjectId, ParseMode(req.Mode), ct);
         return new PricingPreviewDto(plan.Id, plan.Name, version.Id, version.VersionNo, plan.Currency, version.PrivatePrice,
             version.Tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants)
-                .Select(t => new TierAdminDto(t.Id, t.NameAr, t.MinParticipants, t.MaxParticipants, t.PricePerStudent, t.SortOrder)).ToList());
+                .Select(t => new TierAdminDto(t.Id, t.NameAr, t.MinParticipants, t.MaxParticipants, t.PricePerStudent, t.SortOrder, t.NameEn)).ToList());
     }
 
     public async Task<IReadOnlyList<SessionAdminDto>> ListAsync(string? status, bool includePast, CancellationToken ct)
@@ -87,6 +87,9 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         foreach (var b in bookings)
             b.Status = b.Status is BookingStatus.PendingHold or BookingStatus.PendingPayment ? BookingStatus.Cancelled : BookingStatus.RefundPending;
         s.Status = SessionStatus.Cancelled;
+        foreach (var b in bookings)
+            await notify.QueueForBookingAsync(b.Id, Domain.Notifications.TemplateCodes.SessionCancelled, $"cancelled:{b.Id}", ct,
+                new Dictionary<string, string> { ["reason"] = reason });
         db.Audit(clock, actor, nameof(Session), id, "Cancel", new { reason, affected = bookings.Select(b => new { b.Reference, status = b.Status.ToString() }) });
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
@@ -107,7 +110,8 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
     {
         var b = AdminGuard.Found(await db.Bookings.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == bookingId, ct), Fields.Booking);
         var (token, hash) = AccessTokens.Create();
-        db.Bookings.Entry(b).Property(x => x.AccessTokenHash).CurrentValue = hash;
+        b.AccessTokenHash = hash;
+        b.AccessTokenProtected = tokens.Protect(token);
         db.Audit(clock, actor, nameof(Booking), b.Id, "ReissueLink", new { b.Reference });
         await db.SaveChangesAsync(ct);
         var greeting = b.Student is null ? "أهلاً" : $"أهلاً {b.Student.Name}";
@@ -141,7 +145,7 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
                 s.StartUtc, s.EndUtc, (int)(s.EndUtc - s.StartUtc).TotalMinutes, s.Mode.ToString(), s.Capacity, s.MinParticipants,
                 s.TargetTierId, s.TargetTier?.NameAr, price, s.PricingPlanVersion!.Plan!.Currency, s.PricingPlanVersion.Plan.Name,
                 s.BookingDeadlineUtc, s.TierDecisionAtUtc, s.MeetingUrl,
-                c.Confirmed, c.Occupied, active.GetValueOrDefault(s.Id));
+                c.Confirmed, c.Occupied, active.GetValueOrDefault(s.Id), s.ScopeTitleEn, s.ScopeDetailsEn);
         }).ToList();
     }
 
@@ -222,6 +226,8 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         s.LessonId = req.ChapterId is null ? null : req.LessonId;
         s.ScopeTitleAr = AdminGuard.Name(req.ScopeTitleAr, Fields.SessionTitle, 200);
         s.ScopeDetailsAr = AdminGuard.Optional(req.ScopeDetailsAr, 2000);
+        s.ScopeTitleEn = AdminGuard.Optional(req.ScopeTitleEn, 200);
+        s.ScopeDetailsEn = AdminGuard.Optional(req.ScopeDetailsEn, 2000);
         s.TeacherId = req.TeacherId;
         s.StartUtc = start;
         s.EndUtc = start.AddMinutes(req.DurationMinutes);

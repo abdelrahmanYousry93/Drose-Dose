@@ -76,6 +76,8 @@ public sealed class Booking : Entity
 
     public BookingStatus Status { get; set; } = BookingStatus.PendingHold;
     public DateTime CreatedAtUtc { get; init; }
+    /// <summary>Language the student booked in ("ar"/"en"); used for messages.</summary>
+    public string Language { get; set; } = "ar";
     public DateTime? HoldExpiresAtUtc { get; set; }
     public DateTime? PaymentDueAtUtc { get; set; }
 
@@ -96,7 +98,13 @@ public sealed class Booking : Entity
     public PriceSnapshot? PriceSnapshot { get; set; }
 
     /// <summary>SHA-256 of the secret access token in the student's private link.</summary>
-    public required byte[] AccessTokenHash { get; init; }
+    public required byte[] AccessTokenHash { get; set; }
+
+    /// <summary>
+    /// The secret token encrypted with the server's data-protection key, so the team can resend the student's
+    /// link in messages without invalidating it. Never returned by any API except when composing a message.
+    /// </summary>
+    public string? AccessTokenProtected { get; set; }
 
     public byte[] RowVersion { get; set; } = [];
 
@@ -112,9 +120,11 @@ public sealed class PaymentMethod : Entity
 {
     public required string Code { get; set; }
     public required string NameAr { get; set; }
+    public string? NameEn { get; set; }
     /// <summary>InstaPay address or wallet number shown to the student. Admin-managed.</summary>
     public required string ReceivingAccount { get; set; }
     public string? InstructionsAr { get; set; }
+    public string? InstructionsEn { get; set; }
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }

@@ -17,7 +17,7 @@ namespace Dose.Application.Sessions;
 /// never makes the others pay more (Dose absorbs that). Late payment approvals can only lower what others owe.
 /// All steps are idempotent and safe to re-run.
 /// </summary>
-public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, SettingsService settings)
+public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, SettingsService settings, Notifications.NotificationService notify)
 {
     public const string SystemActor = "system";
 
@@ -103,14 +103,17 @@ public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, Settin
             }
             if (due > 0)
             {
-                db.FinancialAdjustments.Add(new FinancialAdjustment
+                var adj = new FinancialAdjustment
                 {
                     BookingId = b.Id, Type = AdjustmentType.TopUpDue, Amount = due, Currency = b.Currency,
                     RespondByUtc = current?.RespondByUtc ?? now.AddHours(cfg.TopUpResponseHours),
                     Reason = $"الجروب اتحسم على {n} طلاب بدل {session.MinParticipants} على الأقل",
                     CreatedBy = actor, CreatedAtUtc = now,
                     StudentChoice = current?.StudentChoice, ChoiceAtUtc = current?.ChoiceAtUtc,
-                });
+                };
+                db.FinancialAdjustments.Add(adj);
+                await notify.QueueForBookingAsync(b.Id, Domain.Notifications.TemplateCodes.TopUpRequired, $"topup:{adj.Id}", ct,
+                    new Dictionary<string, string> { ["amount"] = due.ToString(System.Globalization.CultureInfo.InvariantCulture) });
                 b.Status = BookingStatus.TopUpPending;
             }
             else

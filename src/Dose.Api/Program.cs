@@ -19,6 +19,7 @@ builder.Services.AddOptions<PublicSettings>().Bind(builder.Configuration.GetSect
 
 builder.Services.AddDoseApplication();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<Dose.Application.Abstractions.IAppLinks, AppLinks>();
 builder.Services.AddScoped<Dose.Application.Abstractions.IRequestLanguage, HttpRequestLanguage>();
 builder.Services.AddDoseInfrastructure(builder.Configuration);
 
@@ -93,6 +94,7 @@ if (app.Environment.IsDevelopment())
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<DoseDbContext>();
     await db.Database.MigrateAsync();
+    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(db);
     await DevelopmentSeeder.SeedRolesAndAdminAsync(
         scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
         scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(),
@@ -105,11 +107,20 @@ app.MapDoseEndpoints();
 app.MapAdminConfigEndpoints();
 app.MapPhase3Endpoints();
 app.MapPhase4Endpoints();
+app.MapMessagingEndpoints();
+
+if (!app.Environment.IsDevelopment())
+{
+    // Default message texts are inserted once; admins edit them afterwards.
+    await using var scope = app.Services.CreateAsyncScope();
+    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(scope.ServiceProvider.GetRequiredService<DoseDbContext>());
+}
 
 if (jobsEnabled)
 {
     var jobs = app.Services.GetRequiredService<IRecurringJobManager>();
     jobs.AddOrUpdate<GroupDecisionService>("group-tier-decisions", s => s.RunDueDecisionsAsync(CancellationToken.None), "*/5 * * * *");
+    jobs.AddOrUpdate<Dose.Application.Notifications.NotificationService>("queue-session-reminders", s => s.QueueRemindersAsync(CancellationToken.None), "*/15 * * * *");
     jobs.AddOrUpdate<BookingMaintenance>("expire-stale-bookings", s => s.ExpireStaleAsync(CancellationToken.None), "*/10 * * * *");
 }
 app.Run();

@@ -54,6 +54,7 @@ public sealed class PricingTier : Entity
 {
     public Guid VersionId { get; set; }
     public required string NameAr { get; set; }
+    public string? NameEn { get; set; }
     public int MinParticipants { get; set; }
     public int MaxParticipants { get; set; }
     public decimal PricePerStudent { get; set; }

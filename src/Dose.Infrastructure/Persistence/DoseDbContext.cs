@@ -41,6 +41,8 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
     public DbSet<SessionRequest> SessionRequests => Set<SessionRequest>();
     public DbSet<TeacherAvailability> TeacherAvailabilities => Set<TeacherAvailability>();
     public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<Domain.Notifications.MessageTemplate> MessageTemplates => Set<Domain.Notifications.MessageTemplate>();
+    public DbSet<Domain.Notifications.Notification> Notifications => Set<Domain.Notifications.Notification>();
 
     public Task LockSessionAsync(Guid sessionId, CancellationToken ct)
     {

@@ -81,6 +81,7 @@ public sealed class AdminPricingService(IDoseDbContext db, IClock clock)
         var tiers = (req.Tiers ?? []).Select((t, i) => new PricingTier
         {
             NameAr = AdminGuard.Name(t.NameAr, Fields.TierName),
+            NameEn = AdminGuard.Optional(t.NameEn, 100),
             MinParticipants = t.MinParticipants, MaxParticipants = t.MaxParticipants,
             PricePerStudent = t.PricePerStudent, SortOrder = t.SortOrder == 0 ? i + 1 : t.SortOrder,
         }).ToList();
@@ -130,6 +131,6 @@ public sealed class AdminPricingService(IDoseDbContext db, IClock clock)
             p.Currency, p.Policy.ToString(), p.EffectiveFromUtc, p.EffectiveToUtc, p.IsActive,
             v is null ? null : new PricingVersionAdminDto(v.Id, v.VersionNo, v.PrivatePrice, v.IsLocked,
                 v.Tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants)
-                    .Select(t => new TierAdminDto(t.Id, t.NameAr, t.MinParticipants, t.MaxParticipants, t.PricePerStudent, t.SortOrder)).ToList()));
+                    .Select(t => new TierAdminDto(t.Id, t.NameAr, t.MinParticipants, t.MaxParticipants, t.PricePerStudent, t.SortOrder, t.NameEn)).ToList()));
     }
 }
