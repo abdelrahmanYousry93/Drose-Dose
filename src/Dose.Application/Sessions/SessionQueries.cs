@@ -28,8 +28,8 @@ public static class SessionPricing
         var version = s.PricingPlanVersion ?? throw new InvalidOperationException("Pricing version not loaded.");
         if (s.Mode == SessionMode.Private)
             return version.PrivatePrice
-                   ?? throw new DomainException(PricingErrors.NotConfigured, "Private price is not configured for this session's pricing plan.");
-        var tier = s.TargetTier ?? throw new DomainException(PricingErrors.TierNotFound, "Group session has no target tier.");
+                   ?? throw new DomainException(PricingErrors.NotConfigured, "سعر الجلسة الفردية مش متحدد في خطة التسعير.", "Private price is not configured for this session's pricing plan.");
+        var tier = s.TargetTier ?? throw new DomainException(PricingErrors.TierNotFound, "الجلسة الجماعية مالهاش حجم جروب.", "Group session has no target tier.");
         return tier.PricePerStudent;
     }
 

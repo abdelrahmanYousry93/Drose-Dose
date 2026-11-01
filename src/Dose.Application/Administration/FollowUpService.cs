@@ -59,7 +59,7 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
     {
         var (booking, tx) = await LockAsync(bookingId, ct);
         await using var _ = tx;
-        if (booking.Status != BookingStatus.TopUpPending) throw new DomainException(AdminErrors.Invalid, "الحجز ده مفيهوش فرق مطلوب.");
+        if (booking.Status != BookingStatus.TopUpPending) throw new DomainException(AdminErrors.Invalid, "الحجز ده مفيهوش فرق مطلوب.", "This booking has no top-up due.");
         var adj = await db.FinancialAdjustments.SingleAsync(a => a.BookingId == bookingId && a.Type == AdjustmentType.TopUpDue
                                                                 && a.Status == AdjustmentStatus.Pending, ct);
         var now = clock.UtcNow;
@@ -83,7 +83,7 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
     {
         var (booking, tx) = await LockAsync(bookingId, ct);
         await using var _ = tx;
-        if (booking.Status != BookingStatus.RefundPending) throw new DomainException(AdminErrors.Invalid, "الحجز ده مش منتظر استرداد.");
+        if (booking.Status != BookingStatus.RefundPending) throw new DomainException(AdminErrors.Invalid, "الحجز ده مش منتظر استرداد.", "This booking is not waiting for a refund.");
         var settled = await db.FinancialAdjustments.Where(a => a.BookingId == bookingId && a.Type == AdjustmentType.TopUpDue
                                                                && a.Status == AdjustmentStatus.Settled).SumAsync(a => a.Amount, ct);
         var paidMain = await db.PaymentProofs.AnyAsync(p => p.BookingId == bookingId && p.AdjustmentId == null
@@ -107,7 +107,7 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
     {
         var (booking, tx) = await LockAsync(bookingId, ct);
         await using var _ = tx;
-        if (booking.Status != BookingStatus.Transferred) throw new DomainException(AdminErrors.Invalid, "الحجز ده مش منتظر نقل.");
+        if (booking.Status != BookingStatus.Transferred) throw new DomainException(AdminErrors.Invalid, "الحجز ده مش منتظر نقل.", "This booking is not waiting for a transfer.");
         booking.FollowUpResolvedAtUtc = clock.UtcNow;
         db.Audit(clock, actor, nameof(Booking), bookingId, "TransferDone", new { note });
         await FinishAsync(booking.SessionId, tx, ct);
@@ -116,7 +116,7 @@ public sealed class FollowUpService(IDoseDbContext db, IClock clock, GroupDecisi
     private async Task<(Booking, Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction)> LockAsync(Guid bookingId, CancellationToken ct)
     {
         var sessionId = await db.Bookings.Where(b => b.Id == bookingId).Select(b => (Guid?)b.SessionId).FirstOrDefaultAsync(ct)
-                        ?? throw new DomainException(AdminErrors.NotFound, "الحجز مش موجود.");
+                        ?? throw new DomainException(AdminErrors.NotFound, "الحجز مش موجود.", "Booking not found.");
         var tx = await db.Database.BeginTransactionAsync(ct);
         await db.LockSessionAsync(sessionId, ct);
         return (await db.Bookings.SingleAsync(b => b.Id == bookingId, ct), tx);

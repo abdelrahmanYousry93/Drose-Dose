@@ -29,7 +29,7 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
 
     public async Task<Teacher> TeacherForUserAsync(string userId, CancellationToken ct) =>
         await db.Teachers.AsNoTracking().FirstOrDefaultAsync(t => t.UserId == userId, ct)
-        ?? throw new DomainException(TeacherErrors.NotLinked, "حسابك مش مربوط بملف مدرس. كلّم الإدارة.");
+        ?? throw new DomainException(TeacherErrors.NotLinked, "حسابك مش مربوط بملف مدرس. كلّم الإدارة.", "Your account isn't linked to a teacher profile. Please contact the admin.");
 
     public async Task<IReadOnlyList<TeacherSessionDto>> SessionsAsync(string userId, bool past, CancellationToken ct)
     {
@@ -46,8 +46,8 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
     {
         var teacher = await TeacherForUserAsync(userId, ct);
         var row = await Project(db.Sessions.AsNoTracking().Where(s => s.Id == sessionId)).FirstOrDefaultAsync(ct)
-                  ?? throw new DomainException(TeacherErrors.NotYours, "الجلسة مش موجودة.");
-        if (row.TeacherId != teacher.Id) throw new DomainException(TeacherErrors.NotYours, "الجلسة دي مش من جلساتك.");
+                  ?? throw new DomainException(TeacherErrors.NotYours, "الجلسة مش موجودة.", "Session not found.");
+        if (row.TeacherId != teacher.Id) throw new DomainException(TeacherErrors.NotYours, "الجلسة دي مش من جلساتك.", "This session isn't one of yours.");
 
         var students = await (from b in db.Bookings.AsNoTracking()
                               where b.SessionId == sessionId && (b.Status == BookingStatus.Confirmed
@@ -67,13 +67,13 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
         var session = await OwnSessionAsync(teacher, sessionId, ct);
         var now = clock.UtcNow;
         if (!CanMark(session.Status, session.StartUtc, session.EndUtc, now))
-            throw new DomainException(TeacherErrors.Invalid, "تسجيل الحضور متاح من قبل الجلسة بربع ساعة لحد يومين بعدها.");
+            throw new DomainException(TeacherErrors.Invalid, "تسجيل الحضور متاح من قبل الجلسة بربع ساعة لحد يومين بعدها.", "Attendance can be recorded from 15 minutes before the session until 2 days after it.");
 
         var ids = req.Items.Select(i => i.BookingId).ToList();
         var valid = await db.Bookings.Where(b => b.SessionId == sessionId && ids.Contains(b.Id)
                                                  && (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Completed || b.Status == BookingStatus.NoShow))
             .Select(b => b.Id).ToListAsync(ct);
-        if (valid.Count != ids.Distinct().Count()) throw new DomainException(TeacherErrors.Invalid, "فيه طالب مش في الجلسة دي.");
+        if (valid.Count != ids.Distinct().Count()) throw new DomainException(TeacherErrors.Invalid, "فيه طالب مش في الجلسة دي.", "A student is not part of this session.");
 
         var existing = await db.Attendances.Where(a => ids.Contains(a.BookingId)).ToListAsync(ct);
         foreach (var item in req.Items)
@@ -94,14 +94,14 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
         var session = await OwnSessionAsync(teacher, sessionId, ct);
         var now = clock.UtcNow;
         if (session.Status is SessionStatus.Cancelled or SessionStatus.Completed)
-            throw new DomainException(TeacherErrors.Invalid, "الجلسة ملغية أو متقفلة بالفعل.");
-        if (now < session.StartUtc) throw new DomainException(TeacherErrors.Invalid, "الجلسة لسه مبدأتش.");
+            throw new DomainException(TeacherErrors.Invalid, "الجلسة ملغية أو متقفلة بالفعل.", "The session is already cancelled or closed.");
+        if (now < session.StartUtc) throw new DomainException(TeacherErrors.Invalid, "الجلسة لسه مبدأتش.", "The session hasn't started yet.");
 
         var bookings = await db.Bookings.Where(b => b.SessionId == sessionId && b.Status == BookingStatus.Confirmed).ToListAsync(ct);
         var ids = bookings.Select(b => b.Id).ToList();
         var attendance = await db.Attendances.Where(a => ids.Contains(a.BookingId)).ToDictionaryAsync(a => a.BookingId, a => a.Status, ct);
         if (attendance.Count != bookings.Count)
-            throw new DomainException(TeacherErrors.Invalid, "سجّل حضور كل الطلاب الأول.");
+            throw new DomainException(TeacherErrors.Invalid, "سجّل حضور كل الطلاب الأول.", "Record attendance for every student first.");
 
         foreach (var b in bookings)
             b.Status = attendance[b.Id] == AttendanceStatus.Attended ? BookingStatus.Completed : BookingStatus.NoShow;
@@ -128,15 +128,15 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
         var start = DateTime.SpecifyKind(req.StartUtc, DateTimeKind.Utc);
         var end = DateTime.SpecifyKind(req.EndUtc, DateTimeKind.Utc);
         var now = clock.UtcNow;
-        if (start <= now) throw new DomainException(TeacherErrors.Invalid, "الميعاد لازم يكون في المستقبل.");
-        if (end <= start) throw new DomainException(TeacherErrors.Invalid, "وقت النهاية لازم يكون بعد البداية.");
+        if (start <= now) throw new DomainException(TeacherErrors.Invalid, "الميعاد لازم يكون في المستقبل.", "The time must be in the future.");
+        if (end <= start) throw new DomainException(TeacherErrors.Invalid, "وقت النهاية لازم يكون بعد البداية.", "The end time must be after the start time.");
         if (end - start < TimeSpan.FromMinutes(30) || end - start > TimeSpan.FromHours(12))
-            throw new DomainException(TeacherErrors.Invalid, "الميعاد لازم يكون بين نص ساعة و12 ساعة.");
-        if (start > now.AddDays(90)) throw new DomainException(TeacherErrors.Invalid, "تقدر تضيف مواعيد لحد 3 شهور قدام.");
+            throw new DomainException(TeacherErrors.Invalid, "الميعاد لازم يكون بين نص ساعة و12 ساعة.", "A slot must be between 30 minutes and 12 hours.");
+        if (start > now.AddDays(90)) throw new DomainException(TeacherErrors.Invalid, "تقدر تضيف مواعيد لحد 3 شهور قدام.", "You can add times up to 3 months ahead.");
         var overlaps = await db.TeacherAvailabilities.AnyAsync(a => a.TeacherId == teacher.Id
             && (a.Status == AvailabilityStatus.Submitted || a.Status == AvailabilityStatus.Approved)
             && a.StartUtc < end && start < a.EndUtc, ct);
-        if (overlaps) throw new DomainException(TeacherErrors.Invalid, "الميعاد ده متداخل مع ميعاد تاني ليك.");
+        if (overlaps) throw new DomainException(TeacherErrors.Invalid, "الميعاد ده متداخل مع ميعاد تاني ليك.", "This slot overlaps another of your slots.");
 
         var slot = new TeacherAvailability
         {
@@ -151,9 +151,9 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
     {
         var teacher = await TeacherForUserAsync(userId, ct);
         var slot = await db.TeacherAvailabilities.FirstOrDefaultAsync(a => a.Id == id && a.TeacherId == teacher.Id, ct)
-                   ?? throw new DomainException(TeacherErrors.NotYours, "الميعاد مش موجود.");
+                   ?? throw new DomainException(TeacherErrors.NotYours, "الميعاد مش موجود.", "Time slot not found.");
         if (slot.Status is AvailabilityStatus.Withdrawn or AvailabilityStatus.Rejected || slot.StartUtc <= clock.UtcNow)
-            throw new DomainException(TeacherErrors.Invalid, "مينفعش تسحب الميعاد ده.");
+            throw new DomainException(TeacherErrors.Invalid, "مينفعش تسحب الميعاد ده.", "This slot can't be withdrawn.");
         slot.Status = AvailabilityStatus.Withdrawn;
         await db.SaveChangesAsync(ct);
     }
@@ -172,8 +172,8 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
     public async Task ReviewAvailabilityAsync(Guid id, ReviewAvailabilityRequest req, string actor, CancellationToken ct)
     {
         var slot = await db.TeacherAvailabilities.FirstOrDefaultAsync(a => a.Id == id, ct)
-                   ?? throw new DomainException(AdminErrors.NotFound, "الميعاد مش موجود.");
-        if (slot.Status != AvailabilityStatus.Submitted) throw new DomainException(AdminErrors.Invalid, "الميعاد ده اتراجع قبل كده.");
+                   ?? throw new DomainException(AdminErrors.NotFound, "الميعاد مش موجود.", "Time slot not found.");
+        if (slot.Status != AvailabilityStatus.Submitted) throw new DomainException(AdminErrors.Invalid, "الميعاد ده اتراجع قبل كده.", "This slot was already reviewed.");
         slot.Status = req.Approve ? AvailabilityStatus.Approved : AvailabilityStatus.Rejected;
         slot.ReviewedBy = actor;
         slot.ReviewedAtUtc = clock.UtcNow;
@@ -206,8 +206,8 @@ public sealed class TeacherAreaService(IDoseDbContext db, IClock clock)
     private async Task<Session> OwnSessionAsync(Teacher teacher, Guid sessionId, CancellationToken ct)
     {
         var session = await db.Sessions.FirstOrDefaultAsync(s => s.Id == sessionId, ct)
-                      ?? throw new DomainException(TeacherErrors.NotYours, "الجلسة مش موجودة.");
-        if (session.TeacherId != teacher.Id) throw new DomainException(TeacherErrors.NotYours, "الجلسة دي مش من جلساتك.");
+                      ?? throw new DomainException(TeacherErrors.NotYours, "الجلسة مش موجودة.", "Session not found.");
+        if (session.TeacherId != teacher.Id) throw new DomainException(TeacherErrors.NotYours, "الجلسة دي مش من جلساتك.", "This session isn't one of yours.");
         return session;
     }
 

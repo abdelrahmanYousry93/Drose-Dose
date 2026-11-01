@@ -35,7 +35,7 @@ public sealed class DomainExceptionHandler(IProblemDetailsService problems, ILog
         return await problems.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = http,
-            ProblemDetails = new ProblemDetails { Status = status, Title = ex.Message, Extensions = { ["code"] = ex.Code } },
+            ProblemDetails = new ProblemDetails { Status = status, Title = ex.Text.For(HttpRequestLanguage.Resolve(http)), Extensions = { ["code"] = ex.Code } },
             Exception = ex,
         });
     }

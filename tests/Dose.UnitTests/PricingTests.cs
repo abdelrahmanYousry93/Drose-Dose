@@ -79,23 +79,23 @@ public class PricingTests
     public void Tiers_overlap_is_rejected()
     {
         var errors = TierRules.Validate([Tier("a", 2, 5, 120), Tier("b", 5, 9, 100)]);
-        Assert.Contains(errors, e => e.Contains("متداخلين"));
+        Assert.Contains(errors, e => e.Ar.Contains("متداخلين"));
     }
 
     [Fact]
     public void Tiers_gap_is_rejected()
     {
         var errors = TierRules.Validate([Tier("a", 2, 4, 120), Tier("b", 6, 9, 100)]);
-        Assert.Contains(errors, e => e.Contains("فجوة"));
+        Assert.Contains(errors, e => e.Ar.Contains("فجوة"));
     }
 
     [Fact]
     public void Tiers_invalid_range_and_price_rejected()
     {
         var errors = TierRules.Validate([Tier("a", 0, 4, 120), Tier("b", 9, 5, 0)]);
-        Assert.Contains(errors, e => e.Contains("1 على الأقل"));
-        Assert.Contains(errors, e => e.Contains("أقل من أقل عدد"));
-        Assert.Contains(errors, e => e.Contains("أكبر من صفر"));
+        Assert.Contains(errors, e => e.Ar.Contains("1 على الأقل"));
+        Assert.Contains(errors, e => e.Ar.Contains("أقل من أقل عدد"));
+        Assert.Contains(errors, e => e.Ar.Contains("أكبر من صفر"));
     }
 
     [Fact]

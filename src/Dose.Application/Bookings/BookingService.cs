@@ -22,15 +22,15 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         await db.LockSessionAsync(sessionId, ct);
 
         var session = await LoadSessionAsync(sessionId, ct)
-                      ?? throw new DomainException(BookingErrors.SessionNotFound, "Session not found.");
+                      ?? throw new DomainException(BookingErrors.SessionNotFound, "الجلسة مش موجودة.", "Session not found.");
         var now = clock.UtcNow;
         if (!session.IsOpenForBooking(now))
-            throw new DomainException(BookingErrors.SessionClosed, "This session is no longer open for booking.");
+            throw new DomainException(BookingErrors.SessionClosed, "الحجز في الجلسة دي اتقفل.", "This session is no longer open for booking.");
 
         await ExpireStaleAsync(sessionId, now, ct);
         var occupied = await db.Bookings.Where(b => b.SessionId == sessionId).CountAsync(SeatRules.OccupiesSeat(now), ct);
         if (occupied >= session.Capacity)
-            throw new DomainException(BookingErrors.SessionFull, "No seats left in this session.");
+            throw new DomainException(BookingErrors.SessionFull, "للأسف الأماكن خلصت في الجلسة دي.", "No seats left in this session.");
 
         var price = SessionPricing.CurrentPrice(session);
         var terms = SessionPricing.GroupTerms(session);
@@ -67,37 +67,37 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var now = clock.UtcNow;
         var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
         if (booking.Status != BookingStatus.PendingHold)
-            throw new DomainException(BookingErrors.InvalidState, "Details were already submitted for this booking.");
+            throw new DomainException(BookingErrors.InvalidState, "البيانات اتبعتت للحجز ده قبل كده.", "Details were already submitted for this booking.");
         if (booking.IsExpired(now))
         {
             booking.Status = BookingStatus.Expired;
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            throw new DomainException(BookingErrors.Expired, "The seat hold expired. Please start the booking again.");
+            throw new DomainException(BookingErrors.Expired, "مدة حجز المقعد خلصت. ابدأ الحجز من جديد.", "The seat hold expired. Please start the booking again.");
         }
 
-        var session = await LoadSessionAsync(sessionId, ct) ?? throw new DomainException(BookingErrors.SessionNotFound, "Session not found.");
+        var session = await LoadSessionAsync(sessionId, ct) ?? throw new DomainException(BookingErrors.SessionNotFound, "الجلسة مش موجودة.", "Session not found.");
         if (!session.IsOpenForBooking(now))
-            throw new DomainException(BookingErrors.SessionClosed, "This session is no longer open for booking.");
+            throw new DomainException(BookingErrors.SessionClosed, "الحجز في الجلسة دي اتقفل.", "This session is no longer open for booking.");
 
         if (!req.AcceptTerms)
-            throw new DomainException(BookingErrors.TermsRequired, "You must accept the booking terms.");
+            throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الحجز.", "You must accept the booking terms.");
         if (session.Mode == SessionMode.Group && !req.AcceptTopUpTerms)
-            throw new DomainException(BookingErrors.TermsRequired, "You must accept the group terms (possible difference if the group does not fill).");
+            throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الجروب (احتمال فرق لو الجروب مكملش).", "You must accept the group terms (possible difference if the group does not fill).");
 
         var name = (req.StudentName ?? "").Trim();
         if (name.Length is < 2 or > 100)
-            throw new DomainException("booking.invalid_name", "Student name must be between 2 and 100 characters.");
+            throw new DomainException("booking.invalid_name", "اسم الطالب لازم يكون بين 2 و100 حرف.", "Student name must be between 2 and 100 characters.");
         var phone = PhoneNumber.TryNormalize(req.ContactPhone)
-                    ?? throw new DomainException(BookingErrors.InvalidPhone, "WhatsApp number is not valid.");
+                    ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم الواتساب مش صحيح. اكتبه بالشكل ده: 01xxxxxxxxx", "The WhatsApp number is not valid. Use this format: 01xxxxxxxxx");
 
         string? guardianName = string.IsNullOrWhiteSpace(req.GuardianName) ? null : req.GuardianName.Trim();
         string? guardianPhone = null;
         if (!string.IsNullOrWhiteSpace(req.GuardianPhone))
             guardianPhone = PhoneNumber.TryNormalize(req.GuardianPhone)
-                            ?? throw new DomainException(BookingErrors.InvalidPhone, "Guardian WhatsApp number is not valid.");
+                            ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم واتساب ولي الأمر مش صحيح.", "The guardian's WhatsApp number is not valid.");
         if (session.Grade!.Stage!.RequiresGuardianContact && (guardianName is null || guardianPhone is null))
-            throw new DomainException(BookingErrors.GuardianRequired, "Guardian name and WhatsApp number are required for this grade.");
+            throw new DomainException(BookingErrors.GuardianRequired, "اسم ورقم واتساب ولي الأمر مطلوبين للمرحلة دي.", "Guardian name and WhatsApp number are required for this grade.");
 
         var currentPrice = SessionPricing.CurrentPrice(session);
         if (currentPrice != booking.QuotedPrice || currentPrice != req.ExpectedPrice)
@@ -106,7 +106,7 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
             booking.QuotedWorstCasePrice = SessionPricing.GroupTerms(session)?.WorstCasePrice;
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            throw new DomainException(BookingErrors.PriceChanged, "The price changed. Please review the new price and confirm again.");
+            throw new DomainException(BookingErrors.PriceChanged, "السعر اتغيّر. راجع السعر الجديد ووافق تاني.", "The price changed. Please review the new price and confirm again.");
         }
 
         await ExpireStaleAsync(sessionId, now, ct);
@@ -131,7 +131,7 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         }
         catch (DbUpdateException ex) when (db.IsUniqueViolation(ex))
         {
-            throw new DomainException(BookingErrors.Duplicate, "This WhatsApp number already has an active booking in this session.");
+            throw new DomainException(BookingErrors.Duplicate, "الرقم ده عنده حجز فعلاً في نفس الجلسة.", "This WhatsApp number already has an active booking in this session.");
         }
         await tx.CommitAsync(ct);
     }
@@ -147,12 +147,12 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var booking = await db.Bookings.SingleAsync(b => b.Id == bookingId, ct);
         var now = clock.UtcNow;
         if (booking.Status != BookingStatus.PendingPayment)
-            throw new DomainException(BookingErrors.InvalidState, "This booking is not waiting for payment.");
+            throw new DomainException(BookingErrors.InvalidState, "الحجز ده مش منتظر دفع.", "This booking is not waiting for payment.");
         if (booking.IsExpired(now))
         {
             booking.Status = BookingStatus.Expired;
             await db.SaveChangesAsync(ct);
-            throw new DomainException(BookingErrors.Expired, "The payment deadline passed and the seat was released.");
+            throw new DomainException(BookingErrors.Expired, "مهلة الدفع خلصت والمقعد اتفك.", "The payment deadline passed and the seat was released.");
         }
 
         buffer.Position = 0;
@@ -178,7 +178,7 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new DomainException(BookingErrors.InvalidState, "The booking changed while uploading. Please refresh and try again.");
+            throw new DomainException(BookingErrors.InvalidState, "الحجز اتغيّر وإنت بترفع. حدّث الصفحة وجرّب تاني.", "The booking changed while uploading. Please refresh and try again.");
         }
     }
 
@@ -190,7 +190,7 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
 
         var booking = await db.Bookings.AsNoTracking().Include(b => b.Student).SingleAsync(b => b.Id == bookingId, ct);
         var session = await LoadSessionAsync(booking.SessionId, ct, tracking: false)
-                      ?? throw new DomainException(BookingErrors.SessionNotFound, "Session not found.");
+                      ?? throw new DomainException(BookingErrors.SessionNotFound, "الجلسة مش موجودة.", "Session not found.");
         var latestProof = await db.PaymentProofs.AsNoTracking().Where(p => p.BookingId == bookingId && p.AdjustmentId == null)
             .OrderByDescending(p => p.SubmittedAtUtc).FirstOrDefaultAsync(ct);
         var topUp = await db.FinancialAdjustments.AsNoTracking()
@@ -223,7 +223,7 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
     public async Task ChooseTopUpAsync(string token, string choiceText, CancellationToken ct)
     {
         if (!Enum.TryParse<TopUpChoice>(choiceText, out var choice))
-            throw new DomainException("booking.invalid_choice", "اختار: تدفع الفرق، أو تنقل لميعاد تاني، أو تسترد فلوسك.");
+            throw new DomainException("booking.invalid_choice", "اختار: تدفع الفرق، أو تنقل لميعاد تاني، أو تسترد فلوسك.", "Choose: pay the difference, move to another time, or get a refund.");
         var bookingId = await FindIdAsync(token, ct);
         var sessionId = await db.Bookings.Where(b => b.Id == bookingId).Select(b => b.SessionId).SingleAsync(ct);
 
@@ -233,9 +233,9 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var adj = await db.FinancialAdjustments.FirstOrDefaultAsync(a => a.BookingId == bookingId
             && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending, ct);
         if (booking.Status != BookingStatus.TopUpPending || adj is null)
-            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.");
+            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.", "There is no top-up due on this booking.");
         if (await db.PaymentProofs.AnyAsync(p => p.AdjustmentId == adj.Id && p.Status == PaymentProofStatus.Submitted, ct))
-            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.");
+            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.", "The top-up proof is already under review.");
 
         var now = clock.UtcNow;
         adj.StudentChoice = choice;
@@ -273,9 +273,9 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var adj = await db.FinancialAdjustments.FirstOrDefaultAsync(a => a.BookingId == bookingId
             && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending, ct);
         if (booking.Status != BookingStatus.TopUpPending || adj is null)
-            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.");
+            throw new DomainException(BookingErrors.NoTopUp, "مفيش فرق مطلوب على الحجز ده.", "There is no top-up due on this booking.");
         if (await db.PaymentProofs.AnyAsync(p => p.AdjustmentId == adj.Id && p.Status == PaymentProofStatus.Submitted, ct))
-            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.");
+            throw new DomainException(BookingErrors.InvalidState, "إيصال الفرق تحت المراجعة بالفعل.", "The top-up proof is already under review.");
 
         var now = clock.UtcNow;
         adj.StudentChoice = TopUpChoice.PayDifference;
@@ -307,13 +307,12 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
         var session = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
         var now = clock.UtcNow;
         if (!CanCancel(booking.IsExpired(now) ? BookingStatus.Expired : booking.Status, session, now))
-            throw new DomainException(BookingErrors.CancelNotAllowed, "مينفعش تلغي الحجز ده دلوقتي.");
+            throw new DomainException(BookingErrors.CancelNotAllowed, "مينفعش تلغي الحجز ده دلوقتي.", "This booking can't be cancelled now.");
 
         var paid = booking.Status is BookingStatus.PaymentUnderReview or BookingStatus.Confirmed or BookingStatus.TopUpPending;
         var fullRefund = now <= session.StartUtc.AddHours(-cfg.FullRefundCancellationHours);
         if (paid && !fullRefund && !acceptNoRefund)
-            throw new DomainException(BookingErrors.CancelNotAllowed,
-                $"الإلغاء قبل الجلسة بأقل من {cfg.FullRefundCancellationHours} ساعة مش بيرجّع الفلوس. أكّد إنك موافق تلغي من غير استرداد.");
+            throw new DomainException(BookingErrors.CancelNotAllowed, $"الإلغاء قبل الجلسة بأقل من {cfg.FullRefundCancellationHours} ساعة مش بيرجّع الفلوس. أكّد إنك موافق تلغي من غير استرداد.", $"Cancelling less than {cfg.FullRefundCancellationHours} hours before the session is not refundable. Confirm you accept cancelling without a refund.");
 
         await db.FinancialAdjustments
             .Where(a => a.BookingId == bookingId && a.Type == AdjustmentType.TopUpDue && a.Status == AdjustmentStatus.Pending)
@@ -341,19 +340,19 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
     {
         var cfg = await settings.GetBookingSettingsAsync(ct);
         if (length <= 0 || length > cfg.MaxProofFileSizeKb * 1024L)
-            throw new DomainException(BookingErrors.InvalidFile, $"The image must be smaller than {cfg.MaxProofFileSizeKb / 1024} MB.");
+            throw new DomainException(BookingErrors.InvalidFile, $"الصورة لازم تكون أصغر من {cfg.MaxProofFileSizeKb / 1024} ميجا.", $"The image must be smaller than {cfg.MaxProofFileSizeKb / 1024} MB.");
         var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, ct);
         if (buffer.Length > cfg.MaxProofFileSizeKb * 1024L)
-            throw new DomainException(BookingErrors.InvalidFile, "The image is too large.");
+            throw new DomainException(BookingErrors.InvalidFile, "الصورة حجمها كبير.", "The image is too large.");
         var kind = ImageSniffer.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)))
-                   ?? throw new DomainException(BookingErrors.InvalidFile, "Only JPG, PNG or WebP screenshots are accepted.");
+                   ?? throw new DomainException(BookingErrors.InvalidFile, "ارفع صورة بصيغة JPG أو PNG أو WebP.", "Only JPG, PNG or WebP images are accepted.");
         return (buffer, kind);
     }
 
     private async Task<PaymentMethod> FindMethodAsync(Guid id, CancellationToken ct) =>
         await db.PaymentMethods.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id && m.IsActive, ct)
-        ?? throw new DomainException("payment.method_not_found", "Payment method not found.");
+        ?? throw new DomainException("payment.method_not_found", "طريقة الدفع مش موجودة.", "Payment method not found.");
 
     private static string? Trim100(string? s) =>
         string.IsNullOrWhiteSpace(s) ? null : s.Trim()[..Math.Min(s.Trim().Length, 100)];
@@ -369,22 +368,22 @@ public sealed class BookingService(IDoseDbContext db, IClock clock, SettingsServ
             .SingleAsync(ct);
 
         if (row.Status != BookingStatus.Confirmed || row.SessionStatus == SessionStatus.Cancelled)
-            throw new DomainException(BookingErrors.JoinNotAvailable, "Only confirmed bookings can join the session.");
+            throw new DomainException(BookingErrors.JoinNotAvailable, "الدخول للجلسة متاح للحجوزات المؤكدة بس.", "Only confirmed bookings can join the session.");
         if (now < row.StartUtc.AddMinutes(-cfg.JoinOpensMinutesBeforeStart))
-            throw new DomainException(BookingErrors.JoinNotAvailable, "The session link opens shortly before the start time.");
+            throw new DomainException(BookingErrors.JoinNotAvailable, "رابط الجلسة بيتفتح قبل الميعاد بشوية.", "The session link opens shortly before the start time.");
         if (now > row.EndUtc)
-            throw new DomainException(BookingErrors.JoinNotAvailable, "This session has ended.");
+            throw new DomainException(BookingErrors.JoinNotAvailable, "الجلسة دي خلصت.", "This session has ended.");
         if (string.IsNullOrWhiteSpace(row.MeetingUrl))
-            throw new DomainException(BookingErrors.JoinNotAvailable, "The meeting link has not been added yet. Please contact us on WhatsApp.");
+            throw new DomainException(BookingErrors.JoinNotAvailable, "رابط الجلسة لسه متضافش. كلّمنا على واتساب.", "The meeting link has not been added yet. Please contact us on WhatsApp.");
         return new JoinResponse(row.MeetingUrl);
     }
 
     private async Task<Guid> FindIdAsync(string token, CancellationToken ct)
     {
-        if (!AccessTokens.LooksValid(token)) throw new DomainException(BookingErrors.NotFound, "Booking not found.");
+        if (!AccessTokens.LooksValid(token)) throw new DomainException(BookingErrors.NotFound, "الحجز مش موجود. اتأكد إنك فاتح اللينك الصح.", "Booking not found. Make sure you opened the right link.");
         var hash = AccessTokens.Hash(token);
         var id = await db.Bookings.Where(b => b.AccessTokenHash == hash).Select(b => (Guid?)b.Id).FirstOrDefaultAsync(ct);
-        return id ?? throw new DomainException(BookingErrors.NotFound, "Booking not found.");
+        return id ?? throw new DomainException(BookingErrors.NotFound, "الحجز مش موجود. اتأكد إنك فاتح اللينك الصح.", "Booking not found. Make sure you opened the right link.");
     }
 
     private Task<Session?> LoadSessionAsync(Guid id, CancellationToken ct, bool tracking = true)

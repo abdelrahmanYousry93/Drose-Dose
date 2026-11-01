@@ -26,13 +26,13 @@ public static class PricingPlanResolver
     {
         var matches = plans.Where(p => Matches(p, ctx)).ToList();
         if (matches.Count == 0)
-            throw new DomainException(PricingErrors.NotConfigured,
-                "No active pricing plan matches this grade band, track, subject, service type and mode.");
+            throw new DomainException(PricingErrors.NotConfigured, "مفيش خطة تسعير مفعّلة مناسبة للجلسة دي.", "No active pricing plan matches this grade band, track, subject, service type and mode.");
 
         var best = matches.Max(p => p.Specificity);
         var top = matches.Where(p => p.Specificity == best).ToList();
         if (top.Count > 1)
             throw new DomainException(PricingErrors.Ambiguous,
+                $"فيه {top.Count} خطط تسعير بنفس الدرجة بتنطبق: {string.Join("، ", top.Select(p => p.Name))}.",
                 $"{top.Count} pricing plans match with equal specificity: {string.Join(", ", top.Select(p => p.Name))}.");
         return top[0];
     }
@@ -63,24 +63,24 @@ public static class PricingPlanResolver
 public static class TierRules
 {
     /// <summary>Returns validation errors (empty when valid): ranges, overlaps and gaps.</summary>
-    public static IReadOnlyList<string> Validate(IEnumerable<PricingTier> tiers)
+    public static IReadOnlyList<LocalizedText> Validate(IEnumerable<PricingTier> tiers)
     {
-        var errors = new List<string>();
+        var errors = new List<LocalizedText>();
         var ordered = tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants).ToList();
         foreach (var t in ordered)
         {
-            if (t.MinParticipants < 1) errors.Add($"الشريحة '{t.NameAr}': أقل عدد لازم يكون 1 على الأقل.");
-            if (t.MaxParticipants < t.MinParticipants) errors.Add($"الشريحة '{t.NameAr}': أكبر عدد أقل من أقل عدد.");
-            if (t.PricePerStudent <= 0) errors.Add($"الشريحة '{t.NameAr}': السعر لازم يكون أكبر من صفر.");
+            if (t.MinParticipants < 1) errors.Add(new($"الشريحة '{t.NameAr}': أقل عدد لازم يكون 1 على الأقل.", $"Size '{t.NameAr}': the minimum must be at least 1."));
+            if (t.MaxParticipants < t.MinParticipants) errors.Add(new($"الشريحة '{t.NameAr}': أكبر عدد أقل من أقل عدد.", $"Size '{t.NameAr}': the maximum is below the minimum."));
+            if (t.PricePerStudent <= 0) errors.Add(new($"الشريحة '{t.NameAr}': السعر لازم يكون أكبر من صفر.", $"Size '{t.NameAr}': the price must be greater than zero."));
         }
         for (var i = 1; i < ordered.Count; i++)
         {
             var prev = ordered[i - 1];
             var cur = ordered[i];
             if (cur.MinParticipants <= prev.MaxParticipants)
-                errors.Add($"الشريحتين '{prev.NameAr}' و'{cur.NameAr}' متداخلين.");
+                errors.Add(new($"الشريحتين '{prev.NameAr}' و'{cur.NameAr}' متداخلين.", $"Sizes '{prev.NameAr}' and '{cur.NameAr}' overlap."));
             else if (cur.MinParticipants > prev.MaxParticipants + 1)
-                errors.Add($"فيه فجوة بين '{prev.NameAr}' و'{cur.NameAr}' (من {prev.MaxParticipants + 1} لـ {cur.MinParticipants - 1} طلاب).");
+                errors.Add(new($"فيه فجوة بين '{prev.NameAr}' و'{cur.NameAr}' (من {prev.MaxParticipants + 1} لـ {cur.MinParticipants - 1} طلاب).", $"Gap between '{prev.NameAr}' and '{cur.NameAr}' ({prev.MaxParticipants + 1}–{cur.MinParticipants - 1} students)."));
         }
         return errors;
     }
@@ -88,7 +88,7 @@ public static class TierRules
     public static void EnsureValid(IEnumerable<PricingTier> tiers)
     {
         var errors = Validate(tiers);
-        if (errors.Count > 0) throw new DomainException(PricingErrors.InvalidTiers, string.Join(" ", errors));
+        if (errors.Count > 0) throw new DomainException(PricingErrors.InvalidTiers, string.Join(" ", errors.Select(e => e.Ar)), string.Join(" ", errors.Select(e => e.En)));
     }
 }
 
@@ -103,7 +103,7 @@ public static class GroupPricing
     {
         var tiers = version.Tiers.Where(t => t.IsActive).OrderBy(t => t.MinParticipants).ToList();
         if (tiers.Count == 0)
-            throw new DomainException(PricingErrors.InvalidTiers, "التسعير الجماعي محتاج شريحة واحدة على الأقل.");
+            throw new DomainException(PricingErrors.InvalidTiers, "التسعير الجماعي محتاج شريحة واحدة على الأقل.", "Group pricing needs at least one group size.");
 
         var match = tiers.FirstOrDefault(t => count >= t.MinParticipants && count <= t.MaxParticipants);
         if (match is not null) return match.PricePerStudent;

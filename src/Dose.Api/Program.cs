@@ -18,6 +18,8 @@ builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Ad
 builder.Services.AddOptions<PublicSettings>().Bind(builder.Configuration.GetSection(PublicSettings.SectionName));
 
 builder.Services.AddDoseApplication();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<Dose.Application.Abstractions.IRequestLanguage, HttpRequestLanguage>();
 builder.Services.AddDoseInfrastructure(builder.Configuration);
 
 // ----- Admin / teacher authentication: Identity with an HTTP-only, same-site cookie -----

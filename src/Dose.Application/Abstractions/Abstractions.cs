@@ -65,3 +65,19 @@ public interface IFileStorage
     Task<string> SaveAsync(Stream content, string extension, CancellationToken ct);
     Task<Stream?> OpenAsync(string key, CancellationToken ct);
 }
+
+/// <summary>The language of the current request ("ar" or "en"), resolved from the Accept-Language header.</summary>
+public interface IRequestLanguage
+{
+    string Code { get; }
+    bool IsEnglish => Code == "en";
+    /// <summary>Picks the English text when requested and available, otherwise Arabic.</summary>
+    string Pick(string ar, string? en) => IsEnglish && !string.IsNullOrWhiteSpace(en) ? en : ar;
+}
+
+public sealed class FixedLanguage(string code) : IRequestLanguage
+{
+    public static readonly FixedLanguage Arabic = new("ar");
+    public static readonly FixedLanguage English = new("en");
+    public string Code { get; } = code;
+}

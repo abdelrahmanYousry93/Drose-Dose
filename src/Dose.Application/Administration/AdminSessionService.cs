@@ -35,7 +35,7 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
 
     public async Task<SessionAdminDto> GetAsync(Guid id, CancellationToken ct)
     {
-        var s = AdminGuard.Found(await Query().FirstOrDefaultAsync(x => x.Id == id, ct), "الجلسة");
+        var s = AdminGuard.Found(await Query().FirstOrDefaultAsync(x => x.Id == id, ct), Fields.Session);
         return (await ToDtosAsync([s], ct))[0];
     }
 
@@ -52,9 +52,9 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
 
     public async Task UpdateAsync(Guid id, SessionSaveRequest req, string actor, CancellationToken ct)
     {
-        var session = AdminGuard.Found(await db.Sessions.FirstOrDefaultAsync(s => s.Id == id, ct), "الجلسة");
+        var session = AdminGuard.Found(await db.Sessions.FirstOrDefaultAsync(s => s.Id == id, ct), Fields.Session);
         if (session.Status is SessionStatus.Cancelled or SessionStatus.Completed)
-            throw new DomainException(AdminErrors.Invalid, "مينفعش تعديل جلسة ملغية أو منتهية.");
+            throw new DomainException(AdminErrors.Invalid, "مينفعش تعديل جلسة ملغية أو منتهية.", "A cancelled or completed session can't be edited.");
         var hasBookings = await ActiveBookings(id).AnyAsync(ct);
         var before = new { session.TeacherId, session.StartUtc, session.EndUtc, session.MeetingUrl };
         await ApplyAsync(session, req, hasBookings, ct);
@@ -64,10 +64,10 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
 
     public async Task PublishAsync(Guid id, string actor, CancellationToken ct)
     {
-        var s = AdminGuard.Found(await db.Sessions.Include(x => x.Teacher).FirstOrDefaultAsync(x => x.Id == id, ct), "الجلسة");
-        if (s.Status != SessionStatus.Draft) throw new DomainException(AdminErrors.Invalid, "الجلسة دي مش مسودة.");
-        if (!s.Teacher!.IsPublished) throw new DomainException(AdminErrors.Invalid, "ملف المدرس مش منشور. انشره الأول من صفحة المدرسين.");
-        if (s.BookingDeadlineUtc <= clock.UtcNow) throw new DomainException(AdminErrors.Invalid, "آخر ميعاد للحجز عدّى. غيّر ميعاد الجلسة.");
+        var s = AdminGuard.Found(await db.Sessions.Include(x => x.Teacher).FirstOrDefaultAsync(x => x.Id == id, ct), Fields.Session);
+        if (s.Status != SessionStatus.Draft) throw new DomainException(AdminErrors.Invalid, "الجلسة دي مش مسودة.", "This session is not a draft.");
+        if (!s.Teacher!.IsPublished) throw new DomainException(AdminErrors.Invalid, "ملف المدرس مش منشور. انشره الأول من صفحة المدرسين.", "The teacher profile isn't published. Publish it first from the Teachers page.");
+        if (s.BookingDeadlineUtc <= clock.UtcNow) throw new DomainException(AdminErrors.Invalid, "آخر ميعاد للحجز عدّى. غيّر ميعاد الجلسة.", "The booking deadline has passed. Change the session time.");
         s.Status = SessionStatus.Published;
         db.Audit(clock, actor, nameof(Session), id, "Publish");
         await db.SaveChangesAsync(ct);
@@ -76,12 +76,12 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
     /// <summary>Dose-initiated cancellation: unpaid bookings are cancelled; paid ones move to RefundPending (full refund).</summary>
     public async Task<int> CancelAsync(Guid id, string reason, string actor, CancellationToken ct)
     {
-        reason = AdminGuard.Name(reason, "سبب الإلغاء", 300);
+        reason = AdminGuard.Name(reason, Fields.CancelReason, 300);
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         await db.LockSessionAsync(id, ct);
-        var s = AdminGuard.Found(await db.Sessions.FirstOrDefaultAsync(x => x.Id == id, ct), "الجلسة");
+        var s = AdminGuard.Found(await db.Sessions.FirstOrDefaultAsync(x => x.Id == id, ct), Fields.Session);
         if (s.Status is SessionStatus.Cancelled or SessionStatus.Completed)
-            throw new DomainException(AdminErrors.Invalid, "الجلسة ملغية أو منتهية بالفعل.");
+            throw new DomainException(AdminErrors.Invalid, "الجلسة ملغية أو منتهية بالفعل.", "The session is already cancelled or completed.");
 
         var bookings = await db.Bookings.Where(b => b.SessionId == id && BookingStatuses.SeatOccupying.Contains(b.Status)).ToListAsync(ct);
         foreach (var b in bookings)
@@ -105,7 +105,7 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
     /// </summary>
     public async Task<ReissueLinkResponse> ReissueLinkAsync(Guid bookingId, string actor, CancellationToken ct)
     {
-        var b = AdminGuard.Found(await db.Bookings.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == bookingId, ct), "الحجز");
+        var b = AdminGuard.Found(await db.Bookings.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == bookingId, ct), Fields.Booking);
         var (token, hash) = AccessTokens.Create();
         db.Bookings.Entry(b).Property(x => x.AccessTokenHash).CurrentValue = hash;
         db.Audit(clock, actor, nameof(Booking), b.Id, "ReissueLink", new { b.Reference });
@@ -146,12 +146,12 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
     }
 
     private static SessionMode ParseMode(string? mode) =>
-        Enum.TryParse<SessionMode>(mode, out var m) ? m : throw new DomainException(AdminErrors.Invalid, "اختار فردي أو جماعي.");
+        Enum.TryParse<SessionMode>(mode, out var m) ? m : throw new DomainException(AdminErrors.Invalid, "اختار فردي أو جماعي.", "Choose private or group.");
 
     private async Task<(PricingPlan Plan, PricingPlanVersion Version)> ResolvePricingAsync(
         Guid serviceTypeId, Guid gradeId, Guid trackId, Guid subjectId, SessionMode mode, CancellationToken ct)
     {
-        var grade = AdminGuard.Found(await db.Grades.AsNoTracking().FirstOrDefaultAsync(g => g.Id == gradeId, ct), "الصف");
+        var grade = AdminGuard.Found(await db.Grades.AsNoTracking().FirstOrDefaultAsync(g => g.Id == gradeId, ct), Fields.Grade);
         var plans = await db.PricingPlans.Include(p => p.Versions).ThenInclude(v => v.Tiers)
             .Where(p => p.IsActive && p.ServiceTypeId == serviceTypeId && p.Mode == mode).AsSplitQuery().ToListAsync(ct);
         try
@@ -161,8 +161,7 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         }
         catch (DomainException ex) when (ex.Code == PricingErrors.NotConfigured)
         {
-            throw new DomainException(PricingErrors.NotConfigured,
-                "مفيش خطة تسعير مناسبة للصف والمنهج والمادة ونوع الخدمة دول. أضف خطة من صفحة الأسعار الأول.");
+            throw new DomainException(PricingErrors.NotConfigured, "مفيش خطة تسعير مناسبة للصف والمنهج والمادة ونوع الخدمة دول. أضف خطة من صفحة الأسعار الأول.", "No pricing plan matches this grade, track, subject and service type. Add one from the Pricing page first.");
         }
     }
 
@@ -172,25 +171,24 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         var now = clock.UtcNow;
         var cfg = await settings.GetBookingSettingsAsync(ct);
 
-        if (!await db.ServiceTypes.AnyAsync(x => x.Id == req.ServiceTypeId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الخدمة.");
-        if (!await db.StudyTracks.AnyAsync(x => x.Id == req.StudyTrackId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المنهج.");
+        if (!await db.ServiceTypes.AnyAsync(x => x.Id == req.ServiceTypeId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الخدمة.", "Choose the service type.");
+        if (!await db.StudyTracks.AnyAsync(x => x.Id == req.StudyTrackId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المنهج.", "Choose the curriculum track.");
         if (!await db.GradeSubjects.AnyAsync(x => x.GradeId == req.GradeId && x.SubjectId == req.SubjectId, ct))
-            throw new DomainException(AdminErrors.Invalid, "المادة دي مش مربوطة بالصف ده. اربطها من صفحة الصفوف.");
-        if (!await db.Teachers.AnyAsync(x => x.Id == req.TeacherId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المدرس.");
+            throw new DomainException(AdminErrors.Invalid, "المادة دي مش مربوطة بالصف ده. اربطها من صفحة الصفوف.", "This subject isn't linked to this grade. Link it from the Grades page.");
+        if (!await db.Teachers.AnyAsync(x => x.Id == req.TeacherId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المدرس.", "Choose the teacher.");
         if (req.ChapterId is { } chId && !await db.Chapters.AnyAsync(c => c.Id == chId && c.GradeId == req.GradeId && c.SubjectId == req.SubjectId, ct))
-            throw new DomainException(AdminErrors.Invalid, "الوحدة مش تابعة للصف والمادة دول.");
+            throw new DomainException(AdminErrors.Invalid, "الوحدة مش تابعة للصف والمادة دول.", "The chapter doesn't belong to this grade and subject.");
         if (req.LessonId is { } lId && !await db.Lessons.AnyAsync(l => l.Id == lId && l.ChapterId == req.ChapterId, ct))
-            throw new DomainException(AdminErrors.Invalid, "الدرس مش تابع للوحدة المختارة.");
-        if (req.DurationMinutes is < 15 or > 480) throw new DomainException(AdminErrors.Invalid, "مدة الجلسة لازم تكون بين 15 دقيقة و8 ساعات.");
+            throw new DomainException(AdminErrors.Invalid, "الدرس مش تابع للوحدة المختارة.", "The lesson doesn't belong to the chosen chapter.");
+        if (req.DurationMinutes is < 15 or > 480) throw new DomainException(AdminErrors.Invalid, "مدة الجلسة لازم تكون بين 15 دقيقة و8 ساعات.", "Session duration must be between 15 minutes and 8 hours.");
         var start = DateTime.SpecifyKind(req.StartUtc, DateTimeKind.Utc);
-        if (start <= now.AddHours(1)) throw new DomainException(AdminErrors.Invalid, "ميعاد الجلسة لازم يكون بعد ساعة على الأقل من دلوقتي.");
+        if (start <= now.AddHours(1)) throw new DomainException(AdminErrors.Invalid, "ميعاد الجلسة لازم يكون بعد ساعة على الأقل من دلوقتي.", "The session must start at least one hour from now.");
 
         var pricingChanged = s.PricingPlanVersionId == Guid.Empty || s.Mode != mode || s.TargetTierId != req.TargetTierId ||
                              s.GradeId != req.GradeId || s.SubjectId != req.SubjectId || s.StudyTrackId != req.StudyTrackId ||
                              s.ServiceTypeId != req.ServiceTypeId;
         if (hasBookings && pricingChanged)
-            throw new DomainException(AdminErrors.Conflict,
-                "فيه حجوزات في الجلسة دي، فمينفعش تغيّر الصف أو المادة أو المنهج أو النوع أو حجم الجروب. تقدر تغيّر الميعاد والمدرس والرابط بس.");
+            throw new DomainException(AdminErrors.Conflict, "فيه حجوزات في الجلسة دي، فمينفعش تغيّر الصف أو المادة أو المنهج أو النوع أو حجم الجروب. تقدر تغيّر الميعاد والمدرس والرابط بس.", "This session has bookings, so grade, subject, track, type and group size can't change. You can still change the time, teacher and link.");
 
         if (pricingChanged)
         {
@@ -198,14 +196,14 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
             if (mode == SessionMode.Group)
             {
                 var tier = version.Tiers.FirstOrDefault(t => t.Id == req.TargetTierId && t.IsActive)
-                           ?? throw new DomainException(AdminErrors.Invalid, "اختار حجم الجروب من شرائح خطة التسعير.");
+                           ?? throw new DomainException(AdminErrors.Invalid, "اختار حجم الجروب من شرائح خطة التسعير.", "Choose a group size from the pricing plan's options.");
                 s.TargetTierId = tier.Id;
                 s.Capacity = tier.MaxParticipants;
                 s.MinParticipants = tier.MinParticipants;
             }
             else
             {
-                if (version.PrivatePrice is null) throw new DomainException(PricingErrors.NotConfigured, "خطة التسعير مالهاش سعر للجلسة الفردية.");
+                if (version.PrivatePrice is null) throw new DomainException(PricingErrors.NotConfigured, "خطة التسعير مالهاش سعر للجلسة الفردية.", "The pricing plan has no private session price.");
                 s.TargetTierId = null;
                 s.Capacity = 1;
                 s.MinParticipants = 1;
@@ -222,7 +220,7 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         s.SubjectId = req.SubjectId;
         s.ChapterId = req.ChapterId;
         s.LessonId = req.ChapterId is null ? null : req.LessonId;
-        s.ScopeTitleAr = AdminGuard.Name(req.ScopeTitleAr, "عنوان الجلسة", 200);
+        s.ScopeTitleAr = AdminGuard.Name(req.ScopeTitleAr, Fields.SessionTitle, 200);
         s.ScopeDetailsAr = AdminGuard.Optional(req.ScopeDetailsAr, 2000);
         s.TeacherId = req.TeacherId;
         s.StartUtc = start;
@@ -242,7 +240,6 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
             s.BookingDeadlineUtc = start.AddHours(-cfg.PrivateBookingDeadlineHours);
         }
         if (s.BookingDeadlineUtc <= now)
-            throw new DomainException(AdminErrors.Invalid,
-                "الميعاد قريب جداً: آخر ميعاد للحجز هيكون عدّى. اختار ميعاد أبعد أو غيّر المهلة من الإعدادات.");
+            throw new DomainException(AdminErrors.Invalid, "الميعاد قريب جداً: آخر ميعاد للحجز هيكون عدّى. اختار ميعاد أبعد أو غيّر المهلة من الإعدادات.", "Too soon: the booking deadline would already have passed. Pick a later time or change the deadline in Settings.");
     }
 }

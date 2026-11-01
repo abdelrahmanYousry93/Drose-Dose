@@ -76,9 +76,9 @@ public sealed class SettingsService(IDoseDbContext db, IClock clock)
         foreach (var (key, value) in updates)
         {
             if (!SettingKeys.Definitions.ContainsKey(key))
-                throw new DomainException("settings.unknown_key", $"Unknown setting '{key}'.");
+                throw new DomainException("settings.unknown_key", $"إعداد غير معروف '{key}'.", $"Unknown setting '{key}'.");
             if (!int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var n) || n < 1 || n > 100_000)
-                throw new DomainException("settings.invalid_value", $"Setting '{key}' must be a positive whole number.");
+                throw new DomainException("settings.invalid_value", "القيمة لازم تكون رقم صحيح موجب.", $"Setting '{key}' must be a positive whole number.");
 
             var existing = await db.SystemSettings.FirstOrDefaultAsync(s => s.Key == key, ct);
             var old = existing?.Value ?? SettingKeys.Definitions[key].Default;

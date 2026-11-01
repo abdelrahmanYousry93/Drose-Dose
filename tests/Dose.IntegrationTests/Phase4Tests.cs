@@ -82,7 +82,7 @@ public sealed class Phase4Tests(DatabaseFixture fx)
         Assert.False(mine.CanMarkAttendance);
 
         var details = await svc.DetailsAsync(userId, session.Id, default);
-        Assert.Equal(["سلمى", "كريم"], details.Students.Select(s => s.FirstName).ToArray());
+        Assert.Equal(["سلمى", "كريم"], details.Students.Select(s => s.FirstName).Order().ToArray());
 
         var notYours = await Assert.ThrowsAsync<DomainException>(() => svc.DetailsAsync(otherUser, session.Id, default));
         Assert.Equal(TeacherErrors.NotYours, notYours.Code);
@@ -103,8 +103,10 @@ public sealed class Phase4Tests(DatabaseFixture fx)
 
         await using var check = fx.NewDb();
         Assert.Equal(SessionStatus.Completed, (await check.Sessions.SingleAsync(s => s.Id == session.Id)).Status);
-        var statuses = await check.Bookings.Where(b => b.SessionId == session.Id).OrderBy(b => b.CreatedAtUtc).Select(b => b.Status).ToListAsync();
-        Assert.Equal([BookingStatus.Completed, BookingStatus.NoShow], statuses);
+        var attendedId = items.Single(i => i.Attended).BookingId;
+        var absentId = items.Single(i => !i.Attended).BookingId;
+        Assert.Equal(BookingStatus.Completed, (await check.Bookings.SingleAsync(b => b.Id == attendedId)).Status);
+        Assert.Equal(BookingStatus.NoShow, (await check.Bookings.SingleAsync(b => b.Id == absentId)).Status);
     }
 
     [Fact]

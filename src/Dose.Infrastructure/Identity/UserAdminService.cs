@@ -36,15 +36,15 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     public async Task<string> CreateAsync(CreateUserRequest req, string actor, CancellationToken ct)
     {
         var email = (req.Email ?? "").Trim().ToLowerInvariant();
-        if (!System.Net.Mail.MailAddress.TryCreate(email, out _)) throw new DomainException(AdminErrors.Invalid, "الإيميل مش صحيح.");
-        if (!Roles.Contains(req.Role)) throw new DomainException(AdminErrors.Invalid, "اختار الدور: أدمن أو مدرس.");
-        if (await users.FindByEmailAsync(email) is not null) throw new DomainException(AdminErrors.Conflict, "الإيميل ده عنده حساب بالفعل.");
+        if (!System.Net.Mail.MailAddress.TryCreate(email, out _)) throw new DomainException(AdminErrors.Invalid, "الإيميل مش صحيح.", "The email address is not valid.");
+        if (!Roles.Contains(req.Role)) throw new DomainException(AdminErrors.Invalid, "اختار الدور: أدمن أو مدرس.", "Choose a role: admin or teacher.");
+        if (await users.FindByEmailAsync(email) is not null) throw new DomainException(AdminErrors.Conflict, "الإيميل ده عنده حساب بالفعل.", "This email already has an account.");
         Domain.Teachers.Teacher? teacher = null;
         if (req.Role == DevelopmentSeeder.TeacherRole)
         {
             teacher = await db.Teachers.FirstOrDefaultAsync(t => t.Id == req.TeacherId, ct)
-                      ?? throw new DomainException(AdminErrors.Invalid, "اختار ملف المدرس اللي الحساب ده بتاعه.");
-            if (teacher.UserId is not null) throw new DomainException(AdminErrors.Conflict, "ملف المدرس ده مربوط بحساب تاني.");
+                      ?? throw new DomainException(AdminErrors.Invalid, "اختار ملف المدرس اللي الحساب ده بتاعه.", "Choose the teacher profile this account belongs to.");
+            if (teacher.UserId is not null) throw new DomainException(AdminErrors.Conflict, "ملف المدرس ده مربوط بحساب تاني.", "This teacher profile is linked to another account.");
         }
 
         var user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
@@ -69,12 +69,12 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     public async Task SetDisabledAsync(string userId, bool disabled, string actorUserId, string actor, CancellationToken ct)
     {
         var user = await FindAsync(userId);
-        if (disabled && userId == actorUserId) throw new DomainException(AdminErrors.Invalid, "مينفعش توقف حسابك إنت.");
+        if (disabled && userId == actorUserId) throw new DomainException(AdminErrors.Invalid, "مينفعش توقف حسابك إنت.", "You can't disable your own account.");
         if (disabled && await users.IsInRoleAsync(user, DevelopmentSeeder.AdminRole))
         {
             var admins = await users.GetUsersInRoleAsync(DevelopmentSeeder.AdminRole);
             var active = admins.Count(a => a.LockoutEnd is null || a.LockoutEnd <= DateTimeOffset.UtcNow);
-            if (active <= 1) throw new DomainException(AdminErrors.Invalid, "ده آخر أدمن شغال، مينفعش يتوقف.");
+            if (active <= 1) throw new DomainException(AdminErrors.Invalid, "ده آخر أدمن شغال، مينفعش يتوقف.", "This is the last active admin and can't be disabled.");
         }
         await users.SetLockoutEnabledAsync(user, true);
         Check(await users.SetLockoutEndDateAsync(user, disabled ? DateTimeOffset.MaxValue : null));
@@ -87,13 +87,13 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     {
         var user = await FindAsync(userId);
         if (!await users.IsInRoleAsync(user, DevelopmentSeeder.TeacherRole))
-            throw new DomainException(AdminErrors.Invalid, "الحساب ده مش حساب مدرس.");
+            throw new DomainException(AdminErrors.Invalid, "الحساب ده مش حساب مدرس.", "This account is not a teacher account.");
         var current = await db.Teachers.Where(t => t.UserId == userId).ToListAsync(ct);
         foreach (var t in current) t.UserId = null;
         if (teacherId is { } id)
         {
-            var teacher = await db.Teachers.FirstOrDefaultAsync(t => t.Id == id, ct) ?? throw new DomainException(AdminErrors.Invalid, "ملف المدرس مش موجود.");
-            if (teacher.UserId is not null && teacher.UserId != userId) throw new DomainException(AdminErrors.Conflict, "ملف المدرس ده مربوط بحساب تاني.");
+            var teacher = await db.Teachers.FirstOrDefaultAsync(t => t.Id == id, ct) ?? throw new DomainException(AdminErrors.Invalid, "ملف المدرس مش موجود.", "Teacher profile not found.");
+            if (teacher.UserId is not null && teacher.UserId != userId) throw new DomainException(AdminErrors.Conflict, "ملف المدرس ده مربوط بحساب تاني.", "This teacher profile is linked to another account.");
             teacher.UserId = userId;
         }
         Audit(actor, userId, "LinkTeacher", new { teacherId });
@@ -101,7 +101,7 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     }
 
     private async Task<IdentityUser> FindAsync(string userId) =>
-        await users.FindByIdAsync(userId) ?? throw new DomainException(AdminErrors.NotFound, "الحساب مش موجود.");
+        await users.FindByIdAsync(userId) ?? throw new DomainException(AdminErrors.NotFound, "الحساب مش موجود.", "Account not found.");
 
     private void Audit(string actor, string userId, string action, object? data = null) =>
         db.AuditLogs.Add(new AuditLog
@@ -113,16 +113,18 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     private static void Check(IdentityResult r)
     {
         if (r.Succeeded) return;
-        var msg = string.Join(" ", r.Errors.Select(e => e.Code switch
+        static (string Ar, string En) Text(IdentityError e) => e.Code switch
         {
-            "PasswordTooShort" => "كلمة السر لازم تكون 10 حروف على الأقل.",
-            "PasswordRequiresDigit" => "كلمة السر لازم فيها رقم.",
-            "PasswordRequiresLower" => "كلمة السر لازم فيها حرف إنجليزي صغير.",
-            "PasswordRequiresUpper" => "كلمة السر لازم فيها حرف إنجليزي كبير.",
-            "PasswordRequiresNonAlphanumeric" => "كلمة السر لازم فيها رمز زي ! أو @.",
-            "DuplicateEmail" or "DuplicateUserName" => "الإيميل ده عنده حساب بالفعل.",
-            _ => e.Description,
-        }).Distinct());
-        throw new DomainException(AdminErrors.Invalid, msg);
+            "PasswordTooShort" => ("كلمة السر لازم تكون 10 حروف على الأقل.", "The password must be at least 10 characters."),
+            "PasswordRequiresDigit" => ("كلمة السر لازم فيها رقم.", "The password needs a digit."),
+            "PasswordRequiresLower" => ("كلمة السر لازم فيها حرف إنجليزي صغير.", "The password needs a lowercase letter."),
+            "PasswordRequiresUpper" => ("كلمة السر لازم فيها حرف إنجليزي كبير.", "The password needs an uppercase letter."),
+            "PasswordRequiresNonAlphanumeric" => ("كلمة السر لازم فيها رمز زي ! أو @.", "The password needs a symbol like ! or @."),
+            "DuplicateEmail" or "DuplicateUserName" => ("الإيميل ده عنده حساب بالفعل.", "This email already has an account."),
+            _ => (e.Description, e.Description),
+        };
+        var texts = r.Errors.Select(Text).Distinct().ToList();
+        var msg = (Ar: string.Join(" ", texts.Select(t => t.Ar)), En: string.Join(" ", texts.Select(t => t.En)));
+        throw new DomainException(AdminErrors.Invalid, msg.Ar, msg.En);
     }
 }

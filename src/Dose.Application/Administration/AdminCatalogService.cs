@@ -22,7 +22,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveStageAsync(StageAdminDto dto, string actor, CancellationToken ct)
     {
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.EducationalStages.FindAsync([id], ct), "المرحلة")
+            ? AdminGuard.Found(await db.EducationalStages.FindAsync([id], ct), Fields.Stage)
             : new EducationalStage { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.RequiresGuardianContact = dto.RequiresGuardianContact;
@@ -42,7 +42,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveStudyTrackAsync(LookupAdminDto dto, string actor, CancellationToken ct)
     {
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.StudyTracks.FindAsync([id], ct), "المنهج")
+            ? AdminGuard.Found(await db.StudyTracks.FindAsync([id], ct), Fields.StudyTrack)
             : new StudyTrack { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.SortOrder = dto.SortOrder;
@@ -61,7 +61,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SavePricingBandAsync(PricingBandAdminDto dto, string actor, CancellationToken ct)
     {
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.PricingBands.FindAsync([id], ct), "شريحة التسعير")
+            ? AdminGuard.Found(await db.PricingBands.FindAsync([id], ct), Fields.PricingBand)
             : new PricingBand { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.SortOrder = dto.SortOrder;
@@ -79,7 +79,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveSubjectAsync(LookupAdminDto dto, string actor, CancellationToken ct)
     {
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.Subjects.FindAsync([id], ct), "المادة")
+            ? AdminGuard.Found(await db.Subjects.FindAsync([id], ct), Fields.Subject)
             : new Subject { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.SortOrder = dto.SortOrder;
@@ -102,15 +102,15 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveGradeAsync(GradeAdminDto dto, string actor, CancellationToken ct)
     {
         if (!await db.EducationalStages.AnyAsync(s => s.Id == dto.StageId, ct))
-            throw new DomainException(AdminErrors.Invalid, "اختار المرحلة.");
+            throw new DomainException(AdminErrors.Invalid, "اختار المرحلة.", "Choose the stage.");
         if (!await db.PricingBands.AnyAsync(b => b.Id == dto.PricingBandId, ct))
-            throw new DomainException(AdminErrors.Invalid, "اختار شريحة التسعير.");
+            throw new DomainException(AdminErrors.Invalid, "اختار شريحة التسعير.", "Choose the pricing band.");
         var subjectIds = (dto.SubjectIds ?? []).Distinct().ToList();
         if (await db.Subjects.CountAsync(s => subjectIds.Contains(s.Id), ct) != subjectIds.Count)
-            throw new DomainException(AdminErrors.Invalid, "فيه مادة مش موجودة.");
+            throw new DomainException(AdminErrors.Invalid, "فيه مادة مش موجودة.", "A subject was not found.");
 
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.Grades.FindAsync([id], ct), "الصف")
+            ? AdminGuard.Found(await db.Grades.FindAsync([id], ct), Fields.Grade)
             : new Grade { NameAr = "" };
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.StageId = dto.StageId;
@@ -143,11 +143,11 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveChapterAsync(ChapterAdminDto dto, string actor, CancellationToken ct)
     {
         if (!await db.Grades.AnyAsync(g => g.Id == dto.GradeId, ct) || !await db.Subjects.AnyAsync(s => s.Id == dto.SubjectId, ct))
-            throw new DomainException(AdminErrors.Invalid, "اختار الصف والمادة.");
+            throw new DomainException(AdminErrors.Invalid, "اختار الصف والمادة.", "Choose the grade and subject.");
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.Chapters.FindAsync([id], ct), "الوحدة")
+            ? AdminGuard.Found(await db.Chapters.FindAsync([id], ct), Fields.Chapter)
             : new Chapter { NameAr = "" };
-        e.NameAr = AdminGuard.Name(dto.NameAr, "اسم الوحدة", 200);
+        e.NameAr = AdminGuard.Name(dto.NameAr, Fields.ChapterName, 200);
         e.GradeId = dto.GradeId;
         e.SubjectId = dto.SubjectId;
         e.StudyTrackId = dto.StudyTrackId;
@@ -166,11 +166,11 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     public async Task<Guid> SaveLessonAsync(LessonAdminDto dto, string actor, CancellationToken ct)
     {
         if (!await db.Chapters.AnyAsync(c => c.Id == dto.ChapterId, ct))
-            throw new DomainException(AdminErrors.Invalid, "اختار الوحدة.");
+            throw new DomainException(AdminErrors.Invalid, "اختار الوحدة.", "Choose the chapter.");
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.Lessons.FindAsync([id], ct), "الدرس")
+            ? AdminGuard.Found(await db.Lessons.FindAsync([id], ct), Fields.Lesson)
             : new Lesson { NameAr = "" };
-        e.NameAr = AdminGuard.Name(dto.NameAr, "اسم الدرس", 200);
+        e.NameAr = AdminGuard.Name(dto.NameAr, Fields.LessonName, 200);
         e.ChapterId = dto.ChapterId;
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
@@ -187,7 +187,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
 
     public async Task SaveServiceTypeAsync(ServiceTypeAdminDto dto, string actor, CancellationToken ct)
     {
-        var e = AdminGuard.Found(await db.ServiceTypes.FindAsync([dto.Id], ct), "نوع الخدمة");
+        var e = AdminGuard.Found(await db.ServiceTypes.FindAsync([dto.Id], ct), Fields.ServiceType);
         e.NameAr = AdminGuard.Name(dto.NameAr);
         e.DescriptionAr = AdminGuard.Optional(dto.DescriptionAr, 1000);
         e.SortOrder = dto.SortOrder;
@@ -204,11 +204,11 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
 
     public async Task<Guid> SaveTeacherAsync(TeacherAdminDto dto, string actor, CancellationToken ct)
     {
-        if (dto.YearsOfExperience is < 0 or > 60) throw new DomainException(AdminErrors.Invalid, "سنين الخبرة مش منطقية.");
+        if (dto.YearsOfExperience is < 0 or > 60) throw new DomainException(AdminErrors.Invalid, "سنين الخبرة مش منطقية.", "Years of experience doesn't look right.");
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.Teachers.FindAsync([id], ct), "المدرس")
+            ? AdminGuard.Found(await db.Teachers.FindAsync([id], ct), Fields.Teacher)
             : new Teacher { DisplayNameAr = "" };
-        e.DisplayNameAr = AdminGuard.Name(dto.DisplayNameAr, "اسم المدرس");
+        e.DisplayNameAr = AdminGuard.Name(dto.DisplayNameAr, Fields.TeacherName);
         e.PhotoUrl = AdminGuard.Url(dto.PhotoUrl);
         e.BioAr = AdminGuard.Optional(dto.BioAr, 2000);
         e.QualificationsAr = AdminGuard.Optional(dto.QualificationsAr, 2000);
@@ -230,16 +230,16 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock)
     {
         var code = (dto.Code ?? "").Trim().ToLowerInvariant();
         if (code.Length is < 2 or > 50 || !code.All(c => char.IsAsciiLetterOrDigit(c) || c == '_'))
-            throw new DomainException(AdminErrors.Invalid, "الكود لازم يكون حروف إنجليزي صغيرة وأرقام و _ فقط.");
+            throw new DomainException(AdminErrors.Invalid, "الكود لازم يكون حروف إنجليزي صغيرة وأرقام و _ فقط.", "The code may only contain lowercase letters, digits and _.");
         if (await db.PaymentMethods.AnyAsync(m => m.Code == code && m.Id != dto.Id, ct))
-            throw new DomainException(AdminErrors.Conflict, "الكود ده مستخدم قبل كده.");
+            throw new DomainException(AdminErrors.Conflict, "الكود ده مستخدم قبل كده.", "This code is already in use.");
 
         var e = dto.Id is { } id
-            ? AdminGuard.Found(await db.PaymentMethods.FindAsync([id], ct), "طريقة الدفع")
+            ? AdminGuard.Found(await db.PaymentMethods.FindAsync([id], ct), Fields.PaymentMethod)
             : new PaymentMethod { Code = code, NameAr = "", ReceivingAccount = "" };
         e.Code = code;
         e.NameAr = AdminGuard.Name(dto.NameAr);
-        e.ReceivingAccount = AdminGuard.Name(dto.ReceivingAccount, "رقم أو عنوان الاستلام");
+        e.ReceivingAccount = AdminGuard.Name(dto.ReceivingAccount, Fields.ReceivingAccount);
         e.InstructionsAr = AdminGuard.Optional(dto.InstructionsAr, 1000);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;

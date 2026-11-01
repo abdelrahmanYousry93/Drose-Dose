@@ -40,37 +40,37 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock)
 
     public async Task<CreateSessionRequestResponse> CreateAsync(CreateSessionRequest req, CancellationToken ct)
     {
-        var name = AdminGuard.Name(req.StudentName, "اسم الطالب");
+        var name = AdminGuard.Name(req.StudentName, Fields.StudentName);
         var phone = PhoneNumber.TryNormalize(req.ContactPhone)
-                    ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم الواتساب مش صحيح.");
+                    ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم الواتساب مش صحيح.", "The WhatsApp number is not valid.");
         string? guardianPhone = null;
         if (!string.IsNullOrWhiteSpace(req.GuardianPhone))
             guardianPhone = PhoneNumber.TryNormalize(req.GuardianPhone)
-                            ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم واتساب ولي الأمر مش صحيح.");
+                            ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم واتساب ولي الأمر مش صحيح.", "The guardian's WhatsApp number is not valid.");
         var guardianName = AdminGuard.Optional(req.GuardianName, 100);
 
         var grade = await db.Grades.Include(g => g.Stage).FirstOrDefaultAsync(g => g.Id == req.GradeId && g.IsActive, ct)
-                    ?? throw new DomainException(AdminErrors.Invalid, "اختار الصف.");
+                    ?? throw new DomainException(AdminErrors.Invalid, "اختار الصف.", "Choose the grade.");
         if (grade.Stage!.RequiresGuardianContact && (guardianName is null || guardianPhone is null))
-            throw new DomainException(BookingErrors.GuardianRequired, "اسم ورقم واتساب ولي الأمر مطلوبين للمرحلة دي.");
+            throw new DomainException(BookingErrors.GuardianRequired, "اسم ورقم واتساب ولي الأمر مطلوبين للمرحلة دي.", "Guardian name and WhatsApp number are required for this stage.");
         if (!await db.GradeSubjects.AnyAsync(x => x.GradeId == req.GradeId && x.SubjectId == req.SubjectId, ct))
-            throw new DomainException(AdminErrors.Invalid, "اختار المادة.");
-        if (!await db.StudyTracks.AnyAsync(x => x.Id == req.StudyTrackId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المنهج.");
-        if (!await db.ServiceTypes.AnyAsync(x => x.Id == req.ServiceTypeId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الشرح.");
-        if (!Enum.TryParse<SessionMode>(req.Mode, out var mode)) throw new DomainException(AdminErrors.Invalid, "اختار فردي أو جماعي.");
+            throw new DomainException(AdminErrors.Invalid, "اختار المادة.", "Choose the subject.");
+        if (!await db.StudyTracks.AnyAsync(x => x.Id == req.StudyTrackId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المنهج.", "Choose the curriculum track.");
+        if (!await db.ServiceTypes.AnyAsync(x => x.Id == req.ServiceTypeId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الشرح.", "Choose the type of help.");
+        if (!Enum.TryParse<SessionMode>(req.Mode, out var mode)) throw new DomainException(AdminErrors.Invalid, "اختار فردي أو جماعي.", "Choose private or group.");
         if (mode == SessionMode.Group && req.PreferredTierId is { } tierId && !await db.PricingTiers.AnyAsync(t => t.Id == tierId, ct))
-            throw new DomainException(AdminErrors.Invalid, "حجم الجروب مش موجود.");
+            throw new DomainException(AdminErrors.Invalid, "حجم الجروب مش موجود.", "Group size option not found.");
 
         var days = (req.PreferredDays ?? []).Where(Days.Contains).Distinct().ToList();
         var times = (req.PreferredTimes ?? []).Where(Times.Contains).Distinct().ToList();
-        if (days.Count == 0 || times.Count == 0) throw new DomainException(AdminErrors.Invalid, "اختار الأيام والأوقات المناسبة.");
+        if (days.Count == 0 || times.Count == 0) throw new DomainException(AdminErrors.Invalid, "اختار الأيام والأوقات المناسبة.", "Choose the days and times that suit you.");
 
         var entity = new SessionRequest
         {
             Reference = "RQ-" + AccessTokens.NewReference()[3..],
             StudentName = name, ContactPhoneE164 = phone, GuardianName = guardianName, GuardianPhoneE164 = guardianPhone,
             GradeId = req.GradeId, StudyTrackId = req.StudyTrackId, SubjectId = req.SubjectId, ServiceTypeId = req.ServiceTypeId,
-            ScopeText = AdminGuard.Name(req.ScopeText, "الجزء المطلوب شرحه", 1000),
+            ScopeText = AdminGuard.Name(req.ScopeText, Fields.Scope, 1000),
             PreferredDays = string.Join("، ", days), PreferredTimes = string.Join("، ", times),
             Mode = mode, PreferredTierId = mode == SessionMode.Group ? req.PreferredTierId : null,
             Notes = AdminGuard.Optional(req.Notes, 1000), CreatedAtUtc = clock.UtcNow,
@@ -103,10 +103,10 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock)
 
     public async Task UpdateStatusAsync(Guid id, UpdateRequestStatus req, string actor, CancellationToken ct)
     {
-        var r = AdminGuard.Found(await db.SessionRequests.FirstOrDefaultAsync(x => x.Id == id, ct), "الطلب");
-        if (!Enum.TryParse<SessionRequestStatus>(req.Status, out var status)) throw new DomainException(AdminErrors.Invalid, "حالة غير معروفة.");
+        var r = AdminGuard.Found(await db.SessionRequests.FirstOrDefaultAsync(x => x.Id == id, ct), Fields.Request);
+        if (!Enum.TryParse<SessionRequestStatus>(req.Status, out var status)) throw new DomainException(AdminErrors.Invalid, "حالة غير معروفة.", "Unknown status.");
         if (req.FulfilledBySessionId is { } sid && !await db.Sessions.AnyAsync(s => s.Id == sid, ct))
-            throw new DomainException(AdminErrors.Invalid, "الجلسة مش موجودة.");
+            throw new DomainException(AdminErrors.Invalid, "الجلسة مش موجودة.", "Session not found.");
         r.Status = status;
         r.AdminNotes = AdminGuard.Optional(req.AdminNotes, 1000);
         if (req.FulfilledBySessionId is not null) r.FulfilledBySessionId = req.FulfilledBySessionId;

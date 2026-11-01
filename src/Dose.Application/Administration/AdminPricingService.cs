@@ -24,28 +24,28 @@ public sealed class AdminPricingService(IDoseDbContext db, IClock clock)
     public async Task<PricingPlanAdminDto> PlanAsync(Guid id, CancellationToken ct)
     {
         var plan = AdminGuard.Found(await db.PricingPlans.AsNoTracking().Include(p => p.Versions).ThenInclude(v => v.Tiers)
-            .AsSplitQuery().FirstOrDefaultAsync(p => p.Id == id, ct), "خطة التسعير");
+            .AsSplitQuery().FirstOrDefaultAsync(p => p.Id == id, ct), Fields.PricingPlan);
         return ToDto(plan);
     }
 
     public async Task<Guid> SavePlanAsync(PricingPlanAdminDto dto, string actor, CancellationToken ct)
     {
-        if (!Enum.TryParse<SessionMode>(dto.Mode, out var mode)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الجلسة.");
-        if (!Enum.TryParse<PricingPolicy>(dto.Policy, out var policy)) throw new DomainException(AdminErrors.Invalid, "اختار سياسة التسعير.");
+        if (!Enum.TryParse<SessionMode>(dto.Mode, out var mode)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الجلسة.", "Choose the session type.");
+        if (!Enum.TryParse<PricingPolicy>(dto.Policy, out var policy)) throw new DomainException(AdminErrors.Invalid, "اختار سياسة التسعير.", "Choose the pricing policy.");
         var currency = (dto.Currency ?? "").Trim().ToUpperInvariant();
-        if (currency.Length != 3 || !currency.All(char.IsAsciiLetterUpper)) throw new DomainException(AdminErrors.Invalid, "العملة لازم تكون 3 حروف زي EGP.");
-        if (!await db.ServiceTypes.AnyAsync(s => s.Id == dto.ServiceTypeId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الخدمة.");
-        if (dto.PricingBandId is { } b && !await db.PricingBands.AnyAsync(x => x.Id == b, ct)) throw new DomainException(AdminErrors.Invalid, "شريحة التسعير مش موجودة.");
-        if (dto.StudyTrackId is { } t && !await db.StudyTracks.AnyAsync(x => x.Id == t, ct)) throw new DomainException(AdminErrors.Invalid, "المنهج مش موجود.");
-        if (dto.SubjectId is { } s && !await db.Subjects.AnyAsync(x => x.Id == s, ct)) throw new DomainException(AdminErrors.Invalid, "المادة مش موجودة.");
+        if (currency.Length != 3 || !currency.All(char.IsAsciiLetterUpper)) throw new DomainException(AdminErrors.Invalid, "العملة لازم تكون 3 حروف زي EGP.", "Currency must be a 3-letter code like EGP.");
+        if (!await db.ServiceTypes.AnyAsync(s => s.Id == dto.ServiceTypeId, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الخدمة.", "Choose the service type.");
+        if (dto.PricingBandId is { } b && !await db.PricingBands.AnyAsync(x => x.Id == b, ct)) throw new DomainException(AdminErrors.Invalid, "شريحة التسعير مش موجودة.", "Pricing band not found.");
+        if (dto.StudyTrackId is { } t && !await db.StudyTracks.AnyAsync(x => x.Id == t, ct)) throw new DomainException(AdminErrors.Invalid, "المنهج مش موجود.", "Curriculum track not found.");
+        if (dto.SubjectId is { } s && !await db.Subjects.AnyAsync(x => x.Id == s, ct)) throw new DomainException(AdminErrors.Invalid, "المادة مش موجودة.", "Subject not found.");
         var from = DateTime.SpecifyKind(dto.EffectiveFromUtc, DateTimeKind.Utc);
         DateTime? to = dto.EffectiveToUtc is { } x2 ? DateTime.SpecifyKind(x2, DateTimeKind.Utc) : null;
-        if (to <= from) throw new DomainException(AdminErrors.Invalid, "تاريخ النهاية لازم يكون بعد تاريخ البداية.");
+        if (to <= from) throw new DomainException(AdminErrors.Invalid, "تاريخ النهاية لازم يكون بعد تاريخ البداية.", "The end date must be after the start date.");
 
         var plan = dto.Id is { } id
-            ? AdminGuard.Found(await db.PricingPlans.FindAsync([id], ct), "خطة التسعير")
+            ? AdminGuard.Found(await db.PricingPlans.FindAsync([id], ct), Fields.PricingPlan)
             : new PricingPlan { Name = "" };
-        plan.Name = AdminGuard.Name(dto.Name, "اسم الخطة", 150);
+        plan.Name = AdminGuard.Name(dto.Name, Fields.PlanName, 150);
         plan.ServiceTypeId = dto.ServiceTypeId;
         plan.Mode = mode;
         plan.PricingBandId = dto.PricingBandId;
@@ -62,8 +62,7 @@ public sealed class AdminPricingService(IDoseDbContext db, IClock clock)
             .ToListAsync(ct);
         var clash = others.FirstOrDefault(o => PricingPlanResolver.ConflictsWith(plan, o));
         if (clash is not null)
-            throw new DomainException(AdminErrors.Conflict,
-                $"فيه خطة تانية \"{clash.Name}\" بنفس الأبعاد وفي نفس الفترة. عدّل الأبعاد أو التواريخ أو وقّف واحدة منهم.");
+            throw new DomainException(AdminErrors.Conflict, $"فيه خطة تانية \"{clash.Name}\" بنفس الأبعاد وفي نفس الفترة. عدّل الأبعاد أو التواريخ أو وقّف واحدة منهم.", $"Another plan \"{clash.Name}\" has the same dimensions in the same period. Change the dimensions or dates, or deactivate one of them.");
 
         if (dto.Id is null) db.PricingPlans.Add(plan);
         db.Audit(clock, actor, nameof(PricingPlan), plan.Id, dto.Id is null ? "Create" : "Update",
@@ -76,26 +75,26 @@ public sealed class AdminPricingService(IDoseDbContext db, IClock clock)
     public async Task<PricingPlanAdminDto> SavePricesAsync(Guid planId, SavePricesRequest req, string actor, CancellationToken ct)
     {
         var plan = AdminGuard.Found(await db.PricingPlans.Include(p => p.Versions).ThenInclude(v => v.Tiers)
-            .AsSplitQuery().FirstOrDefaultAsync(p => p.Id == planId, ct), "خطة التسعير");
+            .AsSplitQuery().FirstOrDefaultAsync(p => p.Id == planId, ct), Fields.PricingPlan);
 
-        if (req.PrivatePrice is <= 0) throw new DomainException(AdminErrors.Invalid, "سعر الطالب الواحد لازم يكون أكبر من صفر.");
+        if (req.PrivatePrice is <= 0) throw new DomainException(AdminErrors.Invalid, "سعر الطالب الواحد لازم يكون أكبر من صفر.", "The single-student price must be greater than zero.");
         var tiers = (req.Tiers ?? []).Select((t, i) => new PricingTier
         {
-            NameAr = AdminGuard.Name(t.NameAr, "اسم الشريحة"),
+            NameAr = AdminGuard.Name(t.NameAr, Fields.TierName),
             MinParticipants = t.MinParticipants, MaxParticipants = t.MaxParticipants,
             PricePerStudent = t.PricePerStudent, SortOrder = t.SortOrder == 0 ? i + 1 : t.SortOrder,
         }).ToList();
 
         if (plan.Mode == SessionMode.Private)
         {
-            if (req.PrivatePrice is null) throw new DomainException(AdminErrors.Invalid, "الجلسة الفردية محتاجة سعر.");
-            if (tiers.Count > 0) throw new DomainException(AdminErrors.Invalid, "الجلسة الفردية مالهاش شرائح جروب.");
+            if (req.PrivatePrice is null) throw new DomainException(AdminErrors.Invalid, "الجلسة الفردية محتاجة سعر.", "A private session needs a price.");
+            if (tiers.Count > 0) throw new DomainException(AdminErrors.Invalid, "الجلسة الفردية مالهاش شرائح جروب.", "A private session has no group sizes.");
         }
         else
         {
-            if (tiers.Count == 0) throw new DomainException(AdminErrors.Invalid, "الجلسة الجماعية محتاجة شريحة واحدة على الأقل.");
+            if (tiers.Count == 0) throw new DomainException(AdminErrors.Invalid, "الجلسة الجماعية محتاجة شريحة واحدة على الأقل.", "A group session needs at least one group size.");
             var errors = TierRules.Validate(tiers);
-            if (errors.Count > 0) throw new DomainException(PricingErrors.InvalidTiers, string.Join(" ", errors));
+            if (errors.Count > 0) throw new DomainException(PricingErrors.InvalidTiers, string.Join(" ", errors.Select(e => e.Ar)), string.Join(" ", errors.Select(e => e.En)));
         }
 
         var current = plan.CurrentVersion;
