@@ -1,7 +1,8 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, SessionDetails } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
+import { PublicSettingsService } from '../../core/public-settings.service';
 import { GroupTermsBox } from '../../shared/group-terms';
 import { TeacherCard } from '../../shared/teacher-card';
 
@@ -51,7 +52,7 @@ import { TeacherCard } from '../../shared/teacher-card';
           <ul class="bullets">
             <li>الدفع بإنستاباي أو فودافون كاش، وبعدين ترفع صورة التحويل.</li>
             <li>الحجز بيتأكد بعد ما نراجع الدفع.</li>
-            <li>لو لغيت قبل الجلسة بـ 24 ساعة أو أكتر بترجعلك فلوسك كاملة. ولو إحنا لغينا الجلسة بترجع كاملة دايماً.</li>
+            <li>لو لغيت قبل الجلسة بـ {{ refundHours() }} ساعة أو أكتر بترجعلك فلوسك كاملة. ولو إحنا لغينا الجلسة بترجع كاملة دايماً.</li>
             <li>رابط الجلسة بيوصلك على صفحة الحجز الخاصة بيك قبل الميعاد.</li>
           </ul>
           @if (d()!.requiresGuardianContact) {
@@ -82,6 +83,8 @@ import { TeacherCard } from '../../shared/teacher-card';
 export class SessionDetailsPage {
   private readonly api = inject(Api);
   private readonly router = inject(Router);
+  private readonly publicSettings = inject(PublicSettingsService);
+  protected readonly refundHours = computed(() => this.publicSettings.settings()?.fullRefundCancellationHours ?? 24);
   readonly id = input.required<string>();
 
   protected readonly d = signal<SessionDetails | null>(null);

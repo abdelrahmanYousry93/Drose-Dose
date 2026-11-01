@@ -31,6 +31,14 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-config').then((m) => m.AdminPaymentMethods),
       },
       { path: 'settings', component: AdminSettings, title: 'الإعدادات — Dose' },
+      {
+        path: 'follow-ups', title: 'المتابعات — Dose',
+        loadComponent: () => import('./admin-followups').then((m) => m.AdminFollowUps),
+      },
+      {
+        path: 'requests', title: 'طلبات الجلسات — Dose',
+        loadComponent: () => import('./admin-followups').then((m) => m.AdminRequests),
+      },
     ],
   },
 ];

@@ -62,6 +62,8 @@ export class AdminLogin {
   template: `
     <nav class="admin-nav">
       <a routerLink="/admin/payments" routerLinkActive="on">المدفوعات</a>
+      <a routerLink="/admin/follow-ups" routerLinkActive="on">المتابعات</a>
+      <a routerLink="/admin/requests" routerLinkActive="on">الطلبات</a>
       <a routerLink="/admin/sessions" routerLinkActive="on">الجلسات</a>
       <a routerLink="/admin/pricing" routerLinkActive="on">الأسعار</a>
       <a routerLink="/admin/teachers" routerLinkActive="on">المدرسين</a>
@@ -107,7 +109,7 @@ export class AdminShell {
       @for (p of proofs(); track p.id) {
         <article class="dose-card item" [class.late]="p.status === 'Submitted' && p.ageMinutes > 60">
           <div class="row">
-            <strong dir="ltr">{{ p.bookingReference }}</strong>
+            <strong dir="ltr">{{ p.bookingReference }} @if (p.isTopUp) { <span class="badge">فرق جروب</span> }</strong>
             <span class="badge" [class.badge--yellow]="p.status === 'Submitted'" [class.badge--green]="p.status === 'Approved'"
                   [class.badge--gray]="p.status === 'Rejected'">{{ statusAr(p.status) }}</span>
           </div>

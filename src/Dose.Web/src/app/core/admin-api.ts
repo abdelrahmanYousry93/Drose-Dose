@@ -50,6 +50,19 @@ export interface SessionBookingA {
   id: string; reference: string; status: string; studentName: string | null; contactPhone: string | null;
   guardianName: string | null; guardianPhone: string | null; price: number; currency: string; createdAtUtc: string; confirmedAtUtc: string | null;
 }
+export interface FollowUp {
+  bookingId: string; kind: 'TopUp' | 'Refund' | 'Transfer'; bookingReference: string; bookingStatus: string;
+  studentName: string | null; contactPhone: string | null; guardianPhone: string | null; sessionId: string; sessionTitleAr: string;
+  sessionStartUtc: string; paidAmount: number; currency: string; topUpAmount: number | null; respondByUtc: string | null;
+  studentChoice: string | null; topUpProofStatus: string | null; reason: string | null; overdue: boolean;
+}
+export interface SessionRequestA {
+  id: string; reference: string; status: string; studentName: string; contactPhone: string; guardianName: string | null;
+  guardianPhone: string | null; gradeId: string; gradeNameAr: string; studyTrackId: string; studyTrackNameAr: string;
+  subjectId: string; subjectNameAr: string; serviceTypeId: string; serviceTypeNameAr: string; scopeText: string;
+  preferredDays: string; preferredTimes: string; mode: 'Private' | 'Group'; preferredTierNameAr: string | null;
+  notes: string | null; adminNotes: string | null; fulfilledBySessionId: string | null; createdAtUtc: string;
+}
 export interface ReissueLink { reference: string; accessToken: string; contactPhone: string | null; message: string }
 
 @Injectable({ providedIn: 'root' })
@@ -118,6 +131,17 @@ export class AdminApi {
   cancel(id: string, reason: string) { return this.post<{ refundsPending: number }>(`/sessions/${id}/cancel`, { reason }); }
   sessionBookings(id: string) { return this.get<SessionBookingA[]>(`/sessions/${id}/bookings`); }
   reissueLink(bookingId: string) { return this.post<ReissueLink>(`/bookings/${bookingId}/reissue-link`, {}); }
+  decide(sessionId: string) { return this.post<void>(`/sessions/${sessionId}/decide`, {}); }
+
+  // Follow-ups & requests
+  followUps() { return this.get<FollowUp[]>('/follow-ups'); }
+  waive(bookingId: string, note: string) { return this.post<void>(`/follow-ups/${bookingId}/waive`, { note }); }
+  markRefunded(bookingId: string, note: string) { return this.post<void>(`/follow-ups/${bookingId}/refunded`, { note }); }
+  markTransferDone(bookingId: string, note: string) { return this.post<void>(`/follow-ups/${bookingId}/transfer-done`, { note }); }
+  requests(status: string | null) { return this.get<SessionRequestA[]>('/session-requests', { status }); }
+  updateRequest(id: string, status: string, adminNotes: string | null, fulfilledBySessionId: string | null = null) {
+    return this.post<void>(`/session-requests/${id}/status`, { status, adminNotes, fulfilledBySessionId });
+  }
 }
 
 /** Converts a Cairo local date ("2026-11-05") + time ("18:00") to a UTC ISO string, DST-aware. */

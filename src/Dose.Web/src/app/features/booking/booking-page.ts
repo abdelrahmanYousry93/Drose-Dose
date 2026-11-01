@@ -43,6 +43,8 @@ export class BookingPage {
   protected methodId = '';
   protected senderReference = '';
   protected file: File | null = null;
+  protected topUpChoice: '' | 'PayDifference' | 'Transfer' | 'Refund' = '';
+  protected acceptNoRefund = false;
 
   protected readonly fmt = { date: fmtDate, time: fmtTime, dateTime: fmtDateTime, duration: fmtDuration, money: fmtMoney };
 
@@ -61,7 +63,7 @@ export class BookingPage {
     if (s === 'PendingHold') return 1;
     if (s === 'PendingPayment') return 2;
     if (s === 'PaymentUnderReview') return 3;
-    if (s === 'Confirmed' || s === 'Completed') return 4;
+    if (s === 'Confirmed' || s === 'Completed' || s === 'TopUpPending') return 4;
     return 0;
   });
 
@@ -110,6 +112,33 @@ export class BookingPage {
     }
     await this.act(() => this.api.uploadProof(this.token(), this.methodId, this.file!, this.senderReference));
     this.file = null;
+  }
+
+  protected isPaid(v: BookingView) {
+    return v.status === 'PaymentUnderReview' || v.status === 'Confirmed' || v.status === 'TopUpPending';
+  }
+
+  protected fullRefundAvailable(v: BookingView) {
+    return this.now() <= new Date(v.fullRefundUntilUtc).getTime();
+  }
+
+  protected async chooseTopUp() {
+    if (!this.topUpChoice) return;
+    await this.act(() => this.api.topUpChoice(this.token(), this.topUpChoice));
+  }
+
+  protected async uploadTopUp() {
+    if (!this.file || !this.methodId) {
+      this.actionError.set('اختار طريقة الدفع وارفع صورة التحويل.');
+      return;
+    }
+    await this.act(() => this.api.uploadTopUpProof(this.token(), this.methodId, this.file!, ''));
+    this.file = null;
+  }
+
+  protected async cancelBooking() {
+    if (!confirm('متأكد إنك عايز تلغي الحجز؟')) return;
+    await this.act(() => this.api.cancelBooking(this.token(), this.acceptNoRefund));
   }
 
   protected async joinSession() {

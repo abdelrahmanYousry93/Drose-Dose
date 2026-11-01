@@ -38,6 +38,8 @@ const messages: Record<string, string> = {
   'booking.invalid_file': 'ارفع صورة بصيغة JPG أو PNG أو WebP وحجمها مناسب.',
   'booking.join_not_available': 'رابط الجلسة لسه مش متاح.',
   'payment.reason_required': 'اكتب سبب الرفض للطالب.',
+  'booking.no_topup': 'مفيش فرق مطلوب على الحجز ده.',
+  'booking.invalid_choice': 'اختار واحد من الاختيارات.',
   'http.401': 'لازم تسجّل دخول.',
   'http.403': 'مش مسموح لك بالصفحة دي.',
   'http.429': 'محاولات كتير. استنى دقيقة وجرّب تاني.',

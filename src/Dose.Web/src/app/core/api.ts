@@ -44,11 +44,24 @@ export interface BookingView {
   requiresGuardianContact: boolean; price: number; currency: string; holdExpiresAtUtc: string | null;
   paymentDueAtUtc: string | null; studentName: string | null; latestProofStatus: string | null;
   latestProofRejectionReason: string | null; canJoinNow: boolean; joinOpensAtUtc: string | null; whatsAppMessage: string;
+  topUp: TopUpView | null; fullRefundUntilUtc: string; canCancel: boolean;
+}
+export interface TopUpView {
+  amount: number; currency: string; respondByUtc: string | null; reason: string | null;
+  choice: 'PayDifference' | 'Transfer' | 'Refund' | null; proofStatus: string | null; proofRejectionReason: string | null;
+}
+export interface GroupOption { id: string; nameAr: string; minParticipants: number; maxParticipants: number; pricePerStudent: number }
+export interface PriceOptions { currency: string; privatePrice: number | null; groupOptions: GroupOption[] }
+export interface SessionRequestBody {
+  studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null;
+  gradeId: string; studyTrackId: string; subjectId: string; serviceTypeId: string; scopeText: string;
+  preferredDays: string[]; preferredTimes: string[]; mode: 'Private' | 'Group'; preferredTierId: string | null; notes: string | null;
 }
 export interface PaymentProofAdmin {
   id: string; bookingReference: string; bookingStatus: string; studentName: string; contactPhone: string;
   guardianPhone: string | null; sessionTitleAr: string; sessionStartUtc: string; methodNameAr: string; amount: number;
   currency: string; senderReference: string | null; channel: string; status: string; submittedAtUtc: string; ageMinutes: number;
+  isTopUp: boolean;
 }
 export interface Setting { key: string; value: string; descriptionAr: string | null }
 
@@ -107,6 +120,19 @@ export class Api {
     return this.post<void>(`/b/${encodeURIComponent(token)}/payment-proofs`, form);
   }
   join(token: string) { return this.get<{ meetingUrl: string }>(`/b/${encodeURIComponent(token)}/join`); }
+  topUpChoice(token: string, choice: string) { return this.post<void>(`/b/${encodeURIComponent(token)}/top-up-choice`, { choice }); }
+  uploadTopUpProof(token: string, methodId: string, file: File, senderReference: string) {
+    const form = new FormData();
+    form.append('paymentMethodId', methodId);
+    form.append('screenshot', file);
+    if (senderReference) form.append('senderReference', senderReference);
+    return this.post<void>(`/b/${encodeURIComponent(token)}/top-up-proofs`, form);
+  }
+  cancelBooking(token: string, acceptNoRefund: boolean) { return this.post<void>(`/b/${encodeURIComponent(token)}/cancel`, { acceptNoRefund }); }
+  priceOptions(q: { serviceTypeId: string; gradeId: string; studyTrackId: string; subjectId: string }) {
+    return this.get<PriceOptions | null>('/price-options', q);
+  }
+  createRequest(body: SessionRequestBody) { return this.post<{ reference: string; whatsAppMessage: string }>('/session-requests', body); }
 
   // Auth & admin
   login(email: string, password: string) { return this.post<void>('/auth/login', { email, password }); }

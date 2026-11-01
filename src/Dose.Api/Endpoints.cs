@@ -23,8 +23,9 @@ public static class Endpoints
         var api = app.MapGroup("/api");
 
         api.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-        api.MapGet("/public-settings", (IOptions<PublicSettings> s) =>
-            Results.Ok(new PublicSettingsDto(s.Value.WhatsAppBusinessNumber, s.Value.BusinessTimeZone)));
+        api.MapGet("/public-settings", async (IOptions<PublicSettings> s, SettingsService settings, CancellationToken ct) =>
+            Results.Ok(new PublicSettingsDto(s.Value.WhatsAppBusinessNumber, s.Value.BusinessTimeZone,
+                (await settings.GetBookingSettingsAsync(ct)).FullRefundCancellationHours)));
 
         // ---------- Public catalog ----------
         var catalog = api.MapGroup("/catalog");

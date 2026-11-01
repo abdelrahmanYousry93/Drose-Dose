@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  AdminApi, ChapterA, GradeA, LessonA, PricingPreview, ReissueLink, SessionA, SessionBookingA, SessionSave, cairoToUtc, utcToCairo,
+  AdminApi, ChapterA, GradeA, LessonA, PricingPreview, ReissueLink, SessionA, SessionBookingA, SessionRequestA, SessionSave, cairoToUtc, utcToCairo,
 } from '../../core/admin-api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
 import { Option } from './entity-editor';
@@ -13,7 +13,7 @@ interface Form {
 }
 
 const STATUS_AR: Record<string, string> = {
-  Draft: 'مسودة', Published: 'منشورة', TopUpRequired: 'محتاجة حسم الفرق', Confirmed: 'مؤكدة', InProgress: 'شغالة',
+  Draft: 'مسودة', Published: 'منشورة', TopUpRequired: 'مستنية رد الطلاب على الفرق', Confirmed: 'مؤكدة', InProgress: 'شغالة',
   Completed: 'خلصت', Cancelled: 'ملغية',
   PendingHold: 'حجز مؤقت', PendingPayment: 'منتظر الدفع', PaymentUnderReview: 'الدفع تحت المراجعة', TopUpPending: 'منتظر قرار الفرق',
   Expired: 'انتهت المهلة', RefundPending: 'محتاج استرداد', Refunded: 'اترد', Transferred: 'اتنقل', NoShow: 'محضرش',
@@ -65,6 +65,8 @@ export class AdminSessions {
   protected readonly bookings = signal<SessionBookingA[]>([]);
   protected readonly link = signal<(ReissueLink & { url: string; full: string }) | null>(null);
   protected readonly copied = signal(false);
+  /** Set when the admin came from "create session from request". */
+  protected readonly fromRequest = signal<SessionRequestA | null>((history.state?.fromRequest as SessionRequestA | undefined) ?? null);
 
   constructor() {
     void this.load();
@@ -75,6 +77,8 @@ export class AdminSessions {
         this.tracks.set(t.filter((x) => x.isActive).map((x) => ({ id: x.id!, nameAr: x.nameAr })));
         this.subjects.set(su.map((x) => ({ id: x.id!, nameAr: x.nameAr })));
         this.teachers.set(te.map((x) => ({ id: x.id!, nameAr: x.displayNameAr, published: x.isPublished })));
+        const r = this.fromRequest();
+        if (r) void this.prefillFromRequest(r);
       })
       .catch((e) => this.error.set(errorMessage(e)));
   }
@@ -99,6 +103,18 @@ export class AdminSessions {
     });
     this.preview.set(null);
     this.formError.set('');
+  }
+
+  private async prefillFromRequest(r: SessionRequestA) {
+    this.newSession();
+    const f = this.form()!;
+    Object.assign(f, {
+      serviceTypeId: r.serviceTypeId, gradeId: r.gradeId, studyTrackId: r.studyTrackId, subjectId: r.subjectId,
+      scopeTitleAr: r.scopeText.slice(0, 200), scopeDetailsAr: '', mode: r.mode,
+    });
+    this.form.set({ ...f });
+    await this.loadChapters();
+    await this.refreshPreview();
   }
 
   protected async edit(s: SessionA) {
@@ -173,6 +189,11 @@ export class AdminSessions {
       if (id) await this.api.updateSession(id, body);
       else id = (await this.api.createSession(body)).id;
       if (publish) await this.api.publish(id);
+      const req = this.fromRequest();
+      if (req && !this.editingId()) {
+        await this.api.updateRequest(req.id, 'Fulfilled', req.adminNotes, id);
+        this.fromRequest.set(null);
+      }
       this.notice.set(publish ? 'الجلسة اتحفظت واتنشرت للطلاب ✓' : 'الجلسة اتحفظت ✓');
       this.form.set(null);
       await this.load();
@@ -196,6 +217,11 @@ export class AdminSessions {
       this.notice.set(r.refundsPending ? `الجلسة اتلغت. فيه ${r.refundsPending} حجز محتاج استرداد — كلّمهم على واتساب.` : 'الجلسة اتلغت.');
       await this.load();
     } catch (e) { this.error.set(errorMessage(e)); }
+  }
+
+  protected async decide(s: SessionA) {
+    if (!confirm('حسم الجروب دلوقتي؟ لو العدد مكملش، كل طالب هيتطلب منه الفرق أو يختار ينقل أو يسترد. ده بيحصل تلقائي في ميعاد الحسم.')) return;
+    try { await this.api.decide(s.id); this.notice.set('اتحسم ✓ — شوف صفحة المتابعات.'); await this.load(); } catch (e) { this.error.set(errorMessage(e)); }
   }
 
   protected async showBookings(s: SessionA) {

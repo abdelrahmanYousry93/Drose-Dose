@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 export interface PublicSettings {
   whatsAppBusinessNumber: string;
   businessTimeZone: string;
+  fullRefundCancellationHours: number;
 }
 
 /** Loads non-sensitive settings from the API. Nothing here is hard-coded in the client. */

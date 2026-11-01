@@ -27,8 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'request-session',
-    loadComponent: () => import('./features/coming-soon/coming-soon').then((m) => m.ComingSoon),
-    data: { heading: 'طلب جلسة جديدة' },
+    loadComponent: () => import('./features/request/request-session').then((m) => m.RequestSession),
     title: 'طلب جلسة — Dose',
   },
   {

@@ -154,6 +154,74 @@
         </div>
       }
 
+      @case ('TopUpPending') {
+        @let t = v.topUp!;
+        <div class="dose-card box topup">
+          <h2>الجروب مكملش العدد</h2>
+          <p>{{ t.reason }}. علشان الجلسة تتم بنفس الميعاد، المطلوب فرق <strong class="price">{{ fmt.money(t.amount, t.currency) }}</strong>.</p>
+          @if (t.respondByUtc) { <p class="muted small">ياريت ترد قبل {{ fmt.dateTime(t.respondByUtc) }}.</p> }
+          <p class="muted small">مفيش أي مبلغ هيتخصم منك من غير ما تختار.</p>
+
+          @if (t.proofStatus === 'Submitted') {
+            <p class="alert alert--info">استلمنا إيصال الفرق وبنراجعه. أول ما يتأكد حجزك هيرجع مؤكد.</p>
+          } @else {
+            @if (t.proofStatus === 'Rejected') { <p class="alert alert--error">إيصال الفرق اترفض: {{ t.proofRejectionReason }}</p> }
+            <div class="choices" role="radiogroup" aria-label="اختار">
+              <label class="choice" [class.on]="topUpChoice === 'PayDifference'">
+                <input type="radio" name="topup" value="PayDifference" [(ngModel)]="topUpChoice" />
+                <strong>أدفع الفرق</strong><span class="muted small">وأحضر في نفس الميعاد</span></label>
+              <label class="choice" [class.on]="topUpChoice === 'Transfer'">
+                <input type="radio" name="topup" value="Transfer" [(ngModel)]="topUpChoice" />
+                <strong>أنقل لميعاد تاني</strong><span class="muted small">هنكلمك على واتساب نرتّب</span></label>
+              <label class="choice" [class.on]="topUpChoice === 'Refund'">
+                <input type="radio" name="topup" value="Refund" [(ngModel)]="topUpChoice" />
+                <strong>أسترد فلوسي كاملة</strong><span class="muted small">{{ fmt.money(v.price, v.currency) }}</span></label>
+            </div>
+
+            @if (topUpChoice === 'PayDifference') {
+              <div class="methods" role="radiogroup" aria-label="طريقة الدفع">
+                @for (m of methods(); track m.id) {
+                  <label class="method" [class.on]="methodId === m.id">
+                    <input type="radio" name="method2" [value]="m.id" [(ngModel)]="methodId" />
+                    <span class="m-name">{{ m.nameAr }}</span>
+                    <span class="m-acc" dir="ltr">{{ m.receivingAccount }}</span>
+                  </label>
+                }
+              </div>
+              <label class="field"><span>صورة تحويل الفرق <span class="req">*</span></span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFile($event)" /></label>
+              <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadTopUp()" [disabled]="busy()">ارفع إيصال الفرق</button>
+            } @else if (topUpChoice) {
+              <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="chooseTopUp()" [disabled]="busy()">
+                {{ topUpChoice === 'Refund' ? 'أكّد الاسترداد' : 'أكّد النقل لميعاد تاني' }}</button>
+            }
+          }
+        </div>
+      }
+
+      @case ('RefundPending') {
+        <div class="dose-card box center">
+          <h2>طلب الاسترداد وصلنا</h2>
+          <p class="muted">هنرجّعلك فلوسك على نفس الرقم اللي حوّلت منه، وهنبلغك على واتساب أول ما تتحوّل.</p>
+        </div>
+      }
+      @case ('Refunded') {
+        <div class="dose-card box center"><h2>فلوسك رجعت ✓</h2><p class="muted">لو محتاج أي حاجة كلّمنا على واتساب.</p></div>
+      }
+      @case ('Transferred') {
+        <div class="dose-card box center">
+          <h2>هننقلك لميعاد تاني</h2>
+          <p class="muted">هنكلمك على واتساب نتفق على الميعاد الجديد، وحجزك الجديد هيوصلك على لينك جديد.</p>
+        </div>
+      }
+      @case ('Cancelled') {
+        <div class="dose-card box center">
+          <h2>الحجز اتلغى</h2>
+          <p class="muted">تقدر تحجز جلسة تانية في أي وقت.</p>
+          <a class="dose-btn dose-btn--ghost" routerLink="/sessions">الجلسات المتاحة</a>
+        </div>
+      }
+
       @case ('Expired') {
         <div class="dose-card box center">
           <h2>مدة الحجز خلصت</h2>
@@ -168,6 +236,23 @@
           <p class="muted">لو عندك أي سؤال كلّمنا على واتساب.</p>
         </div>
       }
+    }
+
+    @if (v.canCancel) {
+      <details class="cancel">
+        <summary>محتاج تلغي الحجز؟</summary>
+        @if (isPaid(v)) {
+          @if (fullRefundAvailable(v)) {
+            <p class="small">لو لغيت دلوقتي هترجعلك فلوسك كاملة (الإلغاء المجاني لحد {{ fmt.dateTime(v.fullRefundUntilUtc) }}).</p>
+          } @else {
+            <p class="small alert">فاضل وقت قليل على الجلسة، فالإلغاء دلوقتي <strong>مش بيرجّع الفلوس</strong>.</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="acceptNoRefund" /><span>موافق ألغي من غير استرداد</span></label>
+          }
+        } @else {
+          <p class="small">لسه مدفعتش، فالإلغاء هيفك المقعد بس.</p>
+        }
+        <button class="dose-btn cancel-btn" type="button" (click)="cancelBooking()" [disabled]="busy()">إلغاء الحجز</button>
+      </details>
     }
 
     @if (whatsAppLink(); as wa) {

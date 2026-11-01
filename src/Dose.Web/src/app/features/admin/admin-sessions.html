@@ -9,6 +9,10 @@
   @if (form(); as f) {
     <form class="dose-card editor" (ngSubmit)="save(false)">
       <h2>{{ editingId() ? 'تعديل الجلسة' : 'جلسة جديدة' }}</h2>
+      @if (fromRequest(); as r) {
+        <p class="alert alert--info small">من طلب {{ r.reference }}: {{ r.studentName }} — المواعيد المناسبة: {{ r.preferredDays }} ({{ r.preferredTimes }}).
+          بعد الحفظ الطلب هيتعلّم إنه اتعملّه جلسة، وابعت للطالب رابط الجلسة على واتساب.</p>
+      }
       @if (lockedPricing()) {
         <p class="alert alert--info small">فيه حجوزات في الجلسة دي: تقدر تغيّر الميعاد والمدرس والعنوان والرابط بس. لو غيّرت الميعاد بلّغ الطلاب على واتساب.</p>
       }
@@ -124,6 +128,7 @@
         <li><span>السعر</span><span>{{ money(s.pricePerStudent, s.currency) }}</span></li>
         <li><span>الحجوزات</span><span>{{ s.confirmedCount }} مؤكد · {{ s.occupiedCount }} من {{ s.capacity }} مقعد</span></li>
         <li><span>آخر حجز</span><span>{{ dt(s.bookingDeadlineUtc) }}</span></li>
+        @if (s.tierDecisionAtUtc) { <li><span>حسم الجروب</span><span>{{ dt(s.tierDecisionAtUtc) }}</span></li> }
         <li><span>رابط الجلسة</span><span>{{ s.meetingUrl ? 'موجود ✓' : 'لسه' }}</span></li>
       </ul>
       <div class="actions">
@@ -131,6 +136,7 @@
           <button type="button" class="dose-btn dose-btn--ghost" (click)="edit(s)">تعديل</button>
         }
         @if (s.status === 'Draft') { <button type="button" class="dose-btn dose-btn--primary" (click)="publish(s)">نشر</button> }
+        @if (s.status === 'Published' && s.mode === 'Group') { <button type="button" class="dose-btn dose-btn--ghost" (click)="decide(s)">حسم الجروب الآن</button> }
         <button type="button" class="dose-btn dose-btn--ghost" (click)="showBookings(s)">الحجوزات</button>
         @if (s.status !== 'Cancelled' && s.status !== 'Completed') {
           <button type="button" class="dose-btn danger" (click)="cancel(s)">إلغاء الجلسة</button>
