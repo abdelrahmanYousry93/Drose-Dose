@@ -24,8 +24,25 @@ Need npm    "comes with Node.js"
 if (-not ((dotnet --list-sdks) -match "^(9\.0\.[3-9]|1[0-9]\.)")) { Write-Host "The .NET 9 SDK (9.0.300 or newer) is required: https://dotnet.microsoft.com/download/dotnet/9.0" -ForegroundColor Red; exit 1 }
 
 # ---------- 1. Database ----------
+# No Docker? Use SQL Server LocalDB (installed with Visual Studio / SQL Server Express) or a running local SQL Server.
+if (-not $ConnectionString -and -not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    if (Get-Command sqllocaldb -ErrorAction SilentlyContinue) {
+        Write-Host "Docker not found - using SQL Server LocalDB." -ForegroundColor Cyan
+        sqllocaldb start MSSQLLocalDB | Out-Null
+        $ConnectionString = "Server=(localdb)\MSSQLLocalDB;Database=Dose;Trusted_Connection=True;TrustServerCertificate=True"
+    } else {
+        $svc = Get-Service -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq "MSSQLSERVER" -or $_.Name -like 'MSSQL$*' } | Select-Object -First 1
+        if ($svc) {
+            if ($svc.Status -ne "Running") { Write-Host "SQL Server service '$($svc.Name)' is installed but stopped. Start it (Services app) and run again." -ForegroundColor Red; exit 1 }
+            $instance = if ($svc.Name -eq "MSSQLSERVER") { "." } else { ".\" + $svc.Name.Substring(6) }
+            Write-Host "Docker not found - using local SQL Server $instance (Windows login)." -ForegroundColor Cyan
+            $ConnectionString = "Server=$instance;Database=Dose;Trusted_Connection=True;TrustServerCertificate=True"
+        }
+    }
+}
+
 if (-not $ConnectionString) {
-    Need docker "install Docker Desktop (https://www.docker.com/products/docker-desktop) or pass -ConnectionString for an existing SQL Server"
+    Need docker "no SQL Server found. Install SQL Server Express (https://www.microsoft.com/sql-server/sql-server-downloads - choose Express) or Docker Desktop, or pass -ConnectionString"
     if (-not (Test-Path "$root\.env")) {
         # A random local-only SA password, kept in .env (git-ignored).
         $saPwd = "Dose_" + [guid]::NewGuid().ToString("N").Substring(0, 12) + "!a1"
