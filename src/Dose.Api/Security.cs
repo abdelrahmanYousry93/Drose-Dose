@@ -29,7 +29,7 @@ public static class Security
         {
             o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             o.ForwardLimit = 1;
-            o.KnownIPNetworks.Clear();
+            o.KnownNetworks.Clear();
             o.KnownProxies.Clear();
         });
 

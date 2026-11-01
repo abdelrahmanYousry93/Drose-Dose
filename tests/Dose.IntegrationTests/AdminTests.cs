@@ -47,6 +47,11 @@ public sealed class AdminTests(DatabaseFixture fx)
     {
         RequireDb();
         var c = await ContextAsync();
+        // Other tests add subject-specific plans for c.SubjectId (more specific, so they would win the resolution).
+        // Use another subject of the same grade so this band-level plan is the one that applies, whatever the test order.
+        await using (var db0 = fx.NewDb())
+            c = c with { SubjectId = await db0.GradeSubjects.Where(gs => gs.GradeId == c.GradeId && gs.SubjectId != c.SubjectId)
+                .Select(gs => gs.SubjectId).FirstAsync() };
         var clock = new FakeClock(fx.SeedTime);
         await using var db = fx.NewDb();
         var pricing = new AdminPricingService(db, clock);

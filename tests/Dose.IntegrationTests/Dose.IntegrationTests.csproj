@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <NoWarn>$(NoWarn);xUnit1051</NoWarn>
   </PropertyGroup>
 

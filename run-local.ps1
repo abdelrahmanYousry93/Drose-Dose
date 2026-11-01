@@ -18,10 +18,10 @@ Set-Location $root
 function Need($cmd, $hint) {
     if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { Write-Host "Missing: $cmd - $hint" -ForegroundColor Red; exit 1 }
 }
-Need dotnet "install the .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0"
+Need dotnet "install the .NET 9 SDK: https://dotnet.microsoft.com/download/dotnet/9.0"
 Need node   "install Node.js 22 LTS or newer: https://nodejs.org"
 Need npm    "comes with Node.js"
-if (-not ((dotnet --list-sdks) -match "^10\.")) { Write-Host "The .NET 10 SDK is required: https://dotnet.microsoft.com/download/dotnet/10.0" -ForegroundColor Red; exit 1 }
+if (-not ((dotnet --list-sdks) -match "^(9\.0\.[3-9]|1[0-9]\.)")) { Write-Host "The .NET 9 SDK (9.0.300 or newer) is required: https://dotnet.microsoft.com/download/dotnet/9.0" -ForegroundColor Red; exit 1 }
 
 # ---------- 1. Database ----------
 if (-not $ConnectionString) {

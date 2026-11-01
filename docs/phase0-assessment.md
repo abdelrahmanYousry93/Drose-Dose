@@ -15,7 +15,7 @@ The repository was created from scratch for this project. It contains:
 
 | Path | What it is | State |
 |---|---|---|
-| `src/Dose.Api` | ASP.NET Core (.NET 10 LTS) host | Health + public-settings endpoints only |
+| `src/Dose.Api` | ASP.NET Core (.NET 9; moved from 10 so it runs on the team machines) host | Health + public-settings endpoints only |
 | `src/Dose.Application` | Use cases, one folder per module | Empty module folders |
 | `src/Dose.Domain` | Entities, enums, value objects, rules | Empty module folders |
 | `src/Dose.Infrastructure` | EF Core, storage, notifications, meetings | Empty |

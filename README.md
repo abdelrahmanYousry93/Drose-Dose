@@ -12,7 +12,7 @@ instead of paying for monthly lessons.
 
 | Layer | Tech |
 |---|---|
-| API | ASP.NET Core, .NET 10 (LTS), modular monolith |
+| API | ASP.NET Core, .NET 9 (builds on the .NET 9 or 10 SDK), modular monolith |
 | Data | SQL Server / Azure SQL, EF Core (from Phase 1) |
 | Jobs | Hangfire on SQL Server: group tier decisions (5 min), expire stale bookings (10 min) |
 | Auth | ASP.NET Core Identity, HTTP-only same-site cookie (admin/teacher); students use secret booking links |
@@ -34,13 +34,13 @@ docs/                   Spec, assessment, brand
 
 ## Prerequisites
 
-- .NET SDK 10.0
+- .NET SDK 9.0.300 or newer (10 works too)
 - Node.js 22+ and npm
 - Docker (for local SQL Server)
 
 ## Run locally
 
-Windows, one command (needs .NET 10 SDK, Node.js 22+, Docker Desktop): `powershell -ExecutionPolicy Bypass -File .\run-local.ps1`
+Windows, one command (needs .NET 9 or 10 SDK, Node.js 22+, Docker Desktop): `powershell -ExecutionPolicy Bypass -File .\run-local.ps1`
 — or with an existing SQL Server: add `-ConnectionString "Server=...;Database=Dose;..."`.
 
 Manual steps:
