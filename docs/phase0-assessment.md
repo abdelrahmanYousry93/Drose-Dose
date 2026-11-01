@@ -335,3 +335,16 @@ Still planned: teacher photo upload (URL for now), session requests (Phase 3), t
 | Tests | 76 passing (6 new Phase 3 integration tests) + browser walkthrough of the full request → booking → decision → top-up → refund flow |
 
 Next (Phase 4): teacher area (login, availability, assigned sessions, attendance), notification log with message templates.
+
+## 8. Phase 4 — delivered
+
+| Area | What works |
+|---|---|
+| Team login | One login page (`/login`) for admins and teachers; each is sent to their own area. Students still need no account |
+| Admin dashboard | Home page with what needs attention (payment proofs and the oldest one's age, open/overdue top-ups, refunds, transfers, new requests, availability to approve), sessions in the next 48h (fill and missing Meet links), groups close to their decision (count vs minimum), and last-30-day numbers (confirmed bookings, collected incl. top-ups, refunds) |
+| User management | Create admin/teacher accounts (teacher accounts linked to a teacher profile), reset password, disable/enable, re-link profile. Safeguards: no self-disable, the last active admin can't be disabled; disabling ends sessions within a minute |
+| Teacher area | "My sessions" (upcoming/past, counts, what needs attendance), session page with the Meet link and **first names only** (no phone numbers), attendance from 15 min before start until 48h after end, "end session" (attended → Completed, absent → NoShow) |
+| Availability | Teachers submit time windows (no overlaps, future only), admins approve/reject with a note, teachers can withdraw |
+| Tests | 80 passing (4 new Phase 4 integration tests incl. user safeguards) + browser walkthrough (admin creates teacher account → teacher logs in → availability → admin approves; teacher blocked from admin pages) |
+
+Not yet: notification log with message templates; teacher photo upload; deployment (Phase 5).

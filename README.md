@@ -76,7 +76,9 @@ New migration: `dotnet ef migrations add <Name> -p src/Dose.Infrastructure -s sr
 | `/sessions`, `/open-groups` | Available sessions / open groups |
 | `/b/<token>` | Student's private booking page (secret link): details → payment → confirmation → join; group top-up choice; cancel |
 | `/request-session` | Request a new session |
-| `/admin` | Admin: payments, follow-ups, requests, sessions, pricing, teachers, catalog, payment methods, settings |
+| `/login` | Team login (admins and teachers) |
+| `/admin` | Admin: dashboard, payments, follow-ups, requests, sessions, pricing, teachers, catalog, payment methods, teacher availability, users, settings |
+| `/teacher` | Teacher: my sessions (Meet link, attendance, end session), my availability |
 
 ## Configuration
 
@@ -96,4 +98,4 @@ never hard-coded.
 
 ## Status
 
-Phase 3 delivered — see `docs/phase0-assessment.md` sections 5–7. Next: Phase 4 (teacher area, notification log).
+Phase 4 delivered — see `docs/phase0-assessment.md` sections 5–8. Next: Phase 5 (hardening, PWA, Azure deployment).
