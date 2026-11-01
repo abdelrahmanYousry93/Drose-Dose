@@ -65,3 +65,25 @@ public sealed record SessionRequestAdminDto(
     Guid ServiceTypeId, string ServiceTypeNameAr, string ScopeText, string PreferredDays, string PreferredTimes, string Mode,
     string? PreferredTierNameAr, string? Notes, string? AdminNotes, Guid? FulfilledBySessionId, DateTime CreatedAtUtc);
 public sealed record UpdateRequestStatus(string Status, string? AdminNotes, Guid? FulfilledBySessionId);
+
+// ---------- Dashboard ----------
+public sealed record DashboardSessionDto(
+    Guid Id, string TitleAr, string SubjectNameAr, string TeacherNameAr, DateTime StartUtc, string Mode, string Status,
+    int ConfirmedCount, int Capacity, int MinParticipants, bool HasMeetingUrl, DateTime? TierDecisionAtUtc);
+public sealed record AdminDashboardDto(
+    int PendingProofs, double? OldestPendingProofMinutes, int OpenTopUps, int OverdueTopUps, int PendingRefunds,
+    int PendingTransfers, int NewRequests, int PendingAvailability,
+    IReadOnlyList<DashboardSessionDto> UpcomingSessions, IReadOnlyList<DashboardSessionDto> GroupsNearDecision,
+    int PeriodDays, int PeriodConfirmedBookings, decimal PeriodCollected, decimal PeriodRefunded, string Currency);
+
+// ---------- Users ----------
+public sealed record UserAdminDto(string Id, string Email, IReadOnlyList<string> Roles, bool IsDisabled, Guid? TeacherId, string? TeacherNameAr);
+public sealed record CreateUserRequest(string Email, string Password, string Role, Guid? TeacherId);
+public sealed record ResetPasswordRequest(string Password);
+public sealed record SetDisabledRequest(bool Disabled);
+public sealed record LinkTeacherRequest(Guid? TeacherId);
+
+// ---------- Availability (admin review) ----------
+public sealed record AvailabilityAdminDto(
+    Guid Id, Guid TeacherId, string TeacherNameAr, DateTime StartUtc, DateTime EndUtc, string? Note, string Status, string? ReviewNote, DateTime CreatedAtUtc);
+public sealed record ReviewAvailabilityRequest(bool Approve, string? Note);

@@ -60,6 +60,8 @@ internal sealed class TeacherConfig : IEntityTypeConfiguration<Teacher>
     {
         e.Property(x => x.BioAr).HasMaxLength(2000);
         e.Property(x => x.QualificationsAr).HasMaxLength(2000);
+        e.Property(x => x.UserId).HasMaxLength(450);
+        e.HasIndex(x => x.UserId).IsUnique().HasFilter("[UserId] IS NOT NULL");
     }
 }
 
@@ -253,5 +255,27 @@ internal sealed class SessionRequestConfig : IEntityTypeConfiguration<SessionReq
         e.HasOne<Session>().WithMany().HasForeignKey(x => x.FulfilledBySessionId).OnDelete(DeleteBehavior.Restrict);
         e.HasIndex(x => new { x.Status, x.CreatedAtUtc });
         e.HasIndex(x => x.ContactPhoneE164);
+    }
+}
+
+internal sealed class TeacherAvailabilityConfig : IEntityTypeConfiguration<TeacherAvailability>
+{
+    public void Configure(EntityTypeBuilder<TeacherAvailability> e)
+    {
+        e.Property(x => x.Note).HasMaxLength(300);
+        e.Property(x => x.ReviewNote).HasMaxLength(300);
+        e.HasOne(x => x.Teacher).WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Restrict);
+        e.HasIndex(x => new { x.TeacherId, x.StartUtc });
+        e.HasIndex(x => new { x.Status, x.StartUtc });
+        e.ToTable(t => t.HasCheckConstraint("CK_Availability_Time", "[EndUtc] > [StartUtc]"));
+    }
+}
+
+internal sealed class AttendanceConfig : IEntityTypeConfiguration<Attendance>
+{
+    public void Configure(EntityTypeBuilder<Attendance> e)
+    {
+        e.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
+        e.HasIndex(x => x.BookingId).IsUnique();
     }
 }

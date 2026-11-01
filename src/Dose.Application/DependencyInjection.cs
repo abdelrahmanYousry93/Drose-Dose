@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<FollowUpService>();
         services.AddScoped<SessionRequestService>();
         services.AddScoped<BookingMaintenance>();
+        services.AddScoped<DashboardService>();
+        services.AddScoped<Teachers.TeacherAreaService>();
         return services;
     }
 }

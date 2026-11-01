@@ -15,6 +15,7 @@ namespace Dose.Api;
 public static class Endpoints
 {
     public const string AdminPolicy = "Admin";
+    public const string TeacherPolicy = "Teacher";
     public const string BookingRateLimit = "booking";
     public const string LoginRateLimit = "login";
 

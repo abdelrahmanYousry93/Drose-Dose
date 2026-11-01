@@ -31,7 +31,8 @@ builder.Services.AddIdentityCore<IdentityUser>(o =>
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<DoseDbContext>()
-    .AddSignInManager();
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(o =>
 {
     o.Cookie.Name = "dose.auth";
@@ -44,7 +45,11 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
 });
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(Endpoints.AdminPolicy, p => p.RequireRole(DevelopmentSeeder.AdminRole));
+    .AddPolicy(Endpoints.AdminPolicy, p => p.RequireRole(DevelopmentSeeder.AdminRole))
+    .AddPolicy(Endpoints.TeacherPolicy, p => p.RequireRole(DevelopmentSeeder.TeacherRole));
+// Disabled accounts and password resets take effect within a minute.
+builder.Services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
+builder.Services.AddScoped<Dose.Infrastructure.Identity.UserAdminService>();
 
 // ----- Rate limiting for public booking and login endpoints (per client IP) -----
 builder.Services.AddRateLimiter(o =>
@@ -97,6 +102,7 @@ if (app.Environment.IsDevelopment())
 app.MapDoseEndpoints();
 app.MapAdminConfigEndpoints();
 app.MapPhase3Endpoints();
+app.MapPhase4Endpoints();
 
 if (jobsEnabled)
 {

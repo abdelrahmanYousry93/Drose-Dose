@@ -34,6 +34,8 @@ public interface IDoseDbContext
     DbSet<AuditLog> AuditLogs { get; }
     DbSet<FinancialAdjustment> FinancialAdjustments { get; }
     DbSet<SessionRequest> SessionRequests { get; }
+    DbSet<TeacherAvailability> TeacherAvailabilities { get; }
+    DbSet<Attendance> Attendances { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);

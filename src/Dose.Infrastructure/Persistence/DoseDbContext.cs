@@ -39,6 +39,8 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<FinancialAdjustment> FinancialAdjustments => Set<FinancialAdjustment>();
     public DbSet<SessionRequest> SessionRequests => Set<SessionRequest>();
+    public DbSet<TeacherAvailability> TeacherAvailabilities => Set<TeacherAvailability>();
+    public DbSet<Attendance> Attendances => Set<Attendance>();
 
     public Task LockSessionAsync(Guid sessionId, CancellationToken ct)
     {

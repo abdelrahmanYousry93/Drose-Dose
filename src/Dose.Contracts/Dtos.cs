@@ -135,3 +135,16 @@ public sealed record CreateSessionRequest(
     Guid GradeId, Guid StudyTrackId, Guid SubjectId, Guid ServiceTypeId, string ScopeText,
     IReadOnlyList<string> PreferredDays, IReadOnlyList<string> PreferredTimes, string Mode, Guid? PreferredTierId, string? Notes);
 public sealed record CreateSessionRequestResponse(string Reference, string WhatsAppMessage);
+
+// ---------- Teacher area ----------
+public sealed record TeacherMeDto(Guid TeacherId, string DisplayNameAr, string Email);
+public sealed record TeacherSessionDto(
+    Guid Id, string TitleAr, string? DetailsAr, string SubjectNameAr, string GradeNameAr, string StudyTrackNameAr,
+    DateTime StartUtc, DateTime EndUtc, string Mode, string Status, int ConfirmedCount, int Capacity, string? MeetingUrl,
+    bool CanMarkAttendance, int AttendanceMarked);
+public sealed record TeacherStudentDto(Guid BookingId, string FirstName, string? Attendance);
+public sealed record TeacherSessionDetailsDto(TeacherSessionDto Session, IReadOnlyList<TeacherStudentDto> Students);
+public sealed record MarkAttendanceRequest(IReadOnlyList<AttendanceItem> Items);
+public sealed record AttendanceItem(Guid BookingId, bool Attended);
+public sealed record AvailabilityDto(Guid Id, DateTime StartUtc, DateTime EndUtc, string? Note, string Status, string? ReviewNote);
+public sealed record SubmitAvailabilityRequest(DateTime StartUtc, DateTime EndUtc, string? Note);
