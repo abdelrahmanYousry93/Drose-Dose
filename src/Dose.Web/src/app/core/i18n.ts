@@ -13,7 +13,8 @@ function detect(): Lang {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'ar' || saved === 'en') return saved;
   } catch { /* storage unavailable */ }
-  return typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'ar';
+  // Arabic is the default for everyone; English only when the visitor picks it (the choice is remembered).
+  return 'ar';
 }
 
 /**
