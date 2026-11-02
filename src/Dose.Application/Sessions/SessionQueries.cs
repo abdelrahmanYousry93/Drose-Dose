@@ -60,7 +60,7 @@ public sealed class SessionQueries(IDoseDbContext db, IClock clock, IRequestLang
     public async Task<IReadOnlyList<SessionSummaryDto>> ListAsync(SessionFilter f, CancellationToken ct)
     {
         var now = clock.UtcNow;
-        var q = WithDetails().Where(s => s.Status == SessionStatus.Published && s.BookingDeadlineUtc > now && s.StartUtc > now);
+        var q = WithDetails().Where(s => s.Status == SessionStatus.Published && !s.IsClosed && s.BookingDeadlineUtc > now && s.StartUtc > now);
         if (f.GradeId is { } g) q = q.Where(s => s.GradeId == g);
         if (f.SubjectId is { } sub) q = q.Where(s => s.SubjectId == sub);
         if (f.StudyTrackId is { } t) q = q.Where(s => s.StudyTrackId == t);
@@ -76,7 +76,7 @@ public sealed class SessionQueries(IDoseDbContext db, IClock clock, IRequestLang
 
     public async Task<SessionDetailsDto?> GetAsync(Guid id, CancellationToken ct)
     {
-        var s = await WithDetails().AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id && x.Status != SessionStatus.Draft, ct);
+        var s = await WithDetails().AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id && x.Status != SessionStatus.Draft && !x.IsClosed, ct);
         if (s is null) return null;
         var counts = await CountsAsync([s.Id], ct);
         return ToDetails(s, counts.GetValueOrDefault(s.Id), clock.UtcNow, _lang);
@@ -90,8 +90,9 @@ public sealed class SessionQueries(IDoseDbContext db, IClock clock, IRequestLang
             .Select(g => new
             {
                 g.Key,
-                Occupied = g.Count(),
-                Confirmed = g.Count(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.TopUpPending),
+                // Seats, not rows: a private-group organizer holds all the seats they paid for.
+                Occupied = g.Sum(b => b.SeatCount),
+                Confirmed = g.Sum(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.TopUpPending ? b.SeatCount : 0),
             })
             .ToListAsync(ct);
         return occupied.ToDictionary(x => x.Key, x => (x.Confirmed, x.Occupied));

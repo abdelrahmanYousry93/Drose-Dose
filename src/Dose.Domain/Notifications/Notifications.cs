@@ -12,6 +12,7 @@ public static class TemplateCodes
     public const string RefundCompleted = "refund_completed";
     public const string SessionCancelled = "session_cancelled";
     public const string RequestReceived = "request_received";
+    public const string SessionOffer = "session_offer";
 }
 
 /// <summary>An editable WhatsApp message text with placeholders like {student_name} and {link}.</summary>

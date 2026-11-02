@@ -6,6 +6,7 @@ using Dose.Domain.Administration;
 using Dose.Domain.Bookings;
 using Dose.Domain.Common;
 using Dose.Domain.Pricing;
+using Dose.Domain.Sessions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dose.Application.Payments;
@@ -82,7 +83,7 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
             PlanId = version.PlanId,
             PlanVersionId = version.Id,
             Currency = booking.Currency,
-            BasePrice = booking.QuotedPrice,
+            BasePrice = booking.ListPrice == 0 ? booking.QuotedPrice : booking.ListPrice,
             TargetTierId = session.TargetTierId,
             TierMin = session.TargetTier?.MinParticipants,
             TierMax = session.TargetTier?.MaxParticipants,
@@ -99,6 +100,8 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
         booking.Status = BookingStatus.Confirmed;
         booking.ConfirmedAtUtc = now;
         booking.PriceSnapshotId = snapshot.Id;
+        if (session.IsClosed && booking.SeatCount > 1 && booking.InviteCode is null)
+            booking.InviteCode = await Bookings.InviteCodes.NewUniqueAsync(db, ct);
 
         // The version is now referenced by a confirmed price: it must never change.
         await db.PricingPlanVersions.Where(v => v.Id == version.Id)
@@ -114,6 +117,11 @@ public sealed class PaymentReviewService(IDoseDbContext db, IClock clock, Settin
 
         // Payment approved after the group was decided: it may lower what the others owe (spec 6.4 rule 7).
         var tracked = await db.Sessions.SingleAsync(s => s.Id == sessionId, ct);
+        if (tracked.IsClosed && tracked.Status == SessionStatus.Published)
+        {
+            tracked.Status = SessionStatus.Confirmed; // a private session/group is fully paid by its organizer
+            await db.SaveChangesAsync(ct);
+        }
         if (tracked.TierDecidedAtUtc is not null)
         {
             await decisions.RecalculateAsync(tracked, actor, ct);

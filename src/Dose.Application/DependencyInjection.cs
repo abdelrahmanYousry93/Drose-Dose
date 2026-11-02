@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<SessionRequestService>();
         services.AddScoped<BookingMaintenance>();
         services.AddScoped<Payments.ProofRetention>();
+        services.AddScoped<PromoService>();
+        services.AddScoped<PrivateBookingService>();
         services.AddScoped<DashboardService>();
         services.AddScoped<Teachers.TeacherAreaService>();
         return services;

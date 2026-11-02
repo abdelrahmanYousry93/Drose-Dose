@@ -19,6 +19,8 @@ public static class SettingKeys
     public const string TopUpResponseHours = "group.topup_response_hours";
     public const string FullRefundCancellationHours = "booking.full_refund_cancellation_hours";
     public const string ProofRetentionDays = "privacy.payment_proof_retention_days";
+    public const string PrivateMinLeadHours = "private.min_lead_hours";
+    public const string OfferHoldHours = "private.offer_hold_hours";
 
     public static readonly IReadOnlyDictionary<string, (string Default, string DescriptionAr)> Definitions =
         new Dictionary<string, (string, string)>
@@ -33,6 +35,8 @@ public static class SettingKeys
             [TopUpResponseHours] = ("6", "مهلة رد الطالب لو الجروب مكملش (بالساعات)"),
             [FullRefundCancellationHours] = ("24", "الطالب يسترد فلوسه كاملة لو لغى قبل الجلسة بكام ساعة"),
             [ProofRetentionDays] = ("180", "صور إيصالات الدفع بتتمسح بعد انتهاء الجلسة بكام يوم"),
+            [PrivateMinLeadHours] = ("24", "أقرب ميعاد يقدر الطالب يحجزه بنفسه لجلسة خاصة أو مجموعة خاصة (بعد كام ساعة)"),
+            [OfferHoldHours] = ("24", "مهلة الطالب علشان يأكد ويدفع الميعاد اللي الإدارة عرضته عليه (بالساعات)"),
         };
 }
 
@@ -64,6 +68,9 @@ public sealed class SettingsService(IDoseDbContext db, IClock clock)
             I(SettingKeys.TopUpResponseHours),
             I(SettingKeys.FullRefundCancellationHours));
     }
+
+    public async Task<int> GetIntAsync(string key, CancellationToken ct) =>
+        int.Parse((await GetAllAsync(ct))[key], CultureInfo.InvariantCulture);
 
     public async Task<Dictionary<string, string>> GetAllAsync(CancellationToken ct)
     {

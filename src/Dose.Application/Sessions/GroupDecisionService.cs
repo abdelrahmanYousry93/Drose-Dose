@@ -25,7 +25,7 @@ public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, Settin
     public async Task<int> RunDueDecisionsAsync(CancellationToken ct)
     {
         var now = clock.UtcNow;
-        var due = await db.Sessions.Where(s => s.Mode == SessionMode.Group && s.Status == SessionStatus.Published
+        var due = await db.Sessions.Where(s => s.Mode == SessionMode.Group && !s.IsClosed && s.Status == SessionStatus.Published
                                                && s.TierDecidedAtUtc == null && s.TierDecisionAtUtc <= now)
             .Select(s => s.Id).ToListAsync(ct);
         foreach (var id in due) await DecideAsync(id, SystemActor, ct);
@@ -40,7 +40,7 @@ public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, Settin
             .Include(s => s.PricingPlanVersion!).ThenInclude(v => v.Plan)
             .Include(s => s.TargetTier).AsSplitQuery()
             .SingleAsync(s => s.Id == sessionId, ct);
-        if (session.TierDecidedAtUtc is not null || session.Mode != SessionMode.Group || session.Status != SessionStatus.Published) return;
+        if (session.TierDecidedAtUtc is not null || session.Mode != SessionMode.Group || session.IsClosed || session.Status != SessionStatus.Published) return;
 
         var now = clock.UtcNow;
         var confirmed = await db.Bookings.CountAsync(b => b.SessionId == sessionId && b.Status == BookingStatus.Confirmed, ct);
@@ -90,7 +90,8 @@ public sealed class GroupDecisionService(IDoseDbContext db, IClock clock, Settin
         foreach (var b in participants)
         {
             var paid = b.QuotedPrice + settled.GetValueOrDefault(b.Id);
-            var due = waived.Contains(b.Id) ? 0 : GroupPricing.TopUpPerStudent(version, paid, n);
+            // The student's promo stays: a percentage also comes off the new price, a fixed amount was already taken once.
+            var due = waived.Contains(b.Id) ? 0 : Math.Max(0, b.NetPrice(GroupPricing.PriceForCount(version, Math.Max(1, n))) - paid);
             var current = pending.FirstOrDefault(a => a.BookingId == b.Id);
 
             if (current is not null && current.Amount == due) continue;

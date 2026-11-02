@@ -1,6 +1,7 @@
 using Dose.Application.Abstractions;
 using Dose.Application.Bookings;
 using Dose.Application.Sessions;
+using Dose.Contracts;
 using Dose.Contracts.Admin;
 using Dose.Domain.Bookings;
 using Dose.Domain.Common;
@@ -27,7 +28,8 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
     public async Task<IReadOnlyList<SessionAdminDto>> ListAsync(string? status, bool includePast, CancellationToken ct)
     {
         var q = Query();
-        if (!string.IsNullOrEmpty(status) && Enum.TryParse<SessionStatus>(status, out var st)) q = q.Where(s => s.Status == st);
+        if (status == "Proposed") q = q.Where(s => s.Status == SessionStatus.Draft && s.ProposedByTeacherId != null);
+        else if (!string.IsNullOrEmpty(status) && Enum.TryParse<SessionStatus>(status, out var st)) q = q.Where(s => s.Status == st);
         if (!includePast) { var cutoff = clock.UtcNow.AddDays(-1); q = q.Where(s => s.EndUtc >= cutoff); }
         var sessions = await q.OrderBy(s => s.StartUtc).Take(300).ToListAsync(ct);
         return await ToDtosAsync(sessions, ct);
@@ -48,6 +50,36 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         db.Audit(clock, actor, nameof(Session), session.Id, "Create", req);
         await db.SaveChangesAsync(ct);
         return session.Id;
+    }
+
+    /// <summary>
+    /// A teacher proposes a group session (e.g. a lesson many students ask for). It's priced from the plans like any
+    /// session and stays a draft until an admin reviews and publishes it (or cancels it with a note).
+    /// </summary>
+    public async Task<Guid> ProposeAsync(Guid teacherId, TeacherProposalRequest req, string actor, CancellationToken ct)
+    {
+        var title = (req.Title ?? "").Trim();
+        var session = new Session { ScopeTitleAr = "", ProposedByTeacherId = teacherId };
+        await ApplyAsync(session, new SessionSaveRequest(req.ServiceTypeId, req.GradeId, req.StudyTrackId, req.SubjectId, null, null,
+            title, req.Details, teacherId, req.StartUtc, req.DurationMinutes, nameof(SessionMode.Group), req.TargetTierId, null), hasBookings: false, ct);
+        session.Status = SessionStatus.Draft;
+        db.Sessions.Add(session);
+        db.Audit(clock, actor, nameof(Session), session.Id, "TeacherProposed", req);
+        await db.SaveChangesAsync(ct);
+        return session.Id;
+    }
+
+    public async Task<IReadOnlyList<TeacherProposalDto>> ProposalsAsync(Guid teacherId, CancellationToken ct)
+    {
+        var rows = await db.Sessions.AsNoTracking().Where(s => s.ProposedByTeacherId == teacherId)
+            .OrderByDescending(s => s.StartUtc).Take(100)
+            .Select(s => new { s.Id, s.ScopeTitleAr, Subject = s.Subject!.NameAr, Grade = s.Grade!.NameAr, s.StartUtc, s.EndUtc, s.Capacity, s.Status, s.ReviewNote })
+            .ToListAsync(ct);
+        var created = await db.AuditLogs.AsNoTracking().Where(a => a.Action == "TeacherProposed" && a.Entity == nameof(Session))
+            .Select(a => new { a.EntityId, a.AtUtc }).ToListAsync(ct);
+        return rows.Select(r => new TeacherProposalDto(r.Id, r.ScopeTitleAr, r.Subject, r.Grade, r.StartUtc, (int)(r.EndUtc - r.StartUtc).TotalMinutes,
+            r.Capacity, r.Status switch { SessionStatus.Draft => "Pending", SessionStatus.Cancelled => "Declined", _ => "Approved" }, r.ReviewNote,
+            created.FirstOrDefault(c => c.EntityId == r.Id.ToString())?.AtUtc ?? r.StartUtc)).ToList();
     }
 
     public async Task UpdateAsync(Guid id, SessionSaveRequest req, string actor, CancellationToken ct)
@@ -85,8 +117,10 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
 
         var bookings = await db.Bookings.Where(b => b.SessionId == id && BookingStatuses.SeatOccupying.Contains(b.Status)).ToListAsync(ct);
         foreach (var b in bookings)
-            b.Status = b.Status is BookingStatus.PendingHold or BookingStatus.PendingPayment ? BookingStatus.Cancelled : BookingStatus.RefundPending;
+            b.Status = b.Status is BookingStatus.PendingHold or BookingStatus.PendingPayment || b.SponsorBookingId is not null
+                ? BookingStatus.Cancelled : BookingStatus.RefundPending;
         s.Status = SessionStatus.Cancelled;
+        if (s.ProposedByTeacherId is not null) s.ReviewNote = reason;
         foreach (var b in bookings)
             await notify.QueueForBookingAsync(b.Id, Domain.Notifications.TemplateCodes.SessionCancelled, $"cancelled:{b.Id}", ct,
                 new Dictionary<string, string> { ["reason"] = reason });
@@ -145,7 +179,8 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
                 s.StartUtc, s.EndUtc, (int)(s.EndUtc - s.StartUtc).TotalMinutes, s.Mode.ToString(), s.Capacity, s.MinParticipants,
                 s.TargetTierId, s.TargetTier?.NameAr, price, s.PricingPlanVersion!.Plan!.Currency, s.PricingPlanVersion.Plan.Name,
                 s.BookingDeadlineUtc, s.TierDecisionAtUtc, s.MeetingUrl,
-                c.Confirmed, c.Occupied, active.GetValueOrDefault(s.Id), s.ScopeTitleEn, s.ScopeDetailsEn);
+                c.Confirmed, c.Occupied, active.GetValueOrDefault(s.Id), s.ScopeTitleEn, s.ScopeDetailsEn,
+                s.IsClosed, s.ProposedByTeacherId is null ? null : s.Teacher.DisplayNameAr, s.ReviewNote);
         }).ToList();
     }
 

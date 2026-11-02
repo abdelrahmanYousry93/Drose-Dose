@@ -81,8 +81,23 @@ public sealed class Booking : Entity
     public DateTime? HoldExpiresAtUtc { get; set; }
     public DateTime? PaymentDueAtUtc { get; set; }
 
-    /// <summary>Price quoted when the hold was created; rechecked on details submission.</summary>
+    /// <summary>Amount this booking pays (after any promo code). Rechecked on details submission.</summary>
     public decimal QuotedPrice { get; set; }
+    /// <summary>Price before discount (per-student price × seats).</summary>
+    public decimal ListPrice { get; set; }
+
+    /// <summary>Seats this booking pays for: 1 normally, N for a private-group organizer, 0 for an invited friend.</summary>
+    public int SeatCount { get; set; } = 1;
+    /// <summary>For an invited friend: the organizer's booking that paid for the seat.</summary>
+    public Guid? SponsorBookingId { get; set; }
+    /// <summary>For a private-group organizer (after payment): the code friends use to join. Not a secret link to this booking.</summary>
+    public string? InviteCode { get; set; }
+
+    public Guid? PromoCodeId { get; set; }
+    /// <summary>Percentage discount from the promo (also applied to any later group top-up).</summary>
+    public decimal? DiscountPercent { get; set; }
+    /// <summary>Discount taken off the list price.</summary>
+    public decimal DiscountAmount { get; set; }
     public decimal? QuotedWorstCasePrice { get; set; }
     public required string Currency { get; set; }
 
@@ -107,6 +122,14 @@ public sealed class Booking : Entity
     public string? AccessTokenProtected { get; set; }
 
     public byte[] RowVersion { get; set; } = [];
+
+    /// <summary>
+    /// What this booking owes for a given list price, keeping its promo: a percentage applies again (so a group
+    /// top-up keeps the same discount); a fixed amount is taken off once.
+    /// </summary>
+    public decimal NetPrice(decimal listPrice) => DiscountPercent is { } p
+        ? Math.Round(listPrice * (100 - p) / 100, 2, MidpointRounding.AwayFromZero)
+        : Math.Max(0, listPrice - DiscountAmount);
 
     public bool IsExpired(DateTime nowUtc) => Status switch
     {

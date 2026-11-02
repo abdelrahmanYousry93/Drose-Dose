@@ -15,7 +15,7 @@ namespace Dose.Application.Bookings;
 /// </summary>
 public sealed class BookingService(
     IDoseDbContext db, IClock clock, SettingsService settings, IFileStorage files, GroupDecisionService decisions,
-    IRequestLanguage lang, ITokenProtector tokens)
+    IRequestLanguage lang, ITokenProtector tokens, PromoService promos, Notifications.NotificationService notify)
 {
     public async Task<CreateHoldResponse> CreateHoldAsync(Guid sessionId, CancellationToken ct)
     {
@@ -30,7 +30,9 @@ public sealed class BookingService(
             throw new DomainException(BookingErrors.SessionClosed, "الحجز في الجلسة دي اتقفل.", "This session is no longer open for booking.");
 
         await ExpireStaleAsync(sessionId, now, ct);
-        var occupied = await db.Bookings.Where(b => b.SessionId == sessionId).CountAsync(SeatRules.OccupiesSeat(now), ct);
+        if (session.IsClosed)
+            throw new DomainException(BookingErrors.SessionClosed, "الجلسة دي خاصة. لو معاك كود دعوة ادخل بيه من صفحة \"عندك كود دعوة؟\".", "This is a private session. If you have an invite code, use it on the \"Have an invite code?\" page.");
+        var occupied = await db.Bookings.Where(b => b.SessionId == sessionId).Where(SeatRules.OccupiesSeat(now)).SumAsync(b => b.SeatCount, ct);
         if (occupied >= session.Capacity)
             throw new DomainException(BookingErrors.SessionFull, "للأسف الأماكن خلصت في الجلسة دي.", "No seats left in this session.");
 
@@ -45,6 +47,7 @@ public sealed class BookingService(
             CreatedAtUtc = now,
             HoldExpiresAtUtc = now.AddMinutes(cfg.HoldMinutes),
             QuotedPrice = price,
+            ListPrice = price,
             QuotedWorstCasePrice = terms?.WorstCasePrice,
             Currency = session.PricingPlanVersion!.Plan!.Currency,
             AccessTokenHash = hash,
@@ -86,7 +89,7 @@ public sealed class BookingService(
 
         if (!req.AcceptTerms)
             throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الحجز.", "You must accept the booking terms.");
-        if (session.Mode == SessionMode.Group && !req.AcceptTopUpTerms)
+        if (session.Mode == SessionMode.Group && !session.IsClosed && !req.AcceptTopUpTerms)
             throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الجروب (احتمال فرق لو الجروب مكملش).", "You must accept the group terms (possible difference if the group does not fill).");
 
         var name = (req.StudentName ?? "").Trim();
@@ -103,28 +106,42 @@ public sealed class BookingService(
         if (session.Grade!.Stage!.RequiresGuardianContact && (guardianName is null || guardianPhone is null))
             throw new DomainException(BookingErrors.GuardianRequired, "اسم ورقم واتساب ولي الأمر مطلوبين للمرحلة دي.", "Guardian name and WhatsApp number are required for this grade.");
 
-        var currentPrice = SessionPricing.CurrentPrice(session);
-        if (currentPrice != booking.QuotedPrice || currentPrice != req.ExpectedPrice)
+        var listPrice = SessionPricing.CurrentPrice(session) * booking.SeatCount;
+        if (listPrice != booking.ListPrice)
         {
-            booking.QuotedPrice = currentPrice;
-            booking.QuotedWorstCasePrice = SessionPricing.GroupTerms(session)?.WorstCasePrice;
+            booking.ListPrice = listPrice;
+            booking.QuotedPrice = listPrice;
+            booking.QuotedWorstCasePrice = session.IsClosed ? null : SessionPricing.GroupTerms(session)?.WorstCasePrice;
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
             throw new DomainException(BookingErrors.PriceChanged, "السعر اتغيّر. راجع السعر الجديد ووافق تاني.", "The price changed. Please review the new price and confirm again.");
         }
 
+        // Promo code (optional): validated again here with the student's number, under a lock so limits hold.
+        PromoQuote? quote = string.IsNullOrWhiteSpace(req.PromoCode) ? null
+            : await promos.QuoteAsync(req.PromoCode, session, listPrice, phone, booking.Id, lockRow: true, ct);
+        var net = quote?.NetPrice ?? listPrice;
+        if (req.ExpectedPrice != net)
+            throw new DomainException(BookingErrors.PriceChanged, "المبلغ المطلوب اتغيّر. راجع السعر ووافق تاني.", "The amount due changed. Please review the price and confirm again.");
+        PromoService.Apply(booking, quote);
+
         await ExpireStaleAsync(sessionId, now, ct);
 
-        var student = new Student
+        // A booking the team prepared from a request already has the student's record: update it instead of duplicating.
+        var student = booking.StudentId is { } existingId ? await db.Students.SingleAsync(s => s.Id == existingId, ct) : null;
+        if (student is null)
         {
-            Name = name, ContactPhoneE164 = phone, GuardianName = guardianName, GuardianPhoneE164 = guardianPhone,
-            CreatedAtUtc = now,
-        };
-        db.Students.Add(student);
+            student = new Student { Name = name, ContactPhoneE164 = phone, CreatedAtUtc = now };
+            db.Students.Add(student);
+        }
+        student.Name = name;
+        student.ContactPhoneE164 = phone;
+        student.GuardianName = guardianName;
+        student.GuardianPhoneE164 = guardianPhone;
         booking.StudentId = student.Id;
         booking.ContactPhoneE164 = phone;
         booking.TermsAcceptedAtUtc = now;
-        booking.TopUpTermsAcceptedAtUtc = session.Mode == SessionMode.Group ? now : null;
+        booking.TopUpTermsAcceptedAtUtc = session.Mode == SessionMode.Group && !session.IsClosed ? now : null;
         booking.Status = BookingStatus.PendingPayment;
         booking.HoldExpiresAtUtc = null;
         booking.PaymentDueAtUtc = now.AddMinutes(cfg.PaymentProofDeadlineMinutes);
@@ -208,6 +225,20 @@ public sealed class BookingService(
         var joinOpens = session.StartUtc.AddMinutes(-cfg.JoinOpensMinutesBeforeStart);
         var canJoin = status == BookingStatus.Confirmed && now >= joinOpens && now <= session.EndUtc && session.MeetingUrl is not null;
 
+        // Private group: the organizer sees the invite code and who joined; an invited friend sees who invited them.
+        InviteDto? invite = null;
+        string? invitedBy = null;
+        if (booking.InviteCode is not null && status == BookingStatus.Confirmed)
+        {
+            var friends = await db.Bookings.AsNoTracking()
+                .Where(b => b.SponsorBookingId == booking.Id && b.Status == BookingStatus.Confirmed)
+                .OrderBy(b => b.CreatedAtUtc).Select(b => b.Student!.Name).ToListAsync(ct);
+            invite = new InviteDto(booking.InviteCode, booking.SeatCount, friends.Count + 1, friends.Select(FirstName).ToList());
+        }
+        if (booking.SponsorBookingId is { } sponsorId)
+            invitedBy = FirstName(await db.Bookings.Where(b => b.Id == sponsorId).Select(b => b.Student!.Name).FirstOrDefaultAsync(ct) ?? "");
+        var promoCode = booking.PromoCodeId is { } pid ? await db.PromoCodes.Where(p => p.Id == pid).Select(p => p.Code).FirstOrDefaultAsync(ct) : null;
+
         return new BookingViewDto(
             booking.Reference, status.ToString(),
             SessionQueries.ToSummary(session, counts.GetValueOrDefault(session.Id), lang),
@@ -221,8 +252,27 @@ public sealed class BookingService(
                 topUp.StudentChoice?.ToString(), topUpProof?.Status.ToString(), topUpProof?.RejectionReason,
                 session.DecisionConfirmedCount ?? 0, session.MinParticipants),
             session.StartUtc.AddHours(-cfg.FullRefundCancellationHours),
-            CanCancel(status, session, now));
+            CanCancel(status, session, now),
+            booking.ListPrice == 0 ? booking.QuotedPrice : booking.ListPrice, booking.DiscountAmount, promoCode,
+            booking.SeatCount, session.IsClosed, invite, invitedBy,
+            status == BookingStatus.PendingHold ? booking.Student?.ContactPhoneE164 : null);
     }
+
+    /// <summary>Checks a promo code before the student submits their details (the price shown updates).</summary>
+    public async Task<PromoPreviewDto> PreviewPromoAsync(string token, PromoPreviewRequest req, CancellationToken ct)
+    {
+        var bookingId = await FindIdAsync(token, ct);
+        var booking = await db.Bookings.AsNoTracking().SingleAsync(b => b.Id == bookingId, ct);
+        if (booking.Status != BookingStatus.PendingHold)
+            throw new DomainException(BookingErrors.InvalidState, "كود الخصم بيتكتب قبل تأكيد البيانات.", "A promo code can only be added before confirming your details.");
+        var session = await LoadSessionAsync(booking.SessionId, ct, tracking: false)
+                      ?? throw new DomainException(BookingErrors.SessionNotFound, "الجلسة مش موجودة.", "Session not found.");
+        var listPrice = SessionPricing.CurrentPrice(session) * booking.SeatCount;
+        var quote = await promos.QuoteAsync(req.Code, session, listPrice, PhoneNumber.TryNormalize(req.Phone), booking.Id, lockRow: false, ct);
+        return PromoService.ToPreview(quote, booking.Currency);
+    }
+
+    internal static string FirstName(string name) => name.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
 
     /// <summary>Student's answer when their group did not fill (spec 6.4). Never charges anything by itself.</summary>
     public async Task ChooseTopUpAsync(string token, string choiceText, CancellationToken ct)
@@ -314,7 +364,9 @@ public sealed class BookingService(
         if (!CanCancel(booking.IsExpired(now) ? BookingStatus.Expired : booking.Status, session, now))
             throw new DomainException(BookingErrors.CancelNotAllowed, "مينفعش تلغي الحجز ده دلوقتي.", "This booking can't be cancelled now.");
 
-        var paid = booking.Status is BookingStatus.PaymentUnderReview or BookingStatus.Confirmed or BookingStatus.TopUpPending;
+        // An invited friend paid nothing: leaving just frees the seat for another friend.
+        var isFriend = booking.SponsorBookingId is not null;
+        var paid = !isFriend && booking.Status is BookingStatus.PaymentUnderReview or BookingStatus.Confirmed or BookingStatus.TopUpPending;
         var fullRefund = now <= session.StartUtc.AddHours(-cfg.FullRefundCancellationHours);
         if (paid && !fullRefund && !acceptNoRefund)
             throw new DomainException(BookingErrors.CancelNotAllowed, $"الإلغاء قبل الجلسة بأقل من {cfg.FullRefundCancellationHours} ساعة مش بيرجّع الفلوس. أكّد إنك موافق تلغي من غير استرداد.", $"Cancelling less than {cfg.FullRefundCancellationHours} hours before the session is not refundable. Confirm you accept cancelling without a refund.");
@@ -325,7 +377,23 @@ public sealed class BookingService(
                 .SetProperty(a => a.ResolutionNote, "الطالب لغى الحجز").SetProperty(a => a.ResolvedAtUtc, now), ct);
         booking.Status = paid && fullRefund ? BookingStatus.RefundPending : BookingStatus.Cancelled;
         booking.CancelledAtUtc = now;
-        booking.CancelReason = paid ? (fullRefund ? "إلغاء من الطالب — استرداد كامل" : "إلغاء متأخر من الطالب — بدون استرداد") : "إلغاء من الطالب قبل الدفع";
+        booking.CancelReason = isFriend ? "صاحب اتدعى للمجموعة واعتذر"
+            : paid ? (fullRefund ? "إلغاء من الطالب — استرداد كامل" : "إلغاء متأخر من الطالب — بدون استرداد") : "إلغاء من الطالب قبل الدفع";
+
+        // The organizer of a private session/group cancels the whole session (and the friends' seats with it).
+        if (session.IsClosed && !isFriend)
+        {
+            var friends = await db.Bookings.Where(b => b.SponsorBookingId == booking.Id && BookingStatuses.SeatOccupying.Contains(b.Status)).ToListAsync(ct);
+            foreach (var f in friends)
+            {
+                f.Status = BookingStatus.Cancelled;
+                f.CancelledAtUtc = now;
+                f.CancelReason = "صاحب المجموعة لغى الجلسة";
+                await notify.QueueForBookingAsync(f.Id, Domain.Notifications.TemplateCodes.SessionCancelled, $"cancelled:{f.Id}", ct,
+                    new Dictionary<string, string> { ["reason"] = f.Language == "en" ? "the organizer cancelled" : "صاحب المجموعة لغى الحجز" });
+            }
+            session.Status = SessionStatus.Cancelled;
+        }
         db.AuditLogs.Add(new Domain.Administration.AuditLog
         {
             Actor = "student", Entity = nameof(Booking), EntityId = booking.Id.ToString(), Action = "StudentCancel",

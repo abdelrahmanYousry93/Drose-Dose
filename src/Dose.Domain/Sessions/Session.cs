@@ -70,6 +70,17 @@ public sealed class Session : Entity
     public string? MeetingProvider { get; set; }
     public string? MeetingUrl { get; set; }
 
+    /// <summary>
+    /// Reserved for one booker: a private session or a private group of friends the organizer pays for and invites
+    /// (with a link/code). Hidden from public lists; no group-size decision (the size is paid in full up front).
+    /// </summary>
+    public bool IsClosed { get; set; }
+
+    /// <summary>Set when a teacher proposed this session; it stays a draft until an admin publishes it.</summary>
+    public Guid? ProposedByTeacherId { get; set; }
+    /// <summary>Admin's note to the teacher (e.g. why a proposal was declined).</summary>
+    public string? ReviewNote { get; set; }
+
     public byte[] RowVersion { get; set; } = [];
 
     public bool IsOpenForBooking(DateTime nowUtc) =>

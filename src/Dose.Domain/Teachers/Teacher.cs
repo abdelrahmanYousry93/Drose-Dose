@@ -20,3 +20,10 @@ public sealed class Teacher : Entity
     public int? YearsOfExperience { get; set; }
     public bool IsPublished { get; set; }
 }
+
+/// <summary>Subjects a teacher teaches — used to offer their free times when students book a session themselves.</summary>
+public sealed class TeacherSubject : Entity
+{
+    public Guid TeacherId { get; init; }
+    public Guid SubjectId { get; init; }
+}

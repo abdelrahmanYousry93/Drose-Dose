@@ -58,6 +58,8 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
         if (!await db.StudyTracks.AnyAsync(x => x.Id == req.StudyTrackId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار المنهج.", "Choose the curriculum track.");
         if (!await db.ServiceTypes.AnyAsync(x => x.Id == req.ServiceTypeId && x.IsActive, ct)) throw new DomainException(AdminErrors.Invalid, "اختار نوع الشرح.", "Choose the type of help.");
         if (!Enum.TryParse<SessionMode>(req.Mode, out var mode)) throw new DomainException(AdminErrors.Invalid, "اختار فردي أو جماعي.", "Choose private or group.");
+        if (req.GroupSize is { } gs && (mode != SessionMode.Group || gs is < 2 or > 100))
+            throw new DomainException(AdminErrors.Invalid, "عدد أفراد المجموعة لازم يكون من 2 لـ 100.", "The group size must be between 2 and 100.");
         if (mode == SessionMode.Group && req.PreferredTierId is { } tierId && !await db.PricingTiers.AnyAsync(t => t.Id == tierId, ct))
             throw new DomainException(AdminErrors.Invalid, "حجم الجروب مش موجود.", "Group size option not found.");
 
@@ -72,7 +74,7 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
             GradeId = req.GradeId, StudyTrackId = req.StudyTrackId, SubjectId = req.SubjectId, ServiceTypeId = req.ServiceTypeId,
             ScopeText = AdminGuard.Name(req.ScopeText, Fields.Scope, 1000),
             PreferredDays = string.Join("، ", days), PreferredTimes = string.Join("، ", times),
-            Mode = mode, PreferredTierId = mode == SessionMode.Group ? req.PreferredTierId : null,
+            Mode = mode, PreferredTierId = mode == SessionMode.Group && req.GroupSize is null ? req.PreferredTierId : null, GroupSize = req.GroupSize,
             Notes = AdminGuard.Optional(req.Notes, 1000), CreatedAtUtc = clock.UtcNow, Language = lang.Code,
         };
         db.SessionRequests.Add(entity);
@@ -101,7 +103,7 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
             x.r.Id, x.r.Reference, x.r.Status.ToString(), x.r.StudentName, x.r.ContactPhoneE164, x.r.GuardianName, x.r.GuardianPhoneE164,
             x.r.GradeId, x.Grade, x.r.StudyTrackId, x.Track, x.r.SubjectId, x.Subject, x.r.ServiceTypeId, x.Service,
             x.r.ScopeText, x.r.PreferredDays, x.r.PreferredTimes, x.r.Mode.ToString(), x.Tier, x.r.Notes, x.r.AdminNotes,
-            x.r.FulfilledBySessionId, x.r.CreatedAtUtc)).ToList();
+            x.r.FulfilledBySessionId, x.r.CreatedAtUtc, x.r.GroupSize)).ToList();
     }
 
     public async Task UpdateStatusAsync(Guid id, UpdateRequestStatus req, string actor, CancellationToken ct)

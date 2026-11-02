@@ -78,6 +78,8 @@ public sealed class SessionRequest : Entity
     public required string PreferredTimes { get; init; }
     public Sessions.SessionMode Mode { get; init; }
     public Guid? PreferredTierId { get; init; }
+    /// <summary>Private group of friends ("we are N"): the requester pays for all N and invites them.</summary>
+    public int? GroupSize { get; init; }
     public string? Notes { get; init; }
     public string Language { get; init; } = "ar";
     public SessionRequestStatus Status { get; set; } = SessionRequestStatus.New;

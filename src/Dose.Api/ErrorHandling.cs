@@ -41,3 +41,29 @@ public sealed class DomainExceptionHandler(IProblemDetailsService problems, ILog
         });
     }
 }
+
+/// <summary>
+/// Malformed requests (a missing or empty required field, a value of the wrong type, broken JSON) get a clear,
+/// localized message with a stable code instead of a bare "Bad Request".
+/// </summary>
+public sealed class BadRequestExceptionHandler(IProblemDetailsService problems, ILogger<BadRequestExceptionHandler> log) : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(HttpContext http, Exception exception, CancellationToken ct)
+    {
+        if (exception is not BadHttpRequestException bad) return false;
+        log.LogInformation("Rejected malformed request to {Path}: {Reason}", http.Request.Path, bad.Message);
+        var status = bad.StatusCode is >= 400 and < 500 ? bad.StatusCode : StatusCodes.Status400BadRequest;
+        var en = HttpRequestLanguage.Resolve(http) == "en";
+        var (code, title) = status == StatusCodes.Status413PayloadTooLarge
+            ? ("http.too_large", en ? "The file or data you sent is too large." : "الملف أو البيانات اللي بعتها حجمها كبير.")
+            : ("http.invalid_input", en ? "Some required information is missing or not in the right format. Check the fields and try again."
+                                        : "فيه بيانات مطلوبة ناقصة أو مكتوبة بشكل غلط. راجع الخانات وجرّب تاني.");
+        http.Response.StatusCode = status;
+        return await problems.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = http,
+            ProblemDetails = new ProblemDetails { Status = status, Title = title, Extensions = { ["code"] = code } },
+            Exception = exception,
+        });
+    }
+}

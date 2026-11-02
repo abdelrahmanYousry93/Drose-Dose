@@ -190,7 +190,7 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock, IFileSt
     // ---------- Service types (codes are fixed; names/descriptions/activation are editable) ----------
     public async Task<IReadOnlyList<ServiceTypeAdminDto>> ServiceTypesAsync(CancellationToken ct) =>
         await db.ServiceTypes.AsNoTracking().OrderBy(x => x.SortOrder)
-            .Select(x => new ServiceTypeAdminDto(x.Id, x.Code, x.NameAr, x.DescriptionAr, x.SortOrder, x.IsActive, x.NameEn, x.DescriptionEn)).ToListAsync(ct);
+            .Select(x => new ServiceTypeAdminDto(x.Id, x.Code, x.NameAr, x.DescriptionAr, x.SortOrder, x.IsActive, x.NameEn, x.DescriptionEn, x.DefaultDurationMinutes)).ToListAsync(ct);
 
     public async Task SaveServiceTypeAsync(ServiceTypeAdminDto dto, string actor, CancellationToken ct)
     {
@@ -201,16 +201,22 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock, IFileSt
         e.DescriptionEn = AdminGuard.Optional(dto.DescriptionEn, 1000);
         e.SortOrder = dto.SortOrder;
         e.IsActive = dto.IsActive;
+        if (dto.DefaultDurationMinutes is < 15 or > 480)
+            throw new DomainException(AdminErrors.Invalid, "مدة الجلسة لازم تكون بين 15 دقيقة و8 ساعات.", "Session duration must be between 15 minutes and 8 hours.");
+        e.DefaultDurationMinutes = dto.DefaultDurationMinutes;
         db.Audit(clock, actor, nameof(ServiceType), e.Id, "Update", dto);
         await db.SaveChangesAsync(ct);
     }
 
     // ---------- Teachers ----------
-    public async Task<IReadOnlyList<TeacherAdminDto>> TeachersAsync(CancellationToken ct) =>
-        (await db.Teachers.AsNoTracking().OrderBy(x => x.DisplayNameAr).ToListAsync(ct))
+    public async Task<IReadOnlyList<TeacherAdminDto>> TeachersAsync(CancellationToken ct)
+    {
+        var subjects = (await db.TeacherSubjects.AsNoTracking().ToListAsync(ct)).ToLookup(x => x.TeacherId, x => x.SubjectId);
+        return (await db.Teachers.AsNoTracking().OrderBy(x => x.DisplayNameAr).ToListAsync(ct))
             .Select(x => new TeacherAdminDto(x.Id, x.DisplayNameAr, x.PhotoUrl, x.BioAr, x.QualificationsAr, x.YearsOfExperience, x.IsPublished,
-                x.DisplayNameEn, x.BioEn, x.QualificationsEn, x.PhotoFileKey != null, Sessions.SessionQueries.PhotoUrl(x)))
+                x.DisplayNameEn, x.BioEn, x.QualificationsEn, x.PhotoFileKey != null, Sessions.SessionQueries.PhotoUrl(x), subjects[x.Id].ToList()))
             .ToList();
+    }
 
     public async Task<Guid> SaveTeacherAsync(TeacherAdminDto dto, string actor, CancellationToken ct)
     {
@@ -228,6 +234,15 @@ public sealed class AdminCatalogService(IDoseDbContext db, IClock clock, IFileSt
         e.YearsOfExperience = dto.YearsOfExperience;
         e.IsPublished = dto.IsPublished;
         if (dto.Id is null) db.Teachers.Add(e);
+        if (dto.SubjectIds is { } wanted)
+        {
+            // Subjects this teacher teaches: their approved free time is offered to students booking these subjects.
+            var valid = await db.Subjects.Where(s => wanted.Contains(s.Id)).Select(s => s.Id).ToListAsync(ct);
+            var current = await db.TeacherSubjects.Where(x => x.TeacherId == e.Id).ToListAsync(ct);
+            db.TeacherSubjects.RemoveRange(current.Where(c => !valid.Contains(c.SubjectId)));
+            foreach (var sid in valid.Where(v => current.All(c => c.SubjectId != v)))
+                db.TeacherSubjects.Add(new TeacherSubject { TeacherId = e.Id, SubjectId = sid });
+        }
         db.Audit(clock, actor, nameof(Teacher), e.Id, dto.Id is null ? "Create" : "Update", dto);
         await db.SaveChangesAsync(ct);
         return e.Id;

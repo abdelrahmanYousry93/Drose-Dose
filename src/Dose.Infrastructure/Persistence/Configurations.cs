@@ -173,6 +173,11 @@ internal sealed class BookingConfig : IEntityTypeConfiguration<Booking>
         e.HasOne(x => x.Student).WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne(x => x.PriceSnapshot).WithMany().HasForeignKey(x => x.PriceSnapshotId).OnDelete(DeleteBehavior.Restrict);
         e.HasIndex(x => new { x.SessionId, x.Status });
+        e.Property(x => x.InviteCode).HasMaxLength(12);
+        e.HasIndex(x => x.InviteCode).IsUnique().HasFilter("[InviteCode] IS NOT NULL");
+        e.HasIndex(x => x.SponsorBookingId);
+        e.HasIndex(x => x.PromoCodeId);
+        e.Property(x => x.DiscountPercent).HasPrecision(5, 2);
 
         // One active (seat-occupying) booking per WhatsApp number per session — enforced by the database.
         var occupying = string.Join(",", BookingStatuses.SeatOccupying.Select(s => (int)s));
@@ -319,5 +324,27 @@ internal sealed class NotificationConfig : IEntityTypeConfiguration<Dose.Domain.
         e.HasIndex(x => x.BookingId);
         e.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
         e.HasOne<SessionRequest>().WithMany().HasForeignKey(x => x.SessionRequestId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class PromoCodeConfig : IEntityTypeConfiguration<PromoCode>
+{
+    public void Configure(EntityTypeBuilder<PromoCode> e)
+    {
+        e.Property(x => x.Code).HasMaxLength(30);
+        e.HasIndex(x => x.Code).IsUnique();
+        e.Property(x => x.Description).HasMaxLength(300);
+        e.Property(x => x.CreatedBy).HasMaxLength(256);
+        e.ToTable(t => t.HasCheckConstraint("CK_Promo_Value", "[Value] > 0 AND ([Kind] <> 0 OR [Value] <= 100)"));
+    }
+}
+
+internal sealed class TeacherSubjectConfig : IEntityTypeConfiguration<Dose.Domain.Teachers.TeacherSubject>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Teachers.TeacherSubject> e)
+    {
+        e.HasIndex(x => new { x.TeacherId, x.SubjectId }).IsUnique();
+        e.HasOne<Dose.Domain.Teachers.Teacher>().WithMany().HasForeignKey(x => x.TeacherId).OnDelete(DeleteBehavior.Cascade);
+        e.HasOne<Dose.Domain.Catalog.Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Cascade);
     }
 }

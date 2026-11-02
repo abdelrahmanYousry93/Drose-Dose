@@ -38,6 +38,8 @@ public interface IDoseDbContext
     DbSet<Attendance> Attendances { get; }
     DbSet<Domain.Notifications.MessageTemplate> MessageTemplates { get; }
     DbSet<Domain.Notifications.Notification> Notifications { get; }
+    DbSet<PromoCode> PromoCodes { get; }
+    DbSet<TeacherSubject> TeacherSubjects { get; }
 
     DatabaseFacade Database { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
@@ -47,6 +49,12 @@ public interface IDoseDbContext
     /// serializing all seat operations on that session. Must be called inside a transaction.
     /// </summary>
     Task LockSessionAsync(Guid sessionId, CancellationToken ct);
+
+    /// <summary>Exclusive update lock on a promo code row (enforces its use limits under concurrency). Inside a transaction.</summary>
+    Task LockPromoAsync(Guid promoId, CancellationToken ct);
+
+    /// <summary>Exclusive update lock on a teacher row (one student at a time books that teacher's free time). Inside a transaction.</summary>
+    Task LockTeacherAsync(Guid teacherId, CancellationToken ct);
 
     /// <summary>True when the exception is a unique-index violation (e.g. duplicate active booking).</summary>
     bool IsUniqueViolation(Exception ex);

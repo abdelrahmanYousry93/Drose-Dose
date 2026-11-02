@@ -43,6 +43,7 @@ internal static class Fields
     public static readonly LocalizedText Template = new("القالب", "Template");
     public static readonly LocalizedText MessageBody = new("نص الرسالة", "Message text");
     public static readonly LocalizedText Message = new("الرسالة", "Message");
+    public static readonly LocalizedText Promo = new("كود الخصم", "Promo code");
 }
 
 internal static class AdminGuard

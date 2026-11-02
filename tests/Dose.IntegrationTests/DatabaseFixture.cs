@@ -39,6 +39,7 @@ public sealed class DatabaseFixture : IAsyncLifetime
         await using var db = NewDb();
         await db.Database.MigrateAsync();
         await DevelopmentSeeder.SeedSampleDataAsync(db, SeedTime);
+        await DevelopmentSeeder.FillSampleSchedulingAsync(db, SeedTime);
         await TemplateDefaults.EnsureAsync(db);
     }
 
@@ -66,7 +67,13 @@ public sealed class DatabaseFixture : IAsyncLifetime
     public NotificationService Notify(DoseDbContext db, IClock clock) => new(db, clock, Tokens, new TestLinks());
 
     public BookingService Bookings(DoseDbContext db, IClock clock, IRequestLanguage? lang = null) =>
-        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock), lang ?? FixedLanguage.Arabic, Tokens);
+        new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock), lang ?? FixedLanguage.Arabic, Tokens,
+            new PromoService(db, clock), Notify(db, clock));
+
+    public PromoService Promos(DoseDbContext db, IClock clock) => new(db, clock);
+
+    public PrivateBookingService Private(DoseDbContext db, IClock clock, IRequestLanguage? lang = null) =>
+        new(db, clock, new SettingsService(db, clock), lang ?? FixedLanguage.Arabic, Tokens, Notify(db, clock));
 
     public PaymentReviewService Payments(DoseDbContext db, IClock clock) =>
         new(db, clock, new SettingsService(db, clock), Storage, Decisions(db, clock), Notify(db, clock));

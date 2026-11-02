@@ -17,7 +17,7 @@ namespace Dose.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.14")
+                .HasAnnotation("ProductVersion", "9.0.22")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -128,21 +128,40 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .HasColumnType("nchar(3)")
                         .IsFixedLength();
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<decimal?>("DiscountPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<DateTime?>("FollowUpResolvedAtUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("HoldExpiresAtUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("InviteCode")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
 
+                    b.Property<decimal>("ListPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
                     b.Property<DateTime?>("PaymentDueAtUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("PriceSnapshotId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PromoCodeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("QuotedPrice")
@@ -164,7 +183,13 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<int>("SeatCount")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SponsorBookingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
@@ -184,10 +209,18 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.HasIndex("AccessTokenHash")
                         .IsUnique();
 
+                    b.HasIndex("InviteCode")
+                        .IsUnique()
+                        .HasFilter("[InviteCode] IS NOT NULL");
+
                     b.HasIndex("PriceSnapshotId");
+
+                    b.HasIndex("PromoCodeId");
 
                     b.HasIndex("Reference")
                         .IsUnique();
+
+                    b.HasIndex("SponsorBookingId");
 
                     b.HasIndex("StudentId");
 
@@ -394,6 +427,80 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.ToTable("PaymentProofs");
                 });
 
+            modelBuilder.Entity("Dose.Domain.Bookings.PromoCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<Guid?>("GradeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("MaxTotalUses")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxUsesPerPhone")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxUsesPerSession")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ServiceTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ValidFromUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ValidToUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Value")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("PromoCodes", t =>
+                        {
+                            t.HasCheckConstraint("CK_Promo_Value", "[Value] > 0 AND ([Kind] <> 0 OR [Value] <= 100)");
+                        });
+                });
+
             modelBuilder.Entity("Dose.Domain.Bookings.SessionRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -417,6 +524,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("GradeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("GroupSize")
+                        .HasColumnType("int");
 
                     b.Property<string>("GuardianName")
                         .HasMaxLength(100)
@@ -733,6 +843,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("DefaultDurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<string>("DescriptionAr")
                         .HasMaxLength(1000)
@@ -1146,6 +1259,9 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("GradeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("LessonId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1168,6 +1284,13 @@ namespace Dose.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("PricingPlanVersionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProposedByTeacherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -1388,6 +1511,28 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("CK_Availability_Time", "[EndUtc] > [StartUtc]");
                         });
+                });
+
+            modelBuilder.Entity("Dose.Domain.Teachers.TeacherSubject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("TeacherId", "SubjectId")
+                        .IsUnique();
+
+                    b.ToTable("TeacherSubjects");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
@@ -1949,6 +2094,21 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("Dose.Domain.Teachers.TeacherSubject", b =>
+                {
+                    b.HasOne("Dose.Domain.Catalog.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Dose.Domain.Teachers.Teacher", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -83,9 +83,9 @@ public static class DevelopmentSeeder
         }
 
         // ----- Service types (records, not code) -----
-        var oneLesson = new ServiceType { Code = "one_lesson", NameAr = "شرح درس واحد", DescriptionAr = "شرح مركّز لدرس واحد أو جزء محدد منه.", SortOrder = 1 };
-        var unit = new ServiceType { Code = "chapter_package", NameAr = "شرح وحدة كاملة", DescriptionAr = "باقة بسعر واحد للوحدة كلها، ممكن تكون أكتر من جلسة.", RequiresPackage = true, SortOrder = 2 };
-        var revision = new ServiceType { Code = "general_revision", NameAr = "مراجعة عامة", DescriptionAr = "مراجعة لجزء محدد من المنهج، النطاق مكتوب قبل الحجز.", RequiresPackage = true, SortOrder = 3 };
+        var oneLesson = new ServiceType { Code = "one_lesson", NameAr = "شرح درس واحد", DescriptionAr = "شرح مركّز لدرس واحد أو جزء محدد منه.", SortOrder = 1, DefaultDurationMinutes = 60 };
+        var unit = new ServiceType { Code = "chapter_package", NameAr = "شرح وحدة كاملة", DescriptionAr = "باقة بسعر واحد للوحدة كلها، ممكن تكون أكتر من جلسة.", RequiresPackage = true, SortOrder = 2, DefaultDurationMinutes = 90 };
+        var revision = new ServiceType { Code = "general_revision", NameAr = "مراجعة عامة", DescriptionAr = "مراجعة لجزء محدد من المنهج، النطاق مكتوب قبل الحجز.", RequiresPackage = true, SortOrder = 3, DefaultDurationMinutes = 120 };
         db.ServiceTypes.AddRange(oneLesson, unit, revision);
 
         // ----- Pricing (SAMPLE PRICES — NOT PRODUCTION) -----
@@ -141,6 +141,33 @@ public static class DevelopmentSeeder
     /// Development only: English names for the SAMPLE catalog so the English site can be previewed. Fills only empty
     /// English fields of rows whose Arabic text matches the sample data — anything an admin entered is left alone.
     /// </summary>
+    /// <summary>
+    /// SAMPLE data only: lets the sample teacher teach every subject and gives them approved free time for the next
+    /// 10 days (17:00–21:00 Cairo), so students can try booking a private session / private group. Idempotent.
+    /// </summary>
+    public static async Task FillSampleSchedulingAsync(DoseDbContext db, DateTime nowUtc)
+    {
+        var teacher = await db.Teachers.FirstOrDefaultAsync(t => t.DisplayNameAr == "مدرس تجريبي (بيانات تجريبية)");
+        if (teacher is null) return;
+        if (!await db.TeacherSubjects.AnyAsync(x => x.TeacherId == teacher.Id))
+            foreach (var sid in await db.Subjects.Select(s => s.Id).ToListAsync())
+                db.TeacherSubjects.Add(new TeacherSubject { TeacherId = teacher.Id, SubjectId = sid });
+        var lastWindow = await db.TeacherAvailabilities.Where(a => a.TeacherId == teacher.Id && a.Status == AvailabilityStatus.Approved)
+            .MaxAsync(a => (DateTime?)a.EndUtc);
+        for (var d = 1; d <= 10; d++)
+        {
+            var day = nowUtc.Date.AddDays(d);
+            var start = day.AddHours(14); // 17:00 Cairo (UTC+3)
+            if (lastWindow is { } l && start < l) continue;
+            db.TeacherAvailabilities.Add(new TeacherAvailability
+            {
+                TeacherId = teacher.Id, StartUtc = start, EndUtc = start.AddHours(4), Note = "SAMPLE — بيانات تجريبية",
+                Status = AvailabilityStatus.Approved, ReviewedBy = "seed", ReviewedAtUtc = nowUtc, CreatedAtUtc = nowUtc,
+            });
+        }
+        await db.SaveChangesAsync();
+    }
+
     public static async Task FillSampleEnglishAsync(DoseDbContext db)
     {
         var names = new Dictionary<string, string>

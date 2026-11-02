@@ -9,11 +9,11 @@ public sealed record GradeAdminDto(
     IReadOnlyList<Guid> SubjectIds, string? NameEn = null);
 public sealed record ChapterAdminDto(Guid? Id, string NameAr, Guid SubjectId, Guid GradeId, Guid? StudyTrackId, int SortOrder, bool IsActive, string? NameEn = null);
 public sealed record LessonAdminDto(Guid? Id, string NameAr, Guid ChapterId, int SortOrder, bool IsActive, string? NameEn = null);
-public sealed record ServiceTypeAdminDto(Guid Id, string Code, string NameAr, string? DescriptionAr, int SortOrder, bool IsActive, string? NameEn = null, string? DescriptionEn = null);
+public sealed record ServiceTypeAdminDto(Guid Id, string Code, string NameAr, string? DescriptionAr, int SortOrder, bool IsActive, string? NameEn = null, string? DescriptionEn = null, int DefaultDurationMinutes = 60);
 
 // ---------- Teachers & payment methods ----------
 public sealed record TeacherAdminDto(
-    Guid? Id, string DisplayNameAr, string? PhotoUrl, string? BioAr, string? QualificationsAr, int? YearsOfExperience, bool IsPublished, string? DisplayNameEn = null, string? BioEn = null, string? QualificationsEn = null, bool HasUploadedPhoto = false, string? PhotoPreviewUrl = null);
+    Guid? Id, string DisplayNameAr, string? PhotoUrl, string? BioAr, string? QualificationsAr, int? YearsOfExperience, bool IsPublished, string? DisplayNameEn = null, string? BioEn = null, string? QualificationsEn = null, bool HasUploadedPhoto = false, string? PhotoPreviewUrl = null, IReadOnlyList<Guid>? SubjectIds = null);
 public sealed record PaymentMethodAdminDto(
     Guid? Id, string Code, string NameAr, string ReceivingAccount, string? InstructionsAr, int SortOrder, bool IsActive, string? NameEn = null, string? InstructionsEn = null);
 
@@ -43,7 +43,8 @@ public sealed record SessionAdminDto(
     DateTime StartUtc, DateTime EndUtc, int DurationMinutes, string Mode, int Capacity, int MinParticipants,
     Guid? TargetTierId, string? TargetTierNameAr, decimal PricePerStudent, string Currency, string PlanName,
     DateTime BookingDeadlineUtc, DateTime? TierDecisionAtUtc, string? MeetingUrl,
-    int ConfirmedCount, int OccupiedCount, int ActiveBookingCount, string? ScopeTitleEn = null, string? ScopeDetailsEn = null);
+    int ConfirmedCount, int OccupiedCount, int ActiveBookingCount, string? ScopeTitleEn = null, string? ScopeDetailsEn = null,
+    bool IsClosed = false, string? ProposedByTeacherName = null, string? ReviewNote = null);
 
 public sealed record SessionBookingAdminDto(
     Guid Id, string Reference, string Status, string? StudentName, string? ContactPhone, string? GuardianName,
@@ -64,7 +65,11 @@ public sealed record SessionRequestAdminDto(
     Guid Id, string Reference, string Status, string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone,
     Guid GradeId, string GradeNameAr, Guid StudyTrackId, string StudyTrackNameAr, Guid SubjectId, string SubjectNameAr,
     Guid ServiceTypeId, string ServiceTypeNameAr, string ScopeText, string PreferredDays, string PreferredTimes, string Mode,
-    string? PreferredTierNameAr, string? Notes, string? AdminNotes, Guid? FulfilledBySessionId, DateTime CreatedAtUtc);
+    string? PreferredTierNameAr, string? Notes, string? AdminNotes, Guid? FulfilledBySessionId, DateTime CreatedAtUtc,
+    int? GroupSize = null);
+/// <summary>Admin offers a time for a private session / private group request: creates the session and the student's payment link.</summary>
+public sealed record OfferRequest(Guid TeacherId, DateTime StartUtc, int? DurationMinutes, string? Title);
+public sealed record OfferResponse(Guid SessionId, string BookingReference);
 public sealed record UpdateRequestStatus(string Status, string? AdminNotes, Guid? FulfilledBySessionId);
 
 // ---------- Dashboard ----------
@@ -88,3 +93,10 @@ public sealed record LinkTeacherRequest(Guid? TeacherId);
 public sealed record AvailabilityAdminDto(
     Guid Id, Guid TeacherId, string TeacherNameAr, DateTime StartUtc, DateTime EndUtc, string? Note, string Status, string? ReviewNote, DateTime CreatedAtUtc);
 public sealed record ReviewAvailabilityRequest(bool Approve, string? Note);
+
+// ---------- Promo codes ----------
+public sealed record PromoCodeAdminDto(
+    Guid? Id, string Code, string? Description, string Kind, decimal Value,
+    Guid? GradeId, Guid? SubjectId, Guid? ServiceTypeId, Guid? LessonId, Guid? SessionId,
+    DateTime? ValidFromUtc, DateTime? ValidToUtc, int? MaxTotalUses, int? MaxUsesPerPhone, int? MaxUsesPerSession, bool IsActive,
+    int Uses = 0, decimal TotalDiscount = 0, string? ScopeLabel = null);

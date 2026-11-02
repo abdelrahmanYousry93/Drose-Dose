@@ -46,6 +46,8 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<Domain.Notifications.MessageTemplate> MessageTemplates => Set<Domain.Notifications.MessageTemplate>();
     public DbSet<Domain.Notifications.Notification> Notifications => Set<Domain.Notifications.Notification>();
+    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
+    public DbSet<TeacherSubject> TeacherSubjects => Set<TeacherSubject>();
 
     public Task LockSessionAsync(Guid sessionId, CancellationToken ct)
     {
@@ -53,6 +55,18 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
             throw new InvalidOperationException("LockSessionAsync must be called inside a transaction.");
         return Database.ExecuteSqlInterpolatedAsync(
             $"SELECT 1 FROM [Sessions] WITH (UPDLOCK, HOLDLOCK) WHERE [Id] = {sessionId}", ct);
+    }
+
+    public Task LockPromoAsync(Guid promoId, CancellationToken ct)
+    {
+        if (Database.CurrentTransaction is null) throw new InvalidOperationException("LockPromoAsync must be called inside a transaction.");
+        return Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM [PromoCodes] WITH (UPDLOCK, HOLDLOCK) WHERE [Id] = {promoId}", ct);
+    }
+
+    public Task LockTeacherAsync(Guid teacherId, CancellationToken ct)
+    {
+        if (Database.CurrentTransaction is null) throw new InvalidOperationException("LockTeacherAsync must be called inside a transaction.");
+        return Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM [Teachers] WITH (UPDLOCK, HOLDLOCK) WHERE [Id] = {teacherId}", ct);
     }
 
     public bool IsUniqueViolation(Exception ex) =>

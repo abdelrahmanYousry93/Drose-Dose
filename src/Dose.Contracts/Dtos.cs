@@ -66,7 +66,8 @@ public sealed record SubmitDetailsRequest(
     string? GuardianPhone,
     bool AcceptTerms,
     bool AcceptTopUpTerms,
-    decimal ExpectedPrice);
+    decimal ExpectedPrice,
+    string? PromoCode = null);
 
 public sealed record PaymentMethodDto(Guid Id, string Code, string Name, string ReceivingAccount, string? Instructions);
 
@@ -89,7 +90,33 @@ public sealed record BookingViewDto(
     string WhatsAppMessage,
     TopUpViewDto? TopUp,
     DateTime FullRefundUntilUtc,
-    bool CanCancel);
+    bool CanCancel,
+    decimal ListPrice = 0,
+    decimal DiscountAmount = 0,
+    string? PromoCode = null,
+    int SeatCount = 1,
+    bool IsClosed = false,
+    InviteDto? Invite = null,
+    string? InvitedBy = null,
+    string? PrefillPhone = null);
+
+/// <summary>Private group organizer's invite: friends join with the code or link; their seats are already paid.</summary>
+public sealed record InviteDto(string Code, int Seats, int Joined, IReadOnlyList<string> FriendFirstNames);
+
+public sealed record PromoPreviewRequest(string Code, string? Phone);
+public sealed record PromoPreviewDto(string Code, string? Description, string Kind, decimal Value, decimal Discount, decimal NetPrice, string Currency);
+
+// ---------- Private session / private group booked by the student ----------
+public sealed record SlotDto(Guid TeacherId, string TeacherName, string? TeacherPhotoUrl, DateTime StartUtc);
+public sealed record SlotsDto(int Size, int MaxSize, int DurationMinutes, decimal PricePerStudent, decimal Total, string Currency, IReadOnlyList<SlotDto> Slots);
+public sealed record CreatePrivateBookingRequest(
+    Guid GradeId, Guid SubjectId, Guid StudyTrackId, Guid ServiceTypeId, int Size, Guid TeacherId, DateTime StartUtc, string? ScopeText);
+
+// ---------- Joining a private group with an invite code ----------
+public sealed record InviteInfoDto(SessionSummaryDto Session, TeacherPublicDto Teacher, string OrganizerFirstName, int SeatsLeft,
+    bool RequiresGuardianContact, bool CanJoin);
+public sealed record JoinGroupRequest(string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone, bool AcceptTerms);
+public sealed record JoinGroupResponse(string Reference, string AccessToken);
 
 public sealed record TopUpViewDto(
     decimal Amount, string Currency, DateTime? RespondByUtc, string? Reason, string? Choice,
@@ -134,7 +161,8 @@ public sealed record PriceOptionsDto(string Currency, decimal? PrivatePrice, IRe
 public sealed record CreateSessionRequest(
     string StudentName, string ContactPhone, string? GuardianName, string? GuardianPhone,
     Guid GradeId, Guid StudyTrackId, Guid SubjectId, Guid ServiceTypeId, string ScopeText,
-    IReadOnlyList<string> PreferredDays, IReadOnlyList<string> PreferredTimes, string Mode, Guid? PreferredTierId, string? Notes);
+    IReadOnlyList<string> PreferredDays, IReadOnlyList<string> PreferredTimes, string Mode, Guid? PreferredTierId, string? Notes,
+    int? GroupSize = null);
 public sealed record CreateSessionRequestResponse(string Reference, string WhatsAppMessage);
 
 // ---------- Teacher area ----------
@@ -149,3 +177,11 @@ public sealed record MarkAttendanceRequest(IReadOnlyList<AttendanceItem> Items);
 public sealed record AttendanceItem(Guid BookingId, bool Attended);
 public sealed record AvailabilityDto(Guid Id, DateTime StartUtc, DateTime EndUtc, string? Note, string Status, string? ReviewNote);
 public sealed record SubmitAvailabilityRequest(DateTime StartUtc, DateTime EndUtc, string? Note);
+
+// ---------- Teacher-proposed group sessions ----------
+public sealed record TeacherProposalRequest(
+    Guid ServiceTypeId, Guid GradeId, Guid StudyTrackId, Guid SubjectId, string Title, string? Details,
+    DateTime StartUtc, int DurationMinutes, Guid TargetTierId);
+public sealed record TeacherProposalDto(
+    Guid Id, string Title, string SubjectName, string GradeName, DateTime StartUtc, int DurationMinutes, int Capacity,
+    string State, string? ReviewNote, DateTime CreatedAtUtc);

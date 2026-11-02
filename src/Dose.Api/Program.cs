@@ -21,6 +21,9 @@ if (!builder.Environment.IsDevelopment())
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+// Binding failures throw so BadRequestExceptionHandler can answer with a clear, localized message.
+builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOptions<PublicSettings>().Bind(builder.Configuration.GetSection(PublicSettings.SectionName));
 
@@ -118,6 +121,7 @@ if (app.Environment.IsDevelopment()) app.MapOpenApi();
     {
         await DevelopmentSeeder.SeedSampleDataAsync(db, DateTime.UtcNow);
         await DevelopmentSeeder.FillSampleEnglishAsync(db);
+        await DevelopmentSeeder.FillSampleSchedulingAsync(db, DateTime.UtcNow);
     }
 }
 
@@ -126,6 +130,7 @@ app.MapAdminConfigEndpoints();
 app.MapPhase3Endpoints();
 app.MapPhase4Endpoints();
 app.MapMessagingEndpoints();
+app.MapPhase6Endpoints();
 app.MapDoseSpa();
 
 if (jobsEnabled)

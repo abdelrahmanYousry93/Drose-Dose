@@ -97,6 +97,8 @@ public sealed class ServiceType : Entity
     public string? DescriptionAr { get; set; }
     public string? DescriptionEn { get; set; }
     public bool RequiresPackage { get; set; }
+    /// <summary>Length of a session students book themselves (private session / private group).</summary>
+    public int DefaultDurationMinutes { get; set; } = 60;
     public int SortOrder { get; set; }
     public bool IsActive { get; set; } = true;
 }

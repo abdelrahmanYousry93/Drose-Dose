@@ -37,6 +37,7 @@ public sealed class NotificationService(IDoseDbContext db, IClock clock, ITokenP
         [TemplateCodes.RefundCompleted] = ["student_name", "reference", "amount"],
         [TemplateCodes.SessionCancelled] = ["student_name", "reference", "session_title", "session_time", "reason"],
         [TemplateCodes.RequestReceived] = ["student_name", "reference"],
+        [TemplateCodes.SessionOffer] = ["student_name", "reference", "session_title", "session_time", "amount", "link"],
     };
 
     // ---------- Queueing (called inside the caller's unit of work; the caller saves) ----------
@@ -236,6 +237,9 @@ public static class TemplateDefaults
         T(TemplateCodes.RequestReceived, "استلام طلب جلسة", "Session request received",
             "أهلاً {student_name}، وصلنا طلبك رقم {reference} ✓ هنرتّب الجلسة ونكلمك قريب.",
             "Hi {student_name}, we received your request {reference} ✓ We'll arrange the session and get back to you soon."),
+        T(TemplateCodes.SessionOffer, "ميعاد جاهز للطلب", "Time offered for a request",
+            "أهلاً {student_name} 👋\nجهزنالك \"{session_title}\" يوم {session_time}.\nالمبلغ المطلوب {amount}. أكّد بياناتك وادفع من اللينك ده علشان نثبّت الميعاد:\n{link}",
+            "Hi {student_name} 👋\nWe've arranged \"{session_title}\" on {session_time}.\nThe amount due is {amount}. Confirm your details and pay from this link to secure the time:\n{link}"),
     ];
 
     private static MessageTemplate T(string code, string titleAr, string titleEn, string ar, string en) =>
