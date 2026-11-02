@@ -110,6 +110,7 @@
   <div class="filters">
     <select [ngModel]="filter()" (ngModelChange)="filter.set($event); load()" [attr.aria-label]="'payments.status' | t">
       <option value="">{{ 'sessionsAdmin.allStatuses' | t }}</option>
+      <option value="Proposed">{{ 'sessionsAdmin.proposed' | t }}</option>
       <option value="Draft">{{ 'status.Draft' | t }}</option>
       <option value="Published">{{ 'status.Published' | t }}</option>
       <option value="Cancelled">{{ 'status.Cancelled' | t }}</option>
@@ -124,6 +125,12 @@
         <span class="badge" [class.badge--green]="s.status === 'Published'" [class.badge--yellow]="s.status === 'Draft'"
               [class.badge--gray]="s.status === 'Cancelled'">{{ statusAr(s.status) }}</span>
       </div>
+      @if (s.proposedByTeacherName) {
+        <p class="alert alert--info small">{{ 'sessionsAdmin.proposedBy' | t: { name: s.proposedByTeacherName } }}
+          @if (s.status === 'Draft') { {{ 'sessionsAdmin.proposedHint' | t }} }
+          @if (s.reviewNote) { — {{ s.reviewNote }} }</p>
+      }
+      @if (s.isClosed) { <p class="small"><span class="badge">{{ (s.mode === 'Group' ? 'sessionsAdmin.closedGroup' : 'sessionsAdmin.closedPrivate') | t: { n: s.capacity } }}</span></p> }
       <p class="muted small">{{ s.gradeNameAr }} · {{ s.studyTrackNameAr }} · {{ s.serviceTypeNameAr }} · {{ s.mode === 'Group' ? (s.targetTierNameAr ?? ('booking.group' | t)) : ('booking.private' | t) }}</p>
       <ul class="info-list small">
         <li><span>{{ 'details.when' | t }}</span><span>{{ dt(s.startUtc) }} · {{ 'duration.minutes' | t: { n: s.durationMinutes } }}</span></li>
@@ -139,7 +146,7 @@
           <button type="button" class="dose-btn dose-btn--ghost" (click)="edit(s)">{{ 'sessionsAdmin.editBtn' | t }}</button>
         }
         @if (s.status === 'Draft') { <button type="button" class="dose-btn dose-btn--primary" (click)="publish(s)">{{ 'sessionsAdmin.publish' | t }}</button> }
-        @if (s.status === 'Published' && s.mode === 'Group') { <button type="button" class="dose-btn dose-btn--ghost" (click)="decide(s)">{{ 'sessionsAdmin.decideNow' | t }}</button> }
+        @if (s.status === 'Published' && s.mode === 'Group' && !s.isClosed) { <button type="button" class="dose-btn dose-btn--ghost" (click)="decide(s)">{{ 'sessionsAdmin.decideNow' | t }}</button> }
         <button type="button" class="dose-btn dose-btn--ghost" (click)="showBookings(s)">{{ 'sessionsAdmin.bookings' | t }}</button>
         @if (s.status !== 'Cancelled' && s.status !== 'Completed') {
           <button type="button" class="dose-btn danger" (click)="cancel(s)">{{ 'sessionsAdmin.cancel' | t }}</button>

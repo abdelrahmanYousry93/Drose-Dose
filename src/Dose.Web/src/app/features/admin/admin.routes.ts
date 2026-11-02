@@ -52,6 +52,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-messages').then((m) => m.AdminMessages),
       },
       {
+        path: 'promos', title: 'titles.adminPromos',
+        loadComponent: () => import('./admin-promos').then((m) => m.AdminPromos),
+      },
+      {
         path: 'requests', title: 'titles.adminRequests',
         loadComponent: () => import('./admin-followups').then((m) => m.AdminRequests),
       },

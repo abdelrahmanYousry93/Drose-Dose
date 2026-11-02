@@ -169,6 +169,7 @@ export class AdminCatalog {
       nameEn(),
       { key: 'descriptionAr', label: tr('f.description'), type: 'textarea' },
       { key: 'descriptionEn', label: tr('f.descriptionEn'), type: 'textarea', dir: 'ltr' },
+      { key: 'defaultDurationMinutes', label: tr('f.defaultDuration'), type: 'number', hint: tr('f.defaultDurationHint') },
       { key: 'sortOrder', label: tr('f.sort'), type: 'number' },
       { key: 'isActive', label: tr('f.activeF'), type: 'checkbox' },
     ],
@@ -228,10 +229,12 @@ export class AdminCatalog {
 })
 export class AdminTeachers {
   private readonly api = inject(AdminApi);
+  private readonly subjectOptions = signal<Option[]>([]);
+  constructor() { this.api.subjects().then((s) => this.subjectOptions.set(s.map((x) => ({ id: x.id!, nameAr: x.nameAr, nameEn: x.nameEn })))).catch(() => undefined); }
   protected readonly cfg: EditorConfig<TeacherA> = {
     load: () => this.api.teachers(), save: (d) => this.api.saveTeacher(d),
     title: (r) => (LANG === 'en' && r.displayNameEn ? r.displayNameEn : r.displayNameAr), addLabel: tr('add.teacher'),
-    blank: () => ({ id: null, displayNameAr: '', photoUrl: null, bioAr: null, qualificationsAr: null, yearsOfExperience: null, isPublished: false }),
+    blank: () => ({ id: null, displayNameAr: '', photoUrl: null, bioAr: null, qualificationsAr: null, yearsOfExperience: null, isPublished: false, subjectIds: [] }),
     fields: [
       {
         key: 'photo', label: tr('f.photo'), type: 'photo', hint: tr('f.photoHint'),
@@ -249,6 +252,7 @@ export class AdminTeachers {
       { key: 'qualificationsEn', label: tr('f.qualificationsEn'), type: 'textarea', dir: 'ltr' },
       { key: 'bioAr', label: tr('f.bio'), type: 'textarea' },
       { key: 'bioEn', label: tr('f.bioEn'), type: 'textarea', dir: 'ltr' },
+      { key: 'subjectIds', label: tr('f.teacherSubjects'), type: 'multi', options: () => this.subjectOptions(), hint: tr('f.teacherSubjectsHint') },
       { key: 'isPublished', label: tr('f.published'), type: 'checkbox' },
     ],
   };

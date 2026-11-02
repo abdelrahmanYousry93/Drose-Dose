@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminApi, FollowUp, ReissueLink, SessionRequestA } from '../../core/admin-api';
+import { AdminApi, FollowUp, ReissueLink, SessionRequestA, TeacherA, cairoToUtc } from '../../core/admin-api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
 import { Lang, TranslatePipe, translate as tr, translateIn } from '../../core/i18n';
 
@@ -152,6 +152,7 @@ const reqStatus = (s: string) => { const k = `requests.st.${s}`; const t = tr(k)
       </div>
       <p class="muted small">{{ 'requests.lead' | t }}</p>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
+      @if (notice()) { <p class="alert alert--success" role="status">{{ notice() }}</p> }
 
       @for (r of items(); track r.id) {
         <article class="dose-card item">
@@ -162,7 +163,9 @@ const reqStatus = (s: string) => { const k = `requests.st.${s}`; const t = tr(k)
           <p>{{ r.scopeText }}</p>
           <ul class="info-list small">
             <li><span>{{ 'requests.ref' | t }}</span><span dir="ltr">{{ r.reference }}</span></li>
-            <li><span>{{ 'booking.type' | t }}</span><span>{{ r.serviceTypeNameAr }} · {{ r.studyTrackNameAr }} · {{ r.mode === 'Group' ? ('pricing.group' | t) + (r.preferredTierNameAr ? ' (' + r.preferredTierNameAr + ')' : '') : ('pricing.private' | t) }}</span></li>
+            <li><span>{{ 'booking.type' | t }}</span><span>{{ r.serviceTypeNameAr }} · {{ r.studyTrackNameAr }} ·
+              @if (r.groupSize) { <strong>{{ 'requests.friendsGroup' | t: { n: r.groupSize } }}</strong> }
+              @else { {{ r.mode === 'Group' ? ('pricing.group' | t) + (r.preferredTierNameAr ? ' (' + r.preferredTierNameAr + ')' : '') : ('pricing.private' | t) }} }</span></li>
             <li><span>{{ 'requests.times' | t }}</span><span>{{ r.preferredDays }} — {{ r.preferredTimes }}</span></li>
             <li><span>{{ 'admin.student' | t }}</span><span>{{ r.studentName }} · <span dir="ltr">{{ r.contactPhone }}</span></span></li>
             @if (r.guardianPhone) { <li><span>{{ 'admin.guardian' | t }}</span><span>{{ r.guardianName }} · <span dir="ltr">{{ r.guardianPhone }}</span></span></li> }
@@ -172,10 +175,33 @@ const reqStatus = (s: string) => { const k = `requests.st.${s}`; const t = tr(k)
           <input class="note" [(ngModel)]="r.adminNotes" [placeholder]="'requests.notesPh' | t" [attr.aria-label]="'requests.notesPh' | t" />
           <div class="actions">
             <a class="dose-btn dose-btn--whatsapp small-btn" [href]="'https://wa.me/' + digits(r.contactPhone)" target="_blank" rel="noopener">{{ 'requests.contact' | t }}</a>
-            <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="createSession(r)">{{ 'requests.createSession' | t }}</button>
+            @if (r.groupSize || r.mode === 'Private') {
+              <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="startOffer(r)">{{ 'requests.offer' | t }}</button>
+            } @else {
+              <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="createSession(r)">{{ 'requests.createSession' | t }}</button>
+            }
             @if (r.status === 'New') { <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="set(r, 'Contacted')">{{ 'requests.markContacted' | t }}</button> }
             @if (r.status !== 'Closed') { <button type="button" class="dose-btn small-btn" (click)="set(r, 'Closed')">{{ 'requests.close' | t }}</button> }
           </div>
+          @if (offering() === r.id) {
+            <form class="offer" (ngSubmit)="offer(r)">
+              <p class="small muted">{{ 'requests.offerHint' | t }}</p>
+              <label class="field"><span>{{ 'common.teacher' | t }}</span>
+                <select name="teacher" [(ngModel)]="offerTeacher">
+                  @for (t of teachers(); track t.id) { <option [value]="t.id">{{ t.displayNameAr }}</option> }
+                </select></label>
+              <div class="two">
+                <label class="field"><span>{{ 'requests.offerDate' | t }}</span><input type="date" name="date" [(ngModel)]="offerDate" /></label>
+                <label class="field"><span>{{ 'requests.offerTime' | t }}</span><input type="time" name="time" step="900" [(ngModel)]="offerTime" /></label>
+              </div>
+              <label class="field"><span>{{ 'requests.offerDuration' | t }} <span class="hint">{{ 'common.optional' | t }}</span></span>
+                <input type="number" name="dur" min="15" max="480" step="15" [(ngModel)]="offerDuration" /></label>
+              <div class="actions">
+                <button class="dose-btn dose-btn--primary small-btn" type="submit" [disabled]="busy()">{{ 'requests.sendOffer' | t }}</button>
+                <button class="dose-btn dose-btn--ghost small-btn" type="button" (click)="offering.set(null)">{{ 'common.cancel' | t }}</button>
+              </div>
+            </form>
+          }
         </article>
       } @empty { <p class="muted">{{ 'requests.empty' | t }}</p> }
     </section>
@@ -187,6 +213,9 @@ const reqStatus = (s: string) => { const k = `requests.st.${s}`; const t = tr(k)
     .item p { margin: 0; }
     .actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .small-btn { min-height: 38px; padding: 0 12px; font-size: 0.88rem; }
+    .offer { display: grid; gap: 10px; padding: 12px; border-radius: var(--dose-radius-sm); background: var(--dose-primary-50); }
+    .offer p { margin: 0; }
+    .two { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
   `,
 })
 export class AdminRequests {
@@ -198,8 +227,42 @@ export class AdminRequests {
   protected readonly dt = fmtDateTime;
   protected readonly statusAr = reqStatus;
   protected readonly digits = (p: string) => p.replace(/\D/g, '');
+  protected readonly teachers = signal<TeacherA[]>([]);
+  protected readonly offering = signal<string | null>(null);
+  protected readonly notice = signal('');
+  protected readonly busy = signal(false);
+  protected offerTeacher = '';
+  protected offerDate = '';
+  protected offerTime = '18:00';
+  protected offerDuration: number | null = null;
 
-  constructor() { void this.load(); }
+  constructor() {
+    void this.load();
+    this.api.teachers().then((t) => this.teachers.set(t.filter((x) => x.isPublished))).catch(() => undefined);
+  }
+
+  protected startOffer(r: SessionRequestA) {
+    this.offering.set(r.id);
+    this.offerTeacher = this.teachers()[0]?.id ?? '';
+    this.offerDate = new Date(Date.now() + 2 * 86_400_000).toLocaleDateString('en-CA', { timeZone: 'Africa/Cairo' });
+  }
+
+  /** Creates the private session/group for this request and queues a WhatsApp message with the link to confirm and pay. */
+  protected async offer(r: SessionRequestA) {
+    if (!this.offerTeacher || !this.offerDate || !this.offerTime) { this.error.set(tr('requests.offerMissing')); return; }
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      const res = await this.api.offer(r.id, this.offerTeacher, cairoToUtc(this.offerDate, this.offerTime), this.offerDuration || null, null);
+      this.notice.set(tr('requests.offered', { ref: res.bookingReference, name: r.studentName }));
+      this.offering.set(null);
+      await this.load();
+    } catch (e) {
+      this.error.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
 
   protected async load() {
     try { this.items.set(await this.api.requests(this.status() || null)); this.error.set(''); } catch (e) { this.error.set(errorMessage(e)); }

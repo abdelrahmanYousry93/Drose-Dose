@@ -163,3 +163,4 @@ html[dir='ltr'] .back::before { content: '← '; }
 .field-error { color: #b42318; font-size: 0.86rem; font-weight: 600; }
 .has-error input, .has-error select, .has-error textarea { border-color: #d92d20 !important; background: #fff6f5; }
 .check.has-error span { color: #b42318; }
+.alert--success { background: var(--dose-success-50); color: var(--dose-success); border-color: transparent; font-weight: 600; }

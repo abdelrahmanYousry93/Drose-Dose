@@ -71,6 +71,7 @@ const statusAr = label('teacher.st');
     <nav class="tnav">
       <a routerLink="/teacher/sessions" routerLinkActive="on">{{ 'titles.teacherSessions' | t }}</a>
       <a routerLink="/teacher/availability" routerLinkActive="on">{{ 'titles.teacherAvailability' | t }}</a>
+      <a routerLink="/teacher/proposals" routerLinkActive="on">{{ 'proposals.nav' | t }}</a>
       <button type="button" (click)="logout()">{{ 'adminNav.logout' | t }}</button>
     </nav>
     <router-outlet />

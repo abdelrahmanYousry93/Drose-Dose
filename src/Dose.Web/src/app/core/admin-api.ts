@@ -17,12 +17,12 @@ export interface ChapterA { id: string | null; nameAr: string; nameEn?: string |
 export interface LessonA { id: string | null; nameAr: string; nameEn?: string | null; chapterId: string; sortOrder: number; isActive: boolean }
 export interface ServiceTypeA {
   id: string; code: string; nameAr: string; nameEn?: string | null; descriptionAr: string | null; descriptionEn?: string | null;
-  sortOrder: number; isActive: boolean;
+  sortOrder: number; isActive: boolean; defaultDurationMinutes: number;
 }
 export interface TeacherA {
   id: string | null; displayNameAr: string; displayNameEn?: string | null; photoUrl: string | null; bioAr: string | null;
   bioEn?: string | null; qualificationsAr: string | null; qualificationsEn?: string | null; yearsOfExperience: number | null;
-  isPublished: boolean; hasUploadedPhoto?: boolean; photoPreviewUrl?: string | null;
+  isPublished: boolean; hasUploadedPhoto?: boolean; photoPreviewUrl?: string | null; subjectIds?: string[];
 }
 export interface PaymentMethodA {
   id: string | null; code: string; nameAr: string; nameEn?: string | null; receivingAccount: string; instructionsAr: string | null;
@@ -53,6 +53,7 @@ export interface SessionA {
   bookingDeadlineUtc: string; tierDecisionAtUtc: string | null; meetingUrl: string | null;
   confirmedCount: number; occupiedCount: number; activeBookingCount: number;
   scopeTitleEn: string | null; scopeDetailsEn: string | null;
+  isClosed: boolean; proposedByTeacherName: string | null; reviewNote: string | null;
 }
 export interface SessionBookingA {
   id: string; reference: string; status: string; studentName: string | null; contactPhone: string | null;
@@ -71,6 +72,13 @@ export interface SessionRequestA {
   subjectId: string; subjectNameAr: string; serviceTypeId: string; serviceTypeNameAr: string; scopeText: string;
   preferredDays: string; preferredTimes: string; mode: 'Private' | 'Group'; preferredTierNameAr: string | null;
   notes: string | null; adminNotes: string | null; fulfilledBySessionId: string | null; createdAtUtc: string;
+  groupSize: number | null;
+}
+export interface PromoA {
+  id: string | null; code: string; description: string | null; kind: 'Percent' | 'Fixed'; value: number;
+  gradeId: string | null; subjectId: string | null; serviceTypeId: string | null; lessonId: string | null; sessionId: string | null;
+  validFromUtc: string | null; validToUtc: string | null; maxTotalUses: number | null; maxUsesPerPhone: number | null;
+  maxUsesPerSession: number | null; isActive: boolean; uses?: number; totalDiscount?: number; scopeLabel?: string | null;
 }
 export interface DashSession {
   id: string; titleAr: string; subjectNameAr: string; teacherNameAr: string; startUtc: string; mode: string; status: string;
@@ -201,6 +209,13 @@ export class AdminApi {
   markRefunded(bookingId: string, note: string) { return this.post<void>(`/follow-ups/${bookingId}/refunded`, { note }); }
   markTransferDone(bookingId: string, note: string) { return this.post<void>(`/follow-ups/${bookingId}/transfer-done`, { note }); }
   requests(status: string | null) { return this.get<SessionRequestA[]>('/session-requests', { status }); }
+  offer(requestId: string, teacherId: string, startUtc: string, durationMinutes: number | null, title: string | null) {
+    return this.post<{ sessionId: string; bookingReference: string }>(`/session-requests/${requestId}/offer`, { teacherId, startUtc, durationMinutes, title });
+  }
+
+  // Promo codes
+  promos() { return this.get<PromoA[]>('/promo-codes'); }
+  savePromo(p: PromoA) { return this.post<{ id: string }>('/promo-codes', p); }
   updateRequest(id: string, status: string, adminNotes: string | null, fulfilledBySessionId: string | null = null) {
     return this.post<void>(`/session-requests/${id}/status`, { status, adminNotes, fulfilledBySessionId });
   }

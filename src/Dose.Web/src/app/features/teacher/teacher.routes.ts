@@ -11,6 +11,10 @@ export const teacherRoutes: Routes = [
       { path: 'sessions', component: TeacherSessions, title: 'titles.teacherSessions' },
       { path: 'sessions/:id', component: TeacherSessionPage, title: 'titles.teacherSession' },
       { path: 'availability', component: TeacherAvailability, title: 'titles.teacherAvailability' },
+      {
+        path: 'proposals', title: 'proposals.title',
+        loadComponent: () => import('./teacher-proposals').then((m) => m.TeacherProposals),
+      },
     ],
   },
 ];

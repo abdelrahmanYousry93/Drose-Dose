@@ -69,6 +69,7 @@ export class AdminLogin {
       <a routerLink="/admin/follow-ups" routerLinkActive="on">{{ 'adminNav.followUps' | t }}</a>
       <a routerLink="/admin/messages" routerLinkActive="on">{{ 'adminNav.messages' | t }}</a>
       <a routerLink="/admin/requests" routerLinkActive="on">{{ 'adminNav.requests' | t }}</a>
+      <a routerLink="/admin/promos" routerLinkActive="on">{{ 'adminNav.promos' | t }}</a>
       <a routerLink="/admin/sessions" routerLinkActive="on">{{ 'adminNav.sessions' | t }}</a>
       <a routerLink="/admin/pricing" routerLinkActive="on">{{ 'adminNav.pricing' | t }}</a>
       <a routerLink="/admin/teachers" routerLinkActive="on">{{ 'adminNav.teachers' | t }}</a>
