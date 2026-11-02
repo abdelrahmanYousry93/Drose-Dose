@@ -1,10 +1,12 @@
 import { Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Api, BookingView, PaymentMethod } from '../../core/api';
+import { Api, BookingView, PaymentMethod, PromoPreview } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
+import { StudentContext } from '../../core/student-context';
+import { looksLikePhone } from '../../shared/validation';
 import { escapeHtml } from '../../shared/group-terms';
 import { GroupTermsBox } from '../../shared/group-terms';
 import { TeacherCard } from '../../shared/teacher-card';
@@ -32,6 +34,16 @@ export class BookingPage {
   protected readonly now = signal(Date.now());
   protected readonly methods = signal<PaymentMethod[]>([]);
   protected readonly copied = signal(false);
+  protected readonly inviteCopied = signal(false);
+  private readonly context = inject(StudentContext);
+
+  // Promo code (details step)
+  protected promoCode = '';
+  protected readonly promo = signal<PromoPreview | null>(null);
+  protected readonly promoError = signal('');
+  protected readonly promoBusy = signal(false);
+  /** Fields with a problem, shown in red next to the field. */
+  protected readonly invalid = signal<Record<string, string>>({});
 
   // Details form
   protected studentName = '';
@@ -71,15 +83,42 @@ export class BookingPage {
     return 0;
   });
 
-  protected readonly whatsAppLink = computed(() => {
+  protected readonly whatsAppLink = computed(() => (this.b() ? this.settings.whatsAppLink() : null));
+
+  /** Amount due now: after a previewed promo during the details step. */
+  protected readonly amountDue = computed(() => {
     const v = this.b();
-    return v ? this.settings.whatsAppLink(v.whatsAppMessage) : null;
+    return v?.status === 'PendingHold' && this.promo() ? this.promo()!.netPrice : (v?.price ?? 0);
   });
+
+  /** Invite link friends open to join a private group. */
+  protected inviteUrl(code: string) { return `${location.origin}/join/${code}`; }
+  protected inviteWhatsApp(v: BookingView) {
+    const i = v.invite!;
+    const text = translate('invite.shareText', { session: `${v.session.subjectName} — ${v.session.scopeTitle}`,
+      when: `${fmtDate(v.session.startUtc)} ${fmtTime(v.session.startUtc)}`, code: i.code, link: this.inviteUrl(i.code) });
+    return `https://wa.me/?text=${encodeURIComponent(text)}`;
+  }
 
   constructor() {
     const timer = setInterval(() => this.now.set(Date.now()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
     effect(() => { void this.load(this.token()); });
+    // Tell the WhatsApp button where the student is, so the team can help with the exact step.
+    effect(() => {
+      const v = this.b();
+      if (!v) return;
+      const steps: Record<string, string> = {
+        PendingHold: 'support.step.details', PendingPayment: 'support.step.payment', PaymentUnderReview: 'support.step.review',
+        Confirmed: 'support.step.confirmed', TopUpPending: 'support.step.topUp', RefundPending: 'support.step.refund',
+        Expired: 'support.step.expired', Cancelled: 'support.step.cancelled',
+      };
+      this.context.setSupport({
+        step: steps[v.status] ?? 'support.step.booking', session: `${v.session.subjectName} — ${v.session.scopeTitle}`,
+        sessionTime: `${fmtDate(v.session.startUtc)} ${fmtTime(v.session.startUtc)}`, reference: v.reference, studentName: v.studentName,
+      });
+    });
+    inject(DestroyRef).onDestroy(() => this.context.setSupport({}));
     this.api.paymentMethods().then((m) => {
       this.methods.set(m);
       if (m.length) this.methodId = m[0].id;
@@ -88,21 +127,66 @@ export class BookingPage {
 
   protected async load(token = this.token()) {
     try {
-      this.b.set(await this.api.booking(token));
+      const v = await this.api.booking(token);
+      // A booking the team prepared for you already has your name and number.
+      if (v.status === 'PendingHold' && !this.studentName && v.studentName) this.studentName = v.studentName;
+      if (v.status === 'PendingHold' && !this.contactPhone && v.prefillPhone) this.contactPhone = v.prefillPhone.replace(/^\+20/, '0');
+      this.b.set(v);
       this.error.set('');
     } catch (e) {
       this.error.set(errorMessage(e));
     }
   }
 
+  protected async applyPromo() {
+    this.promoError.set('');
+    const code = this.promoCode.trim();
+    if (!code) { this.promo.set(null); return; }
+    this.promoBusy.set(true);
+    try {
+      this.promo.set(await this.api.previewPromo(this.token(), code, this.contactPhone.trim() || null));
+    } catch (e) {
+      this.promo.set(null);
+      this.promoError.set(errorMessage(e));
+    } finally {
+      this.promoBusy.set(false);
+    }
+  }
+
+  protected removePromo() { this.promo.set(null); this.promoCode = ''; this.promoError.set(''); }
+
+  /** Checks the form before sending, so the student sees exactly which field needs attention. */
+  private validateDetails(v: BookingView): boolean {
+    const e: Record<string, string> = {};
+    if (this.studentName.trim().length < 2) e['studentName'] = translate('validation.name');
+    if (!looksLikePhone(this.contactPhone)) e['contactPhone'] = translate('validation.phone');
+    if (v.requiresGuardianContact && this.guardianName.trim().length < 2) e['guardianName'] = translate('validation.guardianName');
+    if ((v.requiresGuardianContact || this.guardianPhone.trim()) && !looksLikePhone(this.guardianPhone)) e['guardianPhone'] = translate('validation.phone');
+    if (v.groupTerms && !v.isClosed && !this.acceptTopUpTerms) e['acceptTopUpTerms'] = translate('validation.acceptGroup');
+    if (!this.acceptTerms) e['acceptTerms'] = translate('validation.acceptTerms');
+    if (this.promoCode.trim() && this.promo()?.code !== this.promoCode.trim().toUpperCase()) e['promo'] = translate('validation.applyPromo');
+    this.invalid.set(e);
+    if (Object.keys(e).length) this.actionError.set(translate('validation.fixFields'));
+    return Object.keys(e).length === 0;
+  }
+
   protected async submitDetails() {
     const v = this.b();
-    if (!v) return;
+    if (!v || !this.validateDetails(v)) return;
     await this.act(() => this.api.submitDetails(this.token(), {
-      studentName: this.studentName, contactPhone: this.contactPhone,
-      guardianName: this.guardianName || null, guardianPhone: this.guardianPhone || null,
-      acceptTerms: this.acceptTerms, acceptTopUpTerms: this.acceptTopUpTerms, expectedPrice: v.price,
+      studentName: this.studentName.trim(), contactPhone: this.contactPhone.trim(),
+      guardianName: this.guardianName.trim() || null, guardianPhone: this.guardianPhone.trim() || null,
+      acceptTerms: this.acceptTerms, acceptTopUpTerms: this.acceptTopUpTerms, expectedPrice: this.amountDue(),
+      promoCode: this.promo()?.code ?? null,
     }));
+  }
+
+  protected async copyInvite(v: BookingView) {
+    try {
+      await navigator.clipboard.writeText(this.inviteUrl(v.invite!.code));
+      this.inviteCopied.set(true);
+      setTimeout(() => this.inviteCopied.set(false), 2000);
+    } catch { /* clipboard unavailable */ }
   }
 
   protected onFile(event: Event) {
@@ -119,7 +203,7 @@ export class BookingPage {
   }
 
   protected isPaid(v: BookingView) {
-    return v.status === 'PaymentUnderReview' || v.status === 'Confirmed' || v.status === 'TopUpPending';
+    return !v.invitedBy && (v.status === 'PaymentUnderReview' || v.status === 'Confirmed' || v.status === 'TopUpPending');
   }
 
   protected fullRefundAvailable(v: BookingView) {

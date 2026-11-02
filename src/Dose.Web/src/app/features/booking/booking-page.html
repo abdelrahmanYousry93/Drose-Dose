@@ -36,9 +36,20 @@
       <ul class="info-list">
         <li><span>{{ 'details.when' | t }}</span><span>{{ fmt.date(s.startUtc) }} — {{ fmt.time(s.startUtc) }}</span></li>
         <li><span>{{ 'details.duration' | t }}</span><span>{{ fmt.duration(s.durationMinutes) }}</span></li>
-        <li><span>{{ 'booking.type' | t }}</span><span>{{ (s.mode === 'Group' ? 'booking.group' : 'booking.private') | t }}</span></li>
+        <li><span>{{ 'booking.type' | t }}</span><span>{{ (v.isClosed && s.mode === 'Group' ? 'booking.privateGroup' : s.mode === 'Group' ? 'booking.group' : 'booking.private') | t: { n: v.seatCount } }}</span></li>
         <li><span>{{ 'common.teacher' | t }}</span><span>{{ v.teacher.displayName }}</span></li>
-        <li><span>{{ 'booking.amount' | t }}</span><span class="price">{{ fmt.money(v.price, v.currency) }}</span></li>
+        @if (v.invitedBy) {
+          <li><span>{{ 'invite.invitedByLabel' | t }}</span><span>{{ v.invitedBy }} · {{ 'invite.paidByFriend' | t }}</span></li>
+        } @else {
+          @if (v.seatCount > 1) {
+            <li><span>{{ 'booking.seats' | t }}</span><span>{{ 'booking.seatsValue' | t: { n: v.seatCount, price: fmt.money(v.listPrice / v.seatCount, v.currency) } }}</span></li>
+          }
+          @if (amountDue() < v.listPrice) {
+            <li><span>{{ 'booking.listPrice' | t }}</span><span class="strike">{{ fmt.money(v.listPrice, v.currency) }}</span></li>
+            <li><span>{{ 'promo.discount' | t }}</span><span class="ok-text">− {{ fmt.money(v.listPrice - amountDue(), v.currency) }}@if (v.promoCode) { <span dir="ltr"> ({{ v.promoCode }})</span> }</span></li>
+          }
+          <li><span>{{ 'booking.amount' | t }}</span><span class="price">{{ fmt.money(amountDue(), v.currency) }}</span></li>
+        }
       </ul>
     </div>
 
@@ -53,33 +64,55 @@
           </div>
           <dose-teacher-card [teacher]="v.teacher" />
 
-          <label class="field">
+          <label class="field" [class.has-error]="invalid()['studentName']">
             <span>{{ 'booking.studentName' | t }} <span class="req">*</span></span>
-            <input name="studentName" [(ngModel)]="studentName" required maxlength="100" autocomplete="name" />
+            <input name="studentName" [(ngModel)]="studentName" maxlength="100" autocomplete="name" [attr.aria-invalid]="!!invalid()['studentName']" />
+            @if (invalid()['studentName']; as m) { <span class="field-error">{{ m }}</span> }
           </label>
-          <label class="field">
+          <label class="field" [class.has-error]="invalid()['contactPhone']">
             <span>{{ 'booking.whatsapp' | t }} <span class="req">*</span></span>
-            <input name="contactPhone" [(ngModel)]="contactPhone" required inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" autocomplete="tel" />
-            <span class="hint">{{ 'booking.whatsappHint' | t }}</span>
+            <input name="contactPhone" [(ngModel)]="contactPhone" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" autocomplete="tel" [attr.aria-invalid]="!!invalid()['contactPhone']" />
+            @if (invalid()['contactPhone']; as m) { <span class="field-error">{{ m }}</span> } @else { <span class="hint">{{ 'booking.whatsappHint' | t }}</span> }
           </label>
 
-          <label class="field">
+          <label class="field" [class.has-error]="invalid()['guardianName']">
             <span>{{ 'booking.guardianName' | t }} @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">{{ 'common.optional' | t }}</span> }</span>
-            <input name="guardianName" [(ngModel)]="guardianName" [required]="v.requiresGuardianContact" maxlength="100" />
+            <input name="guardianName" [(ngModel)]="guardianName" maxlength="100" />
+            @if (invalid()['guardianName']; as m) { <span class="field-error">{{ m }}</span> }
           </label>
-          <label class="field">
+          <label class="field" [class.has-error]="invalid()['guardianPhone']">
             <span>{{ 'booking.guardianPhone' | t }} @if (v.requiresGuardianContact) { <span class="req">*</span> } @else { <span class="hint">{{ 'common.optional' | t }}</span> }</span>
-            <input name="guardianPhone" [(ngModel)]="guardianPhone" [required]="v.requiresGuardianContact" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" />
+            <input name="guardianPhone" [(ngModel)]="guardianPhone" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx" />
+            @if (invalid()['guardianPhone']; as m) { <span class="field-error">{{ m }}</span> }
           </label>
 
-          @if (v.groupTerms; as g) {
+          <div class="field promo" [class.has-error]="invalid()['promo'] || promoError()">
+            <label for="promo">{{ 'promo.label' | t }} <span class="hint">{{ 'common.optional' | t }}</span></label>
+            @if (promo(); as p) {
+              <div class="promo-ok">
+                <span>✓ <strong dir="ltr">{{ p.code }}</strong> — {{ 'promo.applied' | t: { amount: fmt.money(p.discount, v.currency) } }}</span>
+                <button type="button" class="link-btn" (click)="removePromo()">{{ 'promo.remove' | t }}</button>
+              </div>
+            } @else {
+              <div class="promo-row">
+                <input id="promo" name="promo" [(ngModel)]="promoCode" dir="ltr" maxlength="30" autocomplete="off" [placeholder]="'promo.placeholder' | t" />
+                <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="applyPromo()" [disabled]="promoBusy() || !promoCode.trim()">{{ 'promo.apply' | t }}</button>
+              </div>
+            }
+            @if (promoError()) { <span class="field-error">{{ promoError() }}</span> }
+            @else if (invalid()['promo']; as m) { <span class="field-error">{{ m }}</span> }
+          </div>
+
+          @if (v.isClosed && v.seatCount > 1) {
+            <p class="alert alert--info small">{{ 'booking.privateGroupNote' | t: { n: v.seatCount } }}</p>
+          } @else if (v.groupTerms; as g) {
             <dose-group-terms [terms]="g" [price]="v.price" [currency]="v.currency" />
-            <label class="check">
+            <label class="check" [class.has-error]="invalid()['acceptTopUpTerms']">
               <input type="checkbox" name="acceptTopUpTerms" [(ngModel)]="acceptTopUpTerms" />
               <span>{{ 'booking.acceptTopUp' | t }}</span>
             </label>
           }
-          <label class="check">
+          <label class="check" [class.has-error]="invalid()['acceptTerms']">
             <input type="checkbox" name="acceptTerms" [(ngModel)]="acceptTerms" />
             <span>{{ 'booking.acceptTerms' | t }}</span>
           </label>
@@ -144,6 +177,7 @@
         <div class="dose-card box center confirmed">
           <span class="big ok">✓</span>
           <h2>{{ 'booking.confirmed' | t }}</h2>
+          @if (v.invitedBy) { <p class="muted">{{ 'invite.joinedBody' | t: { name: v.invitedBy } }}</p> }
           @if (v.canJoinNow) {
             <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="joinSession()">{{ 'booking.joinNow' | t }}</button>
           } @else {
@@ -154,6 +188,33 @@
         </div>
       }
 
+    }
+
+    @if (v.status === 'Confirmed' && v.invite; as inv) {
+      <div class="dose-card box invite">
+        <h2>{{ 'invite.title' | t }}</h2>
+        <p class="muted">{{ 'invite.body' | t: { n: inv.seats - 1 } }}</p>
+        <div class="code-box">
+          <span class="muted small">{{ 'invite.code' | t }}</span>
+          <strong class="code" dir="ltr">{{ inv.code }}</strong>
+        </div>
+        <div class="actions">
+          <a class="dose-btn dose-btn--whatsapp" [href]="inviteWhatsApp(v)" target="_blank" rel="noopener">{{ 'invite.shareWhatsapp' | t }}</a>
+          <button class="dose-btn dose-btn--ghost" type="button" (click)="copyInvite(v)">{{ (inviteCopied() ? 'common.copied' : 'invite.copyLink') | t }}</button>
+        </div>
+        <p class="small">{{ 'invite.joinedCount' | t: { n: inv.joined, total: inv.seats } }}</p>
+        @if (inv.friendFirstNames.length) {
+          <ul class="friends">@for (f of inv.friendFirstNames; track $index) { <li>✓ {{ f }}</li> }</ul>
+        }
+        <p class="muted small">{{ 'invite.note' | t }}</p>
+      </div>
+    }
+
+    @switch (v.status) {
+      @case ('PendingHold') {}
+      @case ('PendingPayment') {}
+      @case ('PaymentUnderReview') {}
+      @case ('Confirmed') {}
       @case ('TopUpPending') {
         @let t = v.topUp!;
         <div class="dose-card box topup">
@@ -248,9 +309,12 @@
             <p class="small alert" [innerHTML]="'booking.cancelNoRefund' | t"></p>
             <label class="check"><input type="checkbox" [(ngModel)]="acceptNoRefund" /><span>{{ 'booking.acceptNoRefund' | t }}</span></label>
           }
+        } @else if (v.invitedBy) {
+          <p class="small">{{ 'invite.leave' | t }}</p>
         } @else {
           <p class="small">{{ 'booking.cancelUnpaid' | t }}</p>
         }
+        @if (v.invite) { <p class="small alert">{{ 'invite.cancelAll' | t }}</p> }
         <button class="dose-btn cancel-btn" type="button" (click)="cancelBooking()" [disabled]="busy()">{{ 'booking.cancel' | t }}</button>
       </details>
     }

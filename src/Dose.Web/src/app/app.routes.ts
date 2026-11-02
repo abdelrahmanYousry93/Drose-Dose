@@ -31,6 +31,19 @@ export const routes: Routes = [
     title: 'titles.request',
   },
   {
+    // Book a private session or a private group of friends from the teachers' free times.
+    path: 'private',
+    loadComponent: () => import('./features/private/private-booking').then((m) => m.PrivateBooking),
+    title: 'titles.private',
+  },
+  {
+    // Join a friend's private group with the invite code: /join/<code> (or /join to type it).
+    path: 'join/:code',
+    loadComponent: () => import('./features/private/join-group').then((m) => m.JoinGroup),
+    title: 'titles.join',
+  },
+  { path: 'join', redirectTo: '' },
+  {
     path: 'login',
     loadComponent: () => import('./features/admin/admin').then((m) => m.AdminLogin),
     title: 'titles.login',

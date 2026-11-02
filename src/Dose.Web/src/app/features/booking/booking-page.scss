@@ -51,3 +51,19 @@
 .cancel summary { cursor: pointer; font-weight: 600; color: var(--dose-text-muted); }
 .cancel p { margin: 8px 0; }
 .cancel-btn { background: #fdecea; color: #a52714; margin-top: 8px; }
+
+.strike { text-decoration: line-through; color: var(--dose-text-muted); }
+.ok-text { color: var(--dose-success); font-weight: 700; }
+.promo-row { display: flex; gap: 8px; }
+.promo-row input { flex: 1; text-transform: uppercase; }
+.promo-ok { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px;
+  border-radius: var(--dose-radius-sm); background: var(--dose-success-50); color: var(--dose-success); font-weight: 600; }
+.link-btn { border: 0; background: none; color: var(--dose-text-muted); text-decoration: underline; cursor: pointer; font: inherit; }
+.invite { display: grid; gap: 10px; }
+.invite h2 { margin: 0; }
+.invite p { margin: 0; }
+.code-box { display: grid; justify-items: center; gap: 4px; padding: 14px; border: 2px dashed var(--dose-primary); border-radius: var(--dose-radius-sm); background: var(--dose-primary-50); }
+.code { font-size: 1.7rem; letter-spacing: 0.18em; color: var(--dose-navy); }
+.invite .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.invite .actions > * { flex: 1 1 160px; }
+.friends { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--dose-success); font-weight: 600; }

@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Api, Lookup, Stage } from '../../core/api';
 import { errorMessage } from '../../core/format';
 import { TranslatePipe } from '../../core/i18n';
+import { StudentContext } from '../../core/student-context';
 
 /** Home (spec 9.1). All selector options come from the catalog API. */
 @Component({
@@ -56,11 +57,26 @@ import { TranslatePipe } from '../../core/i18n';
         <strong>{{ 'home.openGroups' | t }}</strong>
         <span>{{ 'home.openGroupsHint' | t }}</span>
       </a>
+      <a class="dose-card entry entry--private" routerLink="/private">
+        <strong>{{ 'home.privateEntry' | t }}</strong>
+        <span>{{ 'home.privateEntryHint' | t }}</span>
+      </a>
       <a class="dose-card entry" routerLink="/request-session">
         <strong>{{ 'home.noTime' | t }}</strong>
         <span>{{ 'home.noTimeHint' | t }}</span>
       </a>
     </section>
+
+    <form class="dose-card invite" (ngSubmit)="openInvite()">
+      <label class="field">
+        <span>{{ 'invite.haveCode' | t }}</span>
+        <div class="invite-row">
+          <input name="invite" [(ngModel)]="inviteCode" dir="ltr" maxlength="12" autocomplete="off" [placeholder]="'invite.codePlaceholder' | t" />
+          <button class="dose-btn dose-btn--ghost" type="submit" [disabled]="inviteCode.trim().length < 6">{{ 'invite.open' | t }}</button>
+        </div>
+        <span class="hint">{{ 'invite.haveCodeHint' | t }}</span>
+      </label>
+    </form>
   `,
   styles: `
     :host { display: block; }
@@ -74,15 +90,21 @@ import { TranslatePipe } from '../../core/i18n';
     .finder p { margin: -8px 0 0; }
     .entries { display: grid; gap: 12px; margin: 16px 0 32px; }
     .entry { display: grid; gap: 4px; padding: 18px; text-decoration: none; color: inherit; border-inline-start: 4px solid var(--dose-primary); }
-    .entry:nth-child(2) { border-inline-start-color: var(--dose-accent); }
+    .entry--private { border-inline-start-color: var(--dose-navy); }
+    .entry:nth-child(3) { border-inline-start-color: var(--dose-accent); }
+    .invite { padding: 16px 18px; margin-bottom: 32px; }
+    .invite-row { display: flex; gap: 8px; }
+    .invite-row input { flex: 1; text-transform: uppercase; letter-spacing: 0.08em; }
     .entry strong { font-size: 1.05rem; color: var(--dose-navy); }
     .entry span { color: var(--dose-text-muted); font-size: 0.92rem; }
-    @media (min-width: 760px) { .entries { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 760px) { .entries { grid-template-columns: 1fr 1fr 1fr; } }
   `,
 })
 export class Home {
   private readonly api = inject(Api);
   private readonly router = inject(Router);
+  private readonly context = inject(StudentContext);
+  protected inviteCode = '';
 
   protected readonly stages = signal<Stage[]>([]);
   protected readonly tracks = signal<Lookup[]>([]);
@@ -94,9 +116,25 @@ export class Home {
   protected readonly canSearch = computed(() => !!this.gradeId());
 
   constructor() {
+    this.context.setSupport({ step: 'support.step.choosing' });
     Promise.all([this.api.stages(), this.api.studyTracks()])
-      .then(([stages, tracks]) => { this.stages.set(stages); this.tracks.set(tracks); })
+      .then(async ([stages, tracks]) => {
+        this.stages.set(stages);
+        this.tracks.set(tracks);
+        // Start from what the student chose last time on this device.
+        const p = this.context.profile();
+        if (p && stages.some((s) => s.grades.some((g) => g.id === p.gradeId))) {
+          await this.onGrade(p.gradeId);
+          if (this.subjects().some((s) => s.id === p.subjectId)) this.subjectId.set(p.subjectId);
+          if (tracks.some((t) => t.id === p.studyTrackId)) this.trackId.set(p.studyTrackId);
+        }
+      })
       .catch((e) => this.loadError.set(errorMessage(e)));
+  }
+
+  protected openInvite() {
+    const code = this.inviteCode.trim().toUpperCase().replace(/[\s-]/g, '');
+    if (code) this.router.navigate(['/join', code]);
   }
 
   protected async onGrade(id: string) {
@@ -107,6 +145,12 @@ export class Home {
 
   protected search() {
     if (!this.canSearch()) return;
+    const grade = this.stages().flatMap((s) => s.grades).find((g) => g.id === this.gradeId());
+    this.context.saveProfile({
+      gradeId: this.gradeId(), gradeName: grade?.name ?? '',
+      subjectId: this.subjectId(), subjectName: this.subjects().find((s) => s.id === this.subjectId())?.name ?? '',
+      studyTrackId: this.trackId(), studyTrackName: this.tracks().find((t) => t.id === this.trackId())?.name ?? '',
+    });
     this.router.navigate(['/sessions'], {
       queryParams: { gradeId: this.gradeId(), subjectId: this.subjectId() || null, studyTrackId: this.trackId() || null },
     });

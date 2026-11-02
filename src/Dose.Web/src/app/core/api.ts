@@ -33,7 +33,7 @@ export interface HoldResponse {
 }
 export interface DetailsRequest {
   studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null;
-  acceptTerms: boolean; acceptTopUpTerms: boolean; expectedPrice: number;
+  acceptTerms: boolean; acceptTopUpTerms: boolean; expectedPrice: number; promoCode?: string | null;
 }
 export interface PaymentMethod { id: string; code: string; name: string; receivingAccount: string; instructions: string | null }
 export type BookingStatus =
@@ -45,7 +45,20 @@ export interface BookingView {
   paymentDueAtUtc: string | null; studentName: string | null; latestProofStatus: string | null;
   latestProofRejectionReason: string | null; canJoinNow: boolean; joinOpensAtUtc: string | null; whatsAppMessage: string;
   topUp: TopUpView | null; fullRefundUntilUtc: string; canCancel: boolean;
+  listPrice: number; discountAmount: number; promoCode: string | null; seatCount: number; isClosed: boolean;
+  invite: InviteInfo | null; invitedBy: string | null; prefillPhone: string | null;
 }
+export interface InviteInfo { code: string; seats: number; joined: number; friendFirstNames: string[] }
+export interface PromoPreview { code: string; description: string | null; kind: 'Percent' | 'Fixed'; value: number; discount: number; netPrice: number; currency: string }
+export interface Slot { teacherId: string; teacherName: string; teacherPhotoUrl: string | null; startUtc: string }
+export interface Slots { size: number; maxSize: number; durationMinutes: number; pricePerStudent: number; total: number; currency: string; slots: Slot[] }
+export interface PrivateBookingBody {
+  gradeId: string; subjectId: string; studyTrackId: string; serviceTypeId: string; size: number; teacherId: string; startUtc: string; scopeText: string | null;
+}
+export interface InviteDetails {
+  session: SessionSummary; teacher: TeacherPublic; organizerFirstName: string; seatsLeft: number; requiresGuardianContact: boolean; canJoin: boolean;
+}
+export interface JoinGroupBody { studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null; acceptTerms: boolean }
 export interface TopUpView {
   amount: number; currency: string; respondByUtc: string | null; reason: string | null;
   choice: 'PayDifference' | 'Transfer' | 'Refund' | null; proofStatus: string | null; proofRejectionReason: string | null;
@@ -57,6 +70,7 @@ export interface SessionRequestBody {
   studentName: string; contactPhone: string; guardianName: string | null; guardianPhone: string | null;
   gradeId: string; studyTrackId: string; subjectId: string; serviceTypeId: string; scopeText: string;
   preferredDays: string[]; preferredTimes: string[]; mode: 'Private' | 'Group'; preferredTierId: string | null; notes: string | null;
+  groupSize?: number | null;
 }
 export interface PaymentProofAdmin {
   id: string; bookingReference: string; bookingStatus: string; studentName: string; contactPhone: string;
@@ -133,6 +147,17 @@ export class Api {
   cancelBooking(token: string, acceptNoRefund: boolean) { return this.post<void>(`/b/${encodeURIComponent(token)}/cancel`, { acceptNoRefund }); }
   priceOptions(q: { serviceTypeId: string; gradeId: string; studyTrackId: string; subjectId: string }) {
     return this.get<PriceOptions | null>('/price-options', q);
+  }
+  previewPromo(token: string, code: string, phone: string | null) {
+    return this.post<PromoPreview>(`/b/${encodeURIComponent(token)}/promo`, { code, phone });
+  }
+  privateSlots(q: { gradeId: string; subjectId: string; studyTrackId: string; serviceTypeId: string; size: string }) {
+    return this.get<Slots>('/private/slots', q);
+  }
+  createPrivateBooking(body: PrivateBookingBody) { return this.post<HoldResponse>('/private/bookings', body); }
+  invite(code: string) { return this.get<InviteDetails>(`/invites/${encodeURIComponent(code)}`); }
+  joinGroup(code: string, body: JoinGroupBody) {
+    return this.post<{ reference: string; accessToken: string }>(`/invites/${encodeURIComponent(code)}/join`, body);
   }
   createRequest(body: SessionRequestBody) { return this.post<{ reference: string; whatsAppMessage: string }>('/session-requests', body); }
 

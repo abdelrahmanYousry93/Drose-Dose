@@ -158,3 +158,8 @@ a {
 /* Direction-aware "back" links: the arrow points toward the start edge in both Arabic (RTL) and English (LTR). */
 .back::before { content: '→ '; }
 html[dir='ltr'] .back::before { content: '← '; }
+
+/* Field-level validation messages (localized, shown next to the field that needs attention). */
+.field-error { color: #b42318; font-size: 0.86rem; font-weight: 600; }
+.has-error input, .has-error select, .has-error textarea { border-color: #d92d20 !important; background: #fff6f5; }
+.check.has-error span { color: #b42318; }

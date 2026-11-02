@@ -347,8 +347,9 @@ public sealed class PrivateBookingService(
         }, token);
     }
 
-    private static string DefaultTitleAr(string subject, int size) => size == 1 ? $"{subject} — جلسة خاصة" : $"{subject} — مجموعة خاصة ({size})";
-    private static string DefaultTitleEn(string subject, int size) => size == 1 ? $"{subject} — private session" : $"{subject} — private group ({size})";
+    // The subject is shown next to the title everywhere, so the default title doesn't repeat it.
+    private static string DefaultTitleAr(string _, int size) => size == 1 ? "جلسة خاصة" : $"مجموعة خاصة ({size})";
+    private static string DefaultTitleEn(string _, int size) => size == 1 ? "Private session" : $"Private group ({size})";
     private static DateTime Max(DateTime a, DateTime b) => a > b ? a : b;
     private static DateTime Min(DateTime a, DateTime b) => a < b ? a : b;
 

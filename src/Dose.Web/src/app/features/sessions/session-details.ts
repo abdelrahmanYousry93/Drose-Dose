@@ -4,6 +4,7 @@ import { Api, SessionDetails } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
+import { StudentContext } from '../../core/student-context';
 import { GroupTermsBox } from '../../shared/group-terms';
 import { TeacherCard } from '../../shared/teacher-card';
 
@@ -85,6 +86,7 @@ export class SessionDetailsPage {
   private readonly api = inject(Api);
   private readonly router = inject(Router);
   private readonly publicSettings = inject(PublicSettingsService);
+  private readonly context = inject(StudentContext);
   protected readonly refundHours = computed(() => this.publicSettings.settings()?.fullRefundCancellationHours ?? 24);
   readonly id = input.required<string>();
 
@@ -101,7 +103,11 @@ export class SessionDetailsPage {
   constructor() {
     effect(() => {
       const id = this.id();
-      this.api.session(id).then((d) => this.d.set(d)).catch((e) => this.error.set(errorMessage(e)));
+      this.api.session(id).then((d) => {
+        this.d.set(d);
+        this.context.setSupport({ step: 'support.step.viewing', session: `${d.summary.subjectName} — ${d.summary.scopeTitle}`,
+          sessionTime: `${fmtDate(d.summary.startUtc)} ${fmtTime(d.summary.startUtc)}` });
+      }).catch((e) => this.error.set(errorMessage(e)));
     });
   }
 
