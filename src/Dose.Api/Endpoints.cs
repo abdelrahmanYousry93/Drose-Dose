@@ -19,13 +19,26 @@ public static class Endpoints
     public const string BookingRateLimit = "booking";
     public const string LoginRateLimit = "login";
 
+    static async Task<bool> DatabaseUpAsync(Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TimeSpan.FromSeconds(5));
+        try { return await db.Database.CanConnectAsync(timeout.Token); }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { return false; }
+    }
+
     public static void MapDoseEndpoints(this WebApplication app)
     {
         var api = app.MapGroup("/api");
 
-        // Used by the Azure App Service health check: 503 when the database is unreachable.
+        // Platform health check: the web app itself is up (200) even while the database is unreachable, so the host
+        // keeps serving the site and a clear "temporarily unavailable" message instead of its own error page.
+        // /api/health/db answers 503 when the database is unreachable (for monitoring).
         api.MapGet("/health", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
-            await db.Database.CanConnectAsync(ct) ? Results.Ok(new { status = "ok" }) : Results.StatusCode(503))
+            Results.Ok(new { status = "ok", database = await DatabaseUpAsync(db, ct) ? "ok" : "unavailable" }))
+            .DisableRateLimiting();
+        api.MapGet("/health/db", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
+            await DatabaseUpAsync(db, ct) ? Results.Ok(new { status = "ok" }) : Results.StatusCode(503))
             .DisableRateLimiting();
         api.MapGet("/public-settings", async (IOptions<PublicSettings> s, SettingsService settings, CancellationToken ct) =>
             Results.Ok(new PublicSettingsDto(s.Value.WhatsAppBusinessNumber, s.Value.BusinessTimeZone,

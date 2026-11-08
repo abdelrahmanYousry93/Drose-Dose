@@ -67,3 +67,45 @@ public sealed class BadRequestExceptionHandler(IProblemDetailsService problems, 
         });
     }
 }
+
+/// <summary>
+/// The database is unreachable (paused, limit reached, network): answer 503 with a clear, localized message and a
+/// stable code instead of a generic server error, so the site can tell the visitor to try again shortly.
+/// </summary>
+public sealed class DatabaseUnavailableExceptionHandler(IProblemDetailsService problems, ILogger<DatabaseUnavailableExceptionHandler> log) : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(HttpContext http, Exception exception, CancellationToken ct)
+    {
+        if (!IsDatabaseUnavailable(exception)) return false;
+        log.LogError(exception, "Database unavailable for {Path}", http.Request.Path);
+        var en = HttpRequestLanguage.Resolve(http) == "en";
+        http.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        http.Response.Headers.RetryAfter = "60";
+        return await problems.TryWriteAsync(new ProblemDetailsContext
+        {
+            HttpContext = http,
+            ProblemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status503ServiceUnavailable,
+                Title = en ? "Dose is briefly unavailable. Please try again in a few minutes."
+                           : "دروس متوقفة مؤقتاً للصيانة. جرّب تاني بعد شوية.",
+                Extensions = { ["code"] = "service.unavailable" },
+            },
+            Exception = exception,
+        });
+    }
+
+    static bool IsDatabaseUnavailable(Exception? ex)
+    {
+        for (; ex is not null; ex = ex.InnerException)
+            if (ex is Microsoft.Data.SqlClient.SqlException sql
+                && (sql.ClientConnectionId == Guid.Empty || sql.Errors.Cast<Microsoft.Data.SqlClient.SqlError>().Any(e => ConnectionErrors.Contains(e.Number))))
+                return true; // never connected, or a connection-level error
+        return false;
+    }
+
+    // Connection-level failures only (not constraint violations or other query errors):
+    // timeout, network, cannot open database, Azure SQL unavailable / paused / resuming / throttled / firewall.
+    static readonly HashSet<int> ConnectionErrors = [-2, 2, 53, 64, 233, 4060, 10053, 10054, 10060, 10928, 10929,
+        40197, 40501, 40532, 40613, 40615, 42108, 42109, 49918, 49919, 49920];
+}

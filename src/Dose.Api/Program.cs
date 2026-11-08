@@ -22,6 +22,7 @@ if (!builder.Environment.IsDevelopment())
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<DatabaseUnavailableExceptionHandler>();
 // Binding failures throw so BadRequestExceptionHandler can answer with a clear, localized message.
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -88,8 +89,10 @@ if (jobsEnabled)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
         .UseSqlServerStorage(builder.Configuration.GetConnectionString("Dose")));
-    builder.Services.AddHangfireServer(o => o.WorkerCount = 2);
 }
+// Database preparation + job server start; never stops the site from starting when the database is unreachable.
+builder.Services.AddSingleton<DatabaseStartup>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<DatabaseStartup>());
 
 var app = builder.Build();
 
@@ -100,30 +103,10 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ----- Database start-up -----
-// Development: always migrate + seed SAMPLE data. Production: migrate only when Database__MigrateOnStartup=true
-// (simple hosts such as DigitalOcean App Platform; a release step can do it instead), SAMPLE data only when
-// Seed__SampleData=true is set explicitly. Roles always exist; the first admin is created from Seed__AdminEmail /
-// Seed__AdminPassword when that account does not exist yet (an existing account and its password are never changed).
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
-{
-    var isDev = app.Environment.IsDevelopment();
-    await using var scope = app.Services.CreateAsyncScope();
-    var db = scope.ServiceProvider.GetRequiredService<DoseDbContext>();
-    if (isDev || app.Configuration.GetValue("Database:MigrateOnStartup", false))
-        await db.Database.MigrateAsync();
-    await Dose.Application.Notifications.TemplateDefaults.EnsureAsync(db);
-    await DevelopmentSeeder.SeedRolesAndAdminAsync(
-        scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
-        scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(),
-        app.Configuration["Seed:AdminEmail"], app.Configuration["Seed:AdminPassword"]);
-    if (app.Configuration.GetValue("Seed:SampleData", isDev))
-    {
-        await DevelopmentSeeder.SeedSampleDataAsync(db, DateTime.UtcNow);
-        await DevelopmentSeeder.FillSampleEnglishAsync(db);
-        await DevelopmentSeeder.FillSampleSchedulingAsync(db, DateTime.UtcNow);
-    }
-}
+
+// ----- Database start-up (see DatabaseStartup): one attempt now, then retries in the background -----
+await app.Services.GetRequiredService<DatabaseStartup>().TryFirstAsync(CancellationToken.None);
 
 app.MapDoseEndpoints();
 app.MapAdminConfigEndpoints();
@@ -133,14 +116,6 @@ app.MapMessagingEndpoints();
 app.MapPhase6Endpoints();
 app.MapDoseSpa();
 
-if (jobsEnabled)
-{
-    var jobs = app.Services.GetRequiredService<IRecurringJobManager>();
-    jobs.AddOrUpdate<GroupDecisionService>("group-tier-decisions", s => s.RunDueDecisionsAsync(CancellationToken.None), "*/5 * * * *");
-    jobs.AddOrUpdate<Dose.Application.Notifications.NotificationService>("queue-session-reminders", s => s.QueueRemindersAsync(CancellationToken.None), "*/15 * * * *");
-    jobs.AddOrUpdate<BookingMaintenance>("expire-stale-bookings", s => s.ExpireStaleAsync(CancellationToken.None), "*/10 * * * *");
-    jobs.AddOrUpdate<Dose.Application.Payments.ProofRetention>("delete-old-payment-screenshots", s => s.PurgeAsync(CancellationToken.None), "30 3 * * *");
-}
 app.Run();
 
 public partial class Program;
