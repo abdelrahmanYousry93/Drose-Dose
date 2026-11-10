@@ -39,6 +39,8 @@ function isIos(): boolean {
  */
 function manualHintKey(): string | null {
   if (isInAppBrowser()) return 'pwa.inAppHint';
+  // Samsung Internet's own install is currently unreliable (fails or gets flagged by Play Protect): guide instead.
+  if (/SamsungBrowser/i.test(navigator.userAgent)) return 'pwa.samsungHint';
   if (!isIos()) return null;
   return /crios|fxios|edgios|opios/i.test(navigator.userAgent) ? 'pwa.iosHintOther' : 'pwa.iosHint';
 }
@@ -129,7 +131,10 @@ export class PwaBanners {
     const destroy = inject(DestroyRef);
     const on = () => this.online.set(true);
     const off = () => this.online.set(false);
-    const beforeInstall = (e: Event) => { e.preventDefault(); this.deferred.set(e as InstallPromptEvent); };
+    const beforeInstall = (e: Event) => {
+      e.preventDefault();
+      if (!/SamsungBrowser/i.test(navigator.userAgent)) this.deferred.set(e as InstallPromptEvent);
+    };
     const installed = () => {
       this.deferred.set(null); this.iosHint.set(null); this.manualSteps.set(false); clearTimeout(this.installTimer);
     };

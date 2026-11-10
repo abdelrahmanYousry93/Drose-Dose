@@ -648,11 +648,12 @@ export const en: typeof ar = {
     "installTitle": "Add Dose to your home screen",
     "iosHint": "On iPhone: tap the Share button (the square with an up arrow), then “Add to Home Screen”.",
     "iosHintOther": "On iPhone, adding to the home screen works from Safari: open the site in Safari, then Share → “Add to Home Screen”.",
-    "manualSteps": "From Chrome's menu (⋮ at the top) choose “Add to Home screen”, then “Create shortcut”. On Xiaomi/Oppo/Realme, if nothing appears: Settings → Apps → Chrome → Permissions → allow “Home screen shortcuts”.",
+    "manualSteps": "From Chrome's menu (⋮ at the top) choose “Add to Home screen”, then “Create shortcut”. On Samsung, if it still says it couldn't install: update Chrome and Google Play services from the store, or turn off “Auto Blocker” in Settings → Security and privacy. On Xiaomi/Oppo/Realme: Settings → Apps → Chrome → Permissions → allow “Home screen shortcuts”.",
     "manualTitle": "Didn't install? Add it by hand in seconds:",
     "notNow": "Not now",
     "offline": "You're offline — showing the last saved information. Booking and payment need a connection.",
     "ok": "Got it",
+    "samsungHint": "In Samsung Internet: open the ≡ menu at the bottom, then “Add page to” → “Home screen”. Or open the site in Chrome and add it from there.",
     "updateNow": "Update now",
     "updateReady": "A new version of Dose is ready."
   },
