@@ -2,7 +2,7 @@ import { Component, WritableSignal, computed, inject, input, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api, Lookup, PriceOptions, ServiceType, Stage } from '../../core/api';
-import { errorMessage, fmtMoney } from '../../core/format';
+import { errorMessage, fmtMoney, myRequests } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
 import { StudentContext } from '../../core/student-context';
@@ -294,6 +294,11 @@ export class RequestSession {
         groupSize: this.friends ? this.groupSize : null,
       });
       this.context.setSupport({ step: 'support.step.requestSent', reference: res.reference, studentName: this.studentName });
+      myRequests.add({
+        reference: res.reference, sentAtUtc: new Date().toISOString(),
+        subject: this.subjects().find((x) => x.id === this.subjectId)?.name ?? '',
+        grade: this.stages().flatMap((st) => st.grades).find((g) => g.id === this.gradeId)?.name ?? '',
+      });
       this.done.set(res);
       window.scrollTo({ top: 0 });
     } catch (e) {

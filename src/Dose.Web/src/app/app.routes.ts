@@ -26,6 +26,12 @@ export const routes: Routes = [
     title: 'titles.booking',
   },
   {
+    // Bookings and requests made or opened on this device, with their live status.
+    path: 'my-bookings',
+    loadComponent: () => import('./features/my-bookings/my-bookings').then((m) => m.MyBookings),
+    title: 'titles.myBookings',
+  },
+  {
     path: 'request-session',
     loadComponent: () => import('./features/request/request-session').then((m) => m.RequestSession),
     title: 'titles.request',

@@ -24,10 +24,23 @@ function isStandalone(): boolean {
   return window.matchMedia?.('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
 }
 
-function isIosSafari(): boolean {
-  const ua = navigator.userAgent;
-  const ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  return ios && /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua);
+/** Facebook / Instagram / Messenger / TikTok in-app browsers: they cannot install or add to the home screen. */
+function isInAppBrowser(): boolean {
+  return /FBAN|FBAV|FB_IAB|Instagram|Messenger|musical_ly|BytedanceWebview|TikTok/i.test(navigator.userAgent);
+}
+
+function isIos(): boolean {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * Which hint to show when the browser has no install button of its own (iPhone never has one):
+ * Safari → the Share-menu steps; other iPhone browsers → "open in Safari"; Facebook/Instagram → "open in browser".
+ */
+function manualHintKey(): string | null {
+  if (isInAppBrowser()) return 'pwa.inAppHint';
+  if (!isIos()) return null;
+  return /crios|fxios|edgios|opios/i.test(navigator.userAgent) ? 'pwa.iosHintOther' : 'pwa.iosHint';
 }
 
 /**
@@ -57,13 +70,24 @@ function isIosSafari(): boolean {
         <img src="icons/icon-192.png" alt="" width="40" height="40" />
         <div class="install__text">
           <strong>{{ 'pwa.installTitle' | t }}</strong>
-          <span class="muted small">{{ (iosHint() ? 'pwa.iosHint' : 'pwa.installBody') | t }}</span>
+          <span class="muted small">{{ (iosHint() ?? 'pwa.installBody') | t }}</span>
         </div>
         <div class="install__actions">
           @if (!iosHint()) {
             <button type="button" class="dose-btn dose-btn--primary btn-sm" (click)="install()">{{ 'pwa.install' | t }}</button>
           }
           <button type="button" class="dose-btn dose-btn--ghost btn-sm" (click)="dismiss()">{{ 'pwa.notNow' | t }}</button>
+        </div>
+      </aside>
+    }
+    @if (manualSteps()) {
+      <aside class="install install--manual" role="status">
+        <div class="install__text">
+          <strong>{{ 'pwa.manualTitle' | t }}</strong>
+          <span class="small">{{ 'pwa.manualSteps' | t }}</span>
+        </div>
+        <div class="install__actions">
+          <button type="button" class="dose-btn dose-btn--ghost btn-sm" (click)="manualSteps.set(false)">{{ 'pwa.ok' | t }}</button>
         </div>
       </aside>
     }
@@ -77,6 +101,7 @@ function isIosSafari(): boolean {
     .install { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 10px; padding: 12px 14px;
       border: 1px solid var(--dose-border); border-radius: var(--dose-radius-sm); background: var(--dose-surface); }
     .install img { border-radius: 10px; flex: none; }
+    .install--manual { background: var(--dose-primary-50); border-color: #cfe0ff; }
     .install__text { display: grid; gap: 2px; flex: 1 1 200px; }
     .install__actions { display: flex; gap: 8px; }
     .btn-sm { min-height: 36px; padding: 0 14px; font-size: 0.88rem; }
@@ -91,17 +116,23 @@ export class PwaBanners {
   private readonly deferred = signal<InstallPromptEvent | null>(null);
   private readonly dismissed = signal(recentlyDismissed());
   private readonly staffPage = signal(false);
-  protected readonly iosHint = signal(false);
+  /** Translation key of the manual "add to home screen" hint, when the browser has no install prompt (iPhone, in-app). */
+  protected readonly iosHint = signal<string | null>(null);
+  /** Shown when Android accepted the install but it never completed (e.g. "Couldn't install" on some phones). */
+  protected readonly manualSteps = signal(false);
+  private installTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly showInstall = computed(() =>
-    !this.dismissed() && !this.staffPage() && !this.updateReady() && (this.deferred() !== null || this.iosHint()));
+    !this.dismissed() && !this.staffPage() && !this.updateReady() && (this.deferred() !== null || !!this.iosHint()));
 
   constructor() {
     const destroy = inject(DestroyRef);
     const on = () => this.online.set(true);
     const off = () => this.online.set(false);
     const beforeInstall = (e: Event) => { e.preventDefault(); this.deferred.set(e as InstallPromptEvent); };
-    const installed = () => { this.deferred.set(null); this.iosHint.set(false); };
+    const installed = () => {
+      this.deferred.set(null); this.iosHint.set(null); this.manualSteps.set(false); clearTimeout(this.installTimer);
+    };
     window.addEventListener('online', on);
     window.addEventListener('offline', off);
     window.addEventListener('beforeinstallprompt', beforeInstall);
@@ -113,7 +144,8 @@ export class PwaBanners {
       window.removeEventListener('appinstalled', installed);
     });
 
-    this.iosHint.set(isIosSafari() && !isStandalone());
+    this.iosHint.set(isStandalone() ? null : manualHintKey());
+    destroy.onDestroy(() => clearTimeout(this.installTimer));
 
     const sub = this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) =>
       this.staffPage.set(/^\/(admin|teacher)(\/|$|\?)/.test((e as NavigationEnd).urlAfterRedirects)));
@@ -138,7 +170,10 @@ export class PwaBanners {
     this.deferred.set(null);
     await e.prompt();
     const { outcome } = await e.userChoice;
-    if (outcome === 'dismissed') this.dismiss();
+    if (outcome === 'dismissed') { this.dismiss(); return; }
+    // Accepted: Chrome normally fires "appinstalled" within seconds. Some phones fail silently or say
+    // "Couldn't install" (missing home-screen-shortcut permission, old Play services): then explain the manual way.
+    this.installTimer = setTimeout(() => this.manualSteps.set(true), 20_000);
   }
 
   protected dismiss() {

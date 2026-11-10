@@ -2,7 +2,7 @@ import { Component, DestroyRef, computed, effect, inject, input, signal } from '
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api, BookingView, PaymentMethod, PromoPreview } from '../../core/api';
-import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime } from '../../core/format';
+import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
 import { StudentContext } from '../../core/student-context';
@@ -133,6 +133,7 @@ export class BookingPage {
       if (v.status === 'PendingHold' && !this.contactPhone && v.prefillPhone) this.contactPhone = v.prefillPhone.replace(/^\+20/, '0');
       this.b.set(v);
       this.error.set('');
+      myBookings.add(v.reference, token); // links opened from WhatsApp also show up in "My bookings"
     } catch (e) {
       this.error.set(errorMessage(e));
     }

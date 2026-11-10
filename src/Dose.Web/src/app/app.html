@@ -4,7 +4,9 @@
     <nav [attr.aria-label]="'nav.main' | t">
       <a routerLink="/open-groups">{{ 'nav.openGroups' | t }}</a>
       <a routerLink="/request-session">{{ 'nav.request' | t }}</a>
+      <a routerLink="/my-bookings">{{ 'nav.myBookings' | t }}</a>
     </nav>
+    <a class="mine" routerLink="/my-bookings">{{ 'nav.myBookings' | t }}</a>
     <dose-lang-switch />
   </div>
 </header>

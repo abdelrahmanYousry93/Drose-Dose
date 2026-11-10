@@ -49,10 +49,37 @@ export const myBookings = {
     try {
       const list = myBookings.list().filter((b) => b.token !== token);
       list.unshift({ reference, token });
-      localStorage.setItem('dose.bookings', JSON.stringify(list.slice(0, 10)));
+      localStorage.setItem('dose.bookings', JSON.stringify(list.slice(0, 30)));
     } catch { /* storage unavailable */ }
   },
+  remove(token: string) {
+    try { localStorage.setItem('dose.bookings', JSON.stringify(myBookings.list().filter((b) => b.token !== token))); } catch { /* storage unavailable */ }
+  },
   list(): { reference: string; token: string }[] {
-    try { return JSON.parse(localStorage.getItem('dose.bookings') ?? '[]'); } catch { return []; }
+    try {
+      const v = JSON.parse(localStorage.getItem('dose.bookings') ?? '[]');
+      return Array.isArray(v) ? v.filter((b) => typeof b?.token === 'string' && typeof b?.reference === 'string') : [];
+    } catch { return []; }
+  },
+};
+
+/** Session requests sent from this device (no private link exists for a request; the team answers on WhatsApp). */
+export interface SentRequest { reference: string; subject: string; grade: string; sentAtUtc: string }
+export const myRequests = {
+  add(r: SentRequest) {
+    try {
+      const list = myRequests.list().filter((x) => x.reference !== r.reference);
+      list.unshift(r);
+      localStorage.setItem('dose.requests', JSON.stringify(list.slice(0, 30)));
+    } catch { /* storage unavailable */ }
+  },
+  remove(reference: string) {
+    try { localStorage.setItem('dose.requests', JSON.stringify(myRequests.list().filter((x) => x.reference !== reference))); } catch { /* storage unavailable */ }
+  },
+  list(): SentRequest[] {
+    try {
+      const v = JSON.parse(localStorage.getItem('dose.requests') ?? '[]');
+      return Array.isArray(v) ? v.filter((x) => typeof x?.reference === 'string') : [];
+    } catch { return []; }
   },
 };

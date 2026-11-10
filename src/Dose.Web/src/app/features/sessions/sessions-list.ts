@@ -125,6 +125,22 @@ export class SessionsList {
         }));
       }
     });
+    // Keep the remembered profile (and so the WhatsApp message) in step with the filters on screen. It reacts to the
+    // filters themselves and waits until the names for the new grade are loaded, so it never keeps an old subject.
+    effect(() => {
+      const g = this.gradeId();
+      if (!g) return;
+      const grade = this.stages().flatMap((s) => s.grades).find((x) => x.id === g);
+      const subjectId = this.subjectId() ?? '';
+      const subject = this.subjects().find((s) => s.id === subjectId);
+      const trackId = this.studyTrackId() ?? '';
+      const track = this.tracks().find((t) => t.id === trackId);
+      if (!grade || (subjectId && !subject) || (trackId && !track)) return; // names not loaded yet
+      untracked(() => this.context.saveProfile({
+        gradeId: g, gradeName: grade.name, subjectId, subjectName: subject?.name ?? '',
+        studyTrackId: trackId, studyTrackName: track?.name ?? '',
+      }));
+    });
     effect(() => {
       const g = this.gradeId();
       untracked(() => {
@@ -151,18 +167,6 @@ export class SessionsList {
 
   protected setFilter(change: { gradeId?: string | null; subjectId?: string | null; studyTrackId?: string | null; mode?: string | null }) {
     const next = { ...change, all: 'gradeId' in change && !change.gradeId ? '1' : null };
-    this.router.navigate([], { queryParams: next, queryParamsHandling: 'merge' }).then(() => this.remember());
-  }
-
-  /** Keeps the remembered profile in step with what the student filters on. */
-  private remember() {
-    const g = this.gradeId();
-    if (!g) return;
-    const grade = this.stages().flatMap((s) => s.grades).find((x) => x.id === g);
-    this.context.saveProfile({
-      gradeId: g, gradeName: grade?.name ?? '',
-      subjectId: this.subjectId() ?? '', subjectName: this.subjects().find((s) => s.id === this.subjectId())?.name ?? '',
-      studyTrackId: this.studyTrackId() ?? '', studyTrackName: this.tracks().find((t) => t.id === this.studyTrackId())?.name ?? '',
-    });
+    this.router.navigate([], { queryParams: next, queryParamsHandling: 'merge' });
   }
 }

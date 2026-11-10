@@ -26,7 +26,10 @@ import { PwaBanners } from './shared/pwa-banners';
     .foot { border-top: 1px solid var(--dose-border); background: var(--dose-surface); }
     .foot__inner { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding-block: 16px; }
     .foot p { margin: 0; color: var(--dose-text-muted); font-size: 0.9rem; }
-    @media (min-width: 760px) { nav { display: flex; } }
+    /* Phones: the main nav is hidden, so "My bookings" gets its own compact link. */
+    .mine { text-decoration: none; font-weight: 700; font-size: 0.9rem; color: var(--dose-primary); padding: 8px 12px;
+      border-radius: 999px; background: var(--dose-primary-50); white-space: nowrap; }
+    @media (min-width: 760px) { nav { display: flex; } .mine { display: none; } }
   `,
 })
 export class App {

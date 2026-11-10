@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Api, Lookup, ServiceType, Slot, Slots, Stage } from '../../core/api';
+import { Api, ApiError, Lookup, ServiceType, Slot, Slots, Stage } from '../../core/api';
 import { errorMessage, fmtDate, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { StudentContext } from '../../core/student-context';
@@ -82,7 +82,13 @@ interface Day { key: string; label: string; slots: Slot[] }
           {{ (loading() ? 'common.loading' : 'private.showTimes') | t }}</button>
       </div>
 
-      @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
+      @if (noPrice()) {
+        <div class="alert alert--info no-price" role="status">
+          <strong>{{ 'private.noPriceTitle' | t }}</strong>
+          <span>{{ 'private.noPriceBody' | t }}</span>
+          <a class="dose-btn dose-btn--primary btn-block" routerLink="/request-session" [queryParams]="requestParams()">{{ 'private.requestPrice' | t }}</a>
+        </div>
+      } @else if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
       @if (slots(); as sl) {
         <div class="dose-card box">
@@ -120,6 +126,7 @@ interface Day { key: string; label: string; slots: Slot[] }
   `,
   styles: `
     .box { padding: 18px; display: grid; gap: 14px; }
+    .no-price { display: grid; gap: 10px; }
     .box h2 { margin: 0; font-size: 1.08rem; color: var(--dose-navy); }
     .two { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
     .summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--dose-radius-sm); background: var(--dose-primary-50); font-weight: 600; }
@@ -169,6 +176,8 @@ export class PrivateBooking {
   protected readonly loading = signal(false);
   protected readonly booking = signal(false);
   protected readonly error = signal('');
+  /** No price set for this subject yet: offer to send a request instead of a dead end. */
+  protected readonly noPrice = signal(false);
   protected readonly invalid = signal<Record<string, string>>({});
 
   protected readonly money = fmtMoney;
@@ -223,7 +232,7 @@ export class PrivateBooking {
     this.subjects.set(id ? await this.api.subjects(id).catch(() => []) : []);
   }
 
-  protected reset() { this.slots.set(null); this.picked.set(null); this.error.set(''); }
+  protected reset() { this.slots.set(null); this.picked.set(null); this.error.set(''); this.noPrice.set(false); }
 
   protected setSize(n: number) {
     const v = Math.max(1, Math.min(n, this.maxSize()));
@@ -252,7 +261,8 @@ export class PrivateBooking {
         studyTrackId: this.trackId(), studyTrackName: this.trackName(),
       });
     } catch (err) {
-      this.error.set(errorMessage(err));
+      if (err instanceof ApiError && err.code === 'pricing.not_configured') this.noPrice.set(true);
+      else this.error.set(errorMessage(err));
     } finally {
       this.loading.set(false);
     }
