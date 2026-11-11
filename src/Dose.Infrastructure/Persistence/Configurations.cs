@@ -348,3 +348,15 @@ internal sealed class TeacherSubjectConfig : IEntityTypeConfiguration<Dose.Domai
         e.HasOne<Dose.Domain.Catalog.Subject>().WithMany().HasForeignKey(x => x.SubjectId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class MarketingPostConfig : IEntityTypeConfiguration<Dose.Domain.Administration.MarketingPost>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Administration.MarketingPost> e)
+    {
+        e.Property(x => x.Key).HasMaxLength(60);
+        e.Property(x => x.Channel).HasMaxLength(20);
+        e.Property(x => x.ExternalId).HasMaxLength(100);
+        e.Property(x => x.LastError).HasMaxLength(1000);
+        e.HasIndex(x => new { x.Key, x.Channel }).IsUnique();
+    }
+}

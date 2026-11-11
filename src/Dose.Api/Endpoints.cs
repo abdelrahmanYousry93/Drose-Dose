@@ -37,6 +37,9 @@ public static class Endpoints
         api.MapGet("/health", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
             Results.Ok(new { status = "ok", database = await DatabaseUpAsync(db, ct) ? "ok" : "unavailable" }))
             .DisableRateLimiting();
+        // What the marketing publisher has queued and published (no secrets) — read by the marketing agency.
+        api.MapGet("/marketing/status", async (MarketingPublisher publisher, CancellationToken ct) =>
+            Results.Ok(await publisher.StatusAsync(ct)));
         api.MapGet("/health/db", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
             await DatabaseUpAsync(db, ct) ? Results.Ok(new { status = "ok" }) : Results.StatusCode(503))
             .DisableRateLimiting();

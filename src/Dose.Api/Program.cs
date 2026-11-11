@@ -27,6 +27,11 @@ builder.Services.AddExceptionHandler<DatabaseUnavailableExceptionHandler>();
 builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(o => o.ThrowOnBadRequest = true);
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOptions<PublicSettings>().Bind(builder.Configuration.GetSection(PublicSettings.SectionName));
+// Marketing: publishes the agency's approved posts to the Dose Facebook Page (inactive until Meta__PageId and
+// Meta__PageAccessToken are set as encrypted environment variables).
+builder.Services.AddOptions<MetaSettings>().Bind(builder.Configuration.GetSection(MetaSettings.SectionName));
+builder.Services.AddHttpClient("meta", c => c.Timeout = TimeSpan.FromSeconds(60));
+builder.Services.AddScoped<MarketingPublisher>();
 
 builder.Services.AddDoseApplication();
 builder.Services.AddHttpContextAccessor();

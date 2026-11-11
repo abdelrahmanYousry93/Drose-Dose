@@ -28,6 +28,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=api /app ./
 COPY --from=web /web/dist/dose-web/browser ./wwwroot
+# Approved social posts waiting for their time (written by the marketing agency, see marketing/agency/weekly-run.md).
+COPY marketing/social-queue.json ./marketing/queue.json
 # Uploaded files (payment screenshots, teacher photos). NOTE: container disk is not permanent on most PaaS hosts —
 # mount a volume here or move to object storage before real use.
 ENV ASPNETCORE_HTTP_PORTS=8080 \
