@@ -76,6 +76,8 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         Assert.Contains("/123/photos", graph.Calls[3].Url);
         // Posts use the Page's own token, read with the configured (user) key.
         Assert.All(graph.Calls, c => Assert.Contains("access_token=page-token", c.Body));
+        // The caption ends with a clickable, post-tagged link to the site.
+        Assert.Contains(Uri.EscapeDataString("https://dose.test/?src=fb-" + key + "-p"), graph.Calls[3].Body);
 
         // A second run publishes nothing again.
         using (var scope = f.Services.CreateScope())

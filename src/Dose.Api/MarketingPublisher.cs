@@ -132,13 +132,16 @@ public sealed class MarketingPublisher(
         }
         static string Id(JsonElement j) => j.TryGetProperty("post_id", out var p) ? p.GetString()! : j.GetProperty("id").GetString()!;
 
+        // Every Facebook post carries a clickable link to the site, tagged with the post so visits can be traced back.
+        var caption = WithLink(post);
+
         switch (post.Kind)
         {
             case "photo":
-                return Id(await Post($"{baseUrl}/photos", new() { ["url"] = Url(post.Media[0]), ["message"] = post.Caption ?? "" }));
+                return Id(await Post($"{baseUrl}/photos", new() { ["url"] = Url(post.Media[0]), ["message"] = caption }));
             case "album":
             {
-                var form = new Dictionary<string, string> { ["message"] = post.Caption ?? "" };
+                var form = new Dictionary<string, string> { ["message"] = caption };
                 for (var i = 0; i < post.Media.Length; i++)
                 {
                     var photo = await Post($"{baseUrl}/photos", new() { ["url"] = Url(post.Media[i]), ["published"] = "false" });
@@ -147,13 +150,25 @@ public sealed class MarketingPublisher(
                 return Id(await Post($"{baseUrl}/feed", form));
             }
             case "video":
-                return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = post.Caption ?? "" }));
+                return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = caption }));
             default:
                 throw new InvalidOperationException($"Unknown post kind '{post.Kind}'.");
         }
     }
 
     static (DateTime At, object Result)? pageCheck;
+
+    /// <summary>
+    /// Adds the booking link (site URL + ?src=fb-{key}) at the end of the caption unless the caption already has a link.
+    /// Instagram-style "link in bio" lines are replaced, since Facebook captions can hold a clickable link.
+    /// </summary>
+    public string WithLink(QueuedPost post)
+    {
+        var caption = (post.Caption ?? "").Replace("اللينك في البايو", "اللينك تحت").Trim();
+        if (caption.Contains("http", StringComparison.OrdinalIgnoreCase)) return caption;
+        var link = $"{site.Value.AppBaseUrl.TrimEnd('/')}/?src=fb-{Uri.EscapeDataString(post.Key)}";
+        return $"{caption}\n\n👈 احجز الدرس اللي محتاجه من هنا:\n{link}".Trim();
+    }
 
     /// <summary>
     /// Posting needs the Page's own token. When the configured key is the owner's (user) token, the Page token is read
