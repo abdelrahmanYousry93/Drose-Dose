@@ -21,6 +21,8 @@ Always pass `if_version` from your last read when updating an existing doc.
    (`GET https://lionfish-app-n6c49.ondigitalocean.app/api/catalog/stages`, `/api/sessions`) to know what is bookable.
 2. **Analyst** → `weeks/<this week>.report` (markdown: numbers table, what worked, what didn't, 3 changes for next week).
    If no metrics were entered, say so plainly and base the report on approvals/feedback only. Never invent numbers.
+   *Next week already produced* (its `weeks` doc exists with items): skip steps 3–8; instead refresh it — apply any new
+   briefs/feedback and the report's 3 changes to its pending (`review`/`changes`) items — then do step 9.
 3. **Strategist** → create `weeks/<next>` (status planning, `current` stays on this week until Saturday) with goal, theme, plan.
    Follow the month arc but adapt to the report, the most-asked lessons and the briefs.
 4. **Copywriter + Designer + Video** → write `marketing/weeks/<next>/spec.json` (see designer.md), render with
