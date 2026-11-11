@@ -58,6 +58,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         await File.WriteAllTextAsync(queue, $$"""
           [ { "key": "{{key}}-a", "kind": "album", "caption": "كابشن", "media": ["/m/w02/1.jpg", "/m/w02/2.jpg"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-5):O}}" },
             { "key": "{{key}}-p", "kind": "photo", "caption": "صورة", "media": ["/m/w02/3.jpg"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-1):O}}" },
+            { "key": "{{key}}-e", "kind": "edit", "editOf": "{{key}}-p", "caption": "نص جديد", "media": [], "publishAt": "{{DateTimeOffset.UtcNow.AddSeconds(-30):O}}" },
             { "key": "{{key}}-f", "kind": "video", "caption": "بعدين", "media": ["/m/w02/r.mp4"], "publishAt": "{{DateTimeOffset.UtcNow.AddDays(1):O}}" } ]
           """);
         var graph = new FakeGraph();
@@ -67,7 +68,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
             await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
 
         // Album: two unpublished photos, then one feed post attaching both; then the single photo. Nothing for tomorrow.
-        Assert.Equal(4, graph.Calls.Count);
+        Assert.Equal(5, graph.Calls.Count);
         Assert.Contains("/v27.0/123/photos", graph.Calls[0].Url);
         Assert.Contains("published=false", graph.Calls[0].Body);
         Assert.Contains("url=https%3A%2F%2Fdose.test%2Fm%2Fw02%2F1.jpg", graph.Calls[0].Body);
@@ -79,10 +80,15 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         // The caption ends with a clickable, post-tagged link to the site.
         Assert.Contains(Uri.EscapeDataString("https://dose.test/?src=fb-" + key + "-p"), graph.Calls[3].Body);
 
+        // The edit replaces the text of the published photo post (its post id), keeping the tagged link.
+        Assert.EndsWith("/page_p4", graph.Calls[4].Url);
+        Assert.Contains(System.Net.WebUtility.UrlEncode("نص جديد"), graph.Calls[4].Body);
+        Assert.Contains(Uri.EscapeDataString("?src=fb-" + key + "-p"), graph.Calls[4].Body);
+
         // A second run publishes nothing again.
         using (var scope = f.Services.CreateScope())
             await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
-        Assert.Equal(4, graph.Calls.Count);
+        Assert.Equal(5, graph.Calls.Count);
 
         var status = await f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test") })
             .GetStringAsync("/api/marketing/status");

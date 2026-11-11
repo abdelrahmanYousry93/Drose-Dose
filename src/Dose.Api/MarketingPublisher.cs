@@ -31,7 +31,8 @@ public sealed class MetaSettings
 
 /// <summary>An approved post waiting for its time. Media are site-relative paths under /m/ (public JPEG/MP4 files).</summary>
 public sealed record QueuedPost(
-    string Key, string Kind, string? Caption, string[] Media, DateTimeOffset PublishAt, string[]? Channels);
+    string Key, string Kind, string? Caption, string[] Media, DateTimeOffset PublishAt, string[]? Channels,
+    string? EditOf = null);
 
 /// <summary>
 /// Publishes approved marketing posts to the Dose Facebook Page when their time comes. The agency only ever adds posts
@@ -151,6 +152,16 @@ public sealed class MarketingPublisher(
             }
             case "video":
                 return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = caption }));
+            case "edit":
+            {
+                // Replace the text of a post this publisher already made (EditOf = that post's queue key).
+                var target = await db.Set<MarketingPost>().AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Key == post.EditOf && x.Channel == "facebook" && x.ExternalId != null, ct)
+                    ?? throw new InvalidOperationException($"No published post '{post.EditOf}' to edit.");
+                var text = WithLink(post with { Key = post.EditOf! });
+                var res = await Post($"https://graph.facebook.com/{m.GraphVersion}/{target.ExternalId}", new() { ["message"] = text });
+                return target.ExternalId!;
+            }
             default:
                 throw new InvalidOperationException($"Unknown post kind '{post.Kind}'.");
         }
