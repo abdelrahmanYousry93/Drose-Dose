@@ -47,7 +47,8 @@ Always pass `if_version` from your last read when updating an existing doc.
 
 ## Daily — publisher sync (Facebook Page)
 The site publishes `marketing/social-queue.json` to the Dose Facebook Page by itself (job every 5 minutes, see
-`src/Dose.Api/MarketingPublisher.cs`); the queue ships with each deploy (push to main → deploy in ~5 minutes).
+`src/Dose.Api/MarketingPublisher.cs`). It reads the queue and new media straight from this repo's main branch, so a
+pushed change takes effect within ~5 minutes without waiting for a deploy.
 1. Read every HQ item whose week is current or next. **Only items with `status: approved` may be in the queue.**
 2. For each approved feed item (not stories — stickers can't be added by API) build a queue entry:
    `{"key": "<item id>", "kind": "photo"|"album"|"video", "caption": "<caption without the parents' variant section>",

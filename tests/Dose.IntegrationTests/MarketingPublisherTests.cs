@@ -44,6 +44,8 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         b.UseSetting("Meta:PageId", "123");
         b.UseSetting("Meta:PageAccessToken", "test-token");
         b.UseSetting("Meta:QueuePath", queuePath);
+        b.UseSetting("Meta:QueueUrl", "");
+        b.UseSetting("Meta:MediaBaseUrl", "");
         b.ConfigureServices(s => s.AddHttpClient("meta").ConfigurePrimaryHttpMessageHandler(() => graph));
     });
 

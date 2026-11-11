@@ -17,6 +17,15 @@ public sealed class MetaSettings
     public string GraphVersion { get; init; } = "v27.0";
     /// <summary>Queue file written by the marketing agency; copied into the image by the Dockerfile.</summary>
     public string QueuePath { get; init; } = "marketing/queue.json";
+    /// <summary>
+    /// Where the live schedule is read from (every run, no deploy needed): the public repo's main branch. The local
+    /// QueuePath copy is only a fallback when GitHub is unreachable. Empty disables the remote read (tests, local dev).
+    /// </summary>
+    public string QueueUrl { get; init; } =
+        "https://raw.githubusercontent.com/abdelrahmanYousry93/Drose-Dose/main/marketing/social-queue.json";
+    /// <summary>Base for media not deployed with the site yet (/m/... paths in the repo's public folder).</summary>
+    public string MediaBaseUrl { get; init; } =
+        "https://raw.githubusercontent.com/abdelrahmanYousry93/Drose-Dose/main/src/Dose.Web/public";
     public bool Enabled => !string.IsNullOrWhiteSpace(PageId) && !string.IsNullOrWhiteSpace(PageAccessToken);
 }
 
@@ -35,6 +44,28 @@ public sealed class MarketingPublisher(
 {
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { NumberHandling = JsonNumberHandling.AllowReadingFromString };
 
+    static (DateTime At, List<QueuedPost> Posts)? remoteQueue;
+
+    /// <summary>The schedule from GitHub (cached 2 minutes), falling back to the copy shipped with the site.</summary>
+    public async Task<IReadOnlyList<QueuedPost>> ReadQueueAsync(CancellationToken ct)
+    {
+        var url = meta.Value.QueueUrl;
+        if (string.IsNullOrWhiteSpace(url)) return ReadQueue();
+        if (remoteQueue is { } c && c.At > DateTime.UtcNow.AddMinutes(-2)) return c.Posts;
+        try
+        {
+            var text = await http.CreateClient("meta").GetStringAsync($"{url}?t={DateTime.UtcNow.Ticks}", ct);
+            var posts = JsonSerializer.Deserialize<List<QueuedPost>>(text, Json) ?? [];
+            remoteQueue = (DateTime.UtcNow, posts);
+            return posts;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            log.LogWarning(ex, "Could not read the marketing schedule from {Url}; using the deployed copy", url);
+            return ReadQueue();
+        }
+    }
+
     public IReadOnlyList<QueuedPost> ReadQueue()
     {
         var path = Path.IsPathRooted(meta.Value.QueuePath) ? meta.Value.QueuePath : Path.Combine(env.ContentRootPath, meta.Value.QueuePath);
@@ -49,7 +80,7 @@ public sealed class MarketingPublisher(
     {
         if (!meta.Value.Enabled) return;
         var now = DateTime.UtcNow;
-        var due = ReadQueue()
+        var due = (await ReadQueueAsync(ct))
             .Where(p => (p.Channels is null || p.Channels.Contains("facebook")) && p.PublishAt.UtcDateTime <= now
                         && p.PublishAt.UtcDateTime > now.AddDays(-2))
             .OrderBy(p => p.PublishAt).ToList();
@@ -76,8 +107,15 @@ public sealed class MarketingPublisher(
     {
         var m = meta.Value;
         var baseUrl = $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}";
-        string Url(string media) => media.StartsWith("http", StringComparison.OrdinalIgnoreCase)
-            ? media : $"{site.Value.AppBaseUrl.TrimEnd('/')}/{media.TrimStart('/')}";
+        // Media deployed with the site are served by it; newer ones come straight from the repo.
+        string Url(string media)
+        {
+            if (media.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return media;
+            var rel = media.TrimStart('/');
+            var deployed = env.WebRootPath is { } root && File.Exists(Path.Combine(root, rel));
+            return deployed || string.IsNullOrWhiteSpace(m.MediaBaseUrl)
+                ? $"{site.Value.AppBaseUrl.TrimEnd('/')}/{rel}" : $"{m.MediaBaseUrl.TrimEnd('/')}/{rel}";
+        }
         var client = http.CreateClient("meta");
         var token = await PageTokenAsync(ct);
 
@@ -172,7 +210,7 @@ public sealed class MarketingPublisher(
         {
             enabled = meta.Value.Enabled,
             page = await CheckPageAsync(ct),
-            queued = ReadQueue().Select(p => new { p.Key, p.Kind, p.PublishAt }),
+            queued = (await ReadQueueAsync(ct)).Select(p => new { p.Key, p.Kind, p.PublishAt }),
             posts = rows,
         };
     }
