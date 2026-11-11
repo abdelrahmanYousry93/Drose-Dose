@@ -58,7 +58,8 @@ pushed change takes effect within ~5 minutes without waiting for a deploy.
    caption gets a clickable link automatically), reel → video (`/m/<week>/<file>.mp4`). `photo` only if no card exists.
    `publishAt` from the item's date and time (Egypt time); if an item has two times, use the later one for Facebook.
    The media files must exist in `src/Dose.Web/public/m/<week>/` (re-render with the 3rd argument if missing).
-3. Remove queue entries whose item is no longer approved, and entries more than 7 days old.
+3. Remove queue entries whose item is no longer approved (before they are published), and published entries more than
+   7 days old — **except `link` entries: keep them, their card page (/p/<key>) is read from the queue.**
 4. Read `GET https://lionfish-app-n6c49.ondigitalocean.app/api/marketing/status`: for each post with `publishedAtUtc`, set the
    HQ item `status: published` (+ `publishedAt`); for each with `lastError`, set `agencyNote` with the error and add an
    owner task if it needs him (e.g. expired token).

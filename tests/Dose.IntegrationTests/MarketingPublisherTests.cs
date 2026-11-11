@@ -129,16 +129,22 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         using (var scope = f.Services.CreateScope())
             await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
 
-        Assert.Single(graph.Calls);
-        Assert.Contains("/123/feed", graph.Calls[0].Url);
-        Assert.Contains("link=" + Uri.EscapeDataString($"https://dose.test/p/{key}"), graph.Calls[0].Body);
-        Assert.DoesNotContain("src%3Dfb", graph.Calls[0].Body); // no extra text link: the card is the link
+        Assert.Equal(2, graph.Calls.Count);
+        Assert.Contains("scrape=true", graph.Calls[0].Body); // Facebook reads the card first
+        Assert.Contains("/123/feed", graph.Calls[1].Url);
+        Assert.Contains("link=" + Uri.EscapeDataString($"https://dose.test/p/{key}"), graph.Calls[1].Body);
+        Assert.DoesNotContain("src%3Dfb", graph.Calls[1].Body); // no extra text link: the card is the link
 
         var client = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test"), AllowAutoRedirect = false });
+        var people = await client.GetAsync($"/p/{key}");
+        Assert.Equal(HttpStatusCode.Redirect, people.StatusCode);
+        Assert.Equal($"https://dose.test/?src=fb-{key}", people.Headers.Location!.ToString());
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("facebookexternalhit/1.1");
         var html = await client.GetStringAsync($"/p/{key}");
+        Assert.DoesNotContain("http-equiv=\"refresh\"", html);
         Assert.Contains("og:image\" content=\"https://dose.test/m/w01/card.jpg\"", html);
         Assert.Contains("عنوان الكارت", html);
-        Assert.Contains($"url=https://dose.test/?src=fb-{key}", html);
+
         var unknown = await client.GetAsync("/p/nothing-here");
         Assert.Equal(HttpStatusCode.Redirect, unknown.StatusCode);
     }

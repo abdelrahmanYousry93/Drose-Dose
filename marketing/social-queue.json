@@ -65,5 +65,15 @@
   "channels": [
    "facebook"
   ]
+ },
+ {
+  "key": "w01-01-card-rescrape1",
+  "kind": "rescrape",
+  "editOf": "w01-01-card",
+  "media": [],
+  "publishAt": "2026-11-11T19:12:00+00:00",
+  "channels": [
+   "facebook"
+  ]
  }
 ]

@@ -145,8 +145,14 @@ public sealed class MarketingPublisher(
             case "video":
                 return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = caption }));
             case "link":
+                // Make sure Facebook has read the card (image + title) before the post goes out.
+                await Post($"https://graph.facebook.com/{m.GraphVersion}/", new() { ["id"] = SharePageUrl(post.Key), ["scrape"] = "true" });
                 // A link post: Facebook shows the share page's image as a big card; tapping it opens the site.
                 return Id(await Post($"{baseUrl}/feed", new() { ["message"] = caption, ["link"] = SharePageUrl(post.Key) }));
+            case "rescrape":
+                // Ask Facebook to read a link card again (after its share page changed); existing posts show the new card.
+                await Post($"https://graph.facebook.com/{m.GraphVersion}/", new() { ["id"] = SharePageUrl(post.EditOf!), ["scrape"] = "true" });
+                return $"rescrape:{post.EditOf}";
             case "edit":
             {
                 // Replace the text of a post this publisher already made (EditOf = that post's queue key).
@@ -203,7 +209,6 @@ public sealed class MarketingPublisher(
             <meta property="og:image" content="{H(MediaUrl(post.Media[0]))}">
             <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
             <meta property="og:url" content="{H(SharePageUrl(key))}">
-            <meta http-equiv="refresh" content="0;url={H(landing)}">
             </head><body><a href="{H(landing)}">{H(title)}</a></body></html>
             """;
     }

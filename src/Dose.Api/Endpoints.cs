@@ -30,11 +30,19 @@ public static class Endpoints
     public static void MapDoseEndpoints(this WebApplication app)
     {
         // Share page of a scheduled Facebook link post (Open Graph card + redirect to the site).
-        app.MapGet("/p/{key}", async (string key, MarketingPublisher publisher, CancellationToken ct) =>
-            await publisher.SharePageAsync(key, ct) is { } html
+        // Link-preview robots (Facebook, WhatsApp…) get the card's tags and stay on the page; they follow redirects, so
+        // people are sent on to the site with a plain redirect instead.
+        app.MapGet("/p/{key}", async (string key, HttpRequest req, MarketingPublisher publisher, CancellationToken ct) =>
+        {
+            var ua = req.Headers.UserAgent.ToString();
+            var robot = System.Text.RegularExpressions.Regex.IsMatch(ua,
+                "facebookexternalhit|Facebot|meta-externalagent|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Slackbot",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!robot) return Results.Redirect(publisher.LandingUrl(key));
+            return await publisher.SharePageAsync(key, ct) is { } html
                 ? Results.Content(html, "text/html; charset=utf-8")
-                : Results.Redirect("/"))
-            .DisableRateLimiting();
+                : Results.Redirect("/");
+        }).DisableRateLimiting();
 
         var api = app.MapGroup("/api");
 
