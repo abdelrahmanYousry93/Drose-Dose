@@ -1,0 +1,8 @@
+{
+  "name": "dose-studio",
+  "private": true,
+  "description": "Dose Agency design renderer (posts, stories, reels). Playwright and ffmpeg come from the machine.",
+  "dependencies": {
+    "@fontsource/cairo": "5.3.0"
+  }
+}

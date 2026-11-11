@@ -1,0 +1,369 @@
+<title>Dose Agency HQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: one column workspace; sticky header with week switcher and section tabs; content cards per piece. */
+:root {
+  --bg: #f4f7fd; --surface: #ffffff; --surface-2: #eaf2ff; --fg: #0b1f6b; --muted: #55627f; --line: #dbe4f5;
+  --primary: #0061fa; --primary-fg: #ffffff; --accent: #ffc30a; --accent-fg: #0b1f6b;
+  --ok: #0f9d58; --ok-bg: #e3f6ec; --warn: #b26a00; --warn-bg: #fff3d6; --bad: #c62828; --bad-bg: #fde7e7; --info-bg: #e7efff;
+  --shadow: 0 1px 2px rgba(11,31,107,.06), 0 6px 18px rgba(11,31,107,.06);
+  --font: "Cairo", "Segoe UI", Tahoma, sans-serif; --radius: 16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0a1230; --surface: #111c44; --surface-2: #17255a; --fg: #e8eeff; --muted: #a3b0d6; --line: #24346f;
+  --primary: #4d8dff; --primary-fg: #06103a; --accent: #ffc30a; --accent-fg: #0b1f6b;
+  --ok: #4cd08a; --ok-bg: #12382a; --warn: #ffc95c; --warn-bg: #3a2d0d; --bad: #ff8a8a; --bad-bg: #3d1720; --info-bg: #1a2b66;
+  --shadow: none; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0a1230; --surface: #111c44; --surface-2: #17255a; --fg: #e8eeff; --muted: #a3b0d6; --line: #24346f;
+  --primary: #4d8dff; --primary-fg: #06103a; --accent: #ffc30a; --accent-fg: #0b1f6b;
+  --ok: #4cd08a; --ok-bg: #12382a; --warn: #ffc95c; --warn-bg: #3a2d0d; --bad: #ff8a8a; --bad-bg: #3d1720; --info-bg: #1a2b66;
+  --shadow: none; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.65; direction: rtl; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar-in { display: grid; gap: 10px; padding-block: 12px 0; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.brand h1 .en { direction: ltr; color: var(--primary); }
+.brand h1 .en b { color: var(--accent); }
+.weeks { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 999px; padding: 4px 14px; font: 700 0.85rem var(--font); cursor: pointer; white-space: nowrap; }
+.chip[aria-pressed="true"] { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; }
+nav.tabs a { text-decoration: none; color: var(--muted); font-weight: 700; padding: 10px 14px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs a[aria-current="page"] { color: var(--primary); border-bottom-color: var(--primary); }
+nav.tabs .count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: var(--accent-fg); font-size: 0.75rem; margin-inline-start: 4px; }
+main { padding-block: 20px 60px; display: grid; gap: 16px; }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 10px; box-shadow: var(--shadow); }
+.summary h2 { margin: 0; font-size: 1.15rem; text-wrap: balance; }
+.summary p { margin: 0; color: var(--muted); }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.stat { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.s-review { background: var(--info-bg); color: var(--primary); } .s-changes { background: var(--warn-bg); color: var(--warn); }
+.s-approved { background: var(--ok-bg); color: var(--ok); } .s-published { background: var(--surface-2); color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.card h3 { margin: 0; font-size: 1.08rem; text-wrap: balance; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 0.86rem; font-weight: 600; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.badge { border-radius: 8px; padding: 2px 10px; font-size: 0.78rem; font-weight: 800; letter-spacing: .01em; }
+.b-format { background: var(--surface-2); color: var(--fg); }
+.b-sec { background: #0061fa; color: #fff; } .b-prep { background: #ffc30a; color: #0b1f6b; } .b-both { background: #0b1f6b; color: #fff; } .b-parents { background: #12b76a; color: #fff; }
+:root[data-theme="dark"] .b-both { background: #e8eeff; color: #0b1f6b; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .b-both { background: #e8eeff; color: #0b1f6b; } }
+.head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.head > div { min-width: 0; display: grid; gap: 6px; }
+.status { flex: none; }
+.brief { margin: 0; color: var(--muted); }
+.assets { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.assets img, .assets video { height: 220px; width: auto; max-width: none; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); cursor: zoom-in; flex: none; }
+.caption { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.howto { border-inline-start: 3px solid var(--accent); padding-inline-start: 10px; font-size: 0.9rem; }
+.feedback { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-weight: 600; font-size: 0.9rem; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+button.btn { font: 700 0.9rem var(--font); border-radius: 10px; padding: 8px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+button.btn:focus-visible, .chip:focus-visible, nav.tabs a:focus-visible, textarea:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+button.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+button.warnb { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+button.ghost { background: transparent; }
+button:disabled { opacity: .55; cursor: default; }
+textarea, input[type=number], input[type=text] { width: 100%; font: 500 0.95rem var(--font); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+textarea { min-height: 80px; resize: vertical; }
+.md h2, .md h3 { margin: 14px 0 4px; font-size: 1.05rem; } .md h2:first-child, .md h3:first-child { margin-top: 0; }
+.md p { margin: 6px 0; } .md ul, .md ol { margin: 6px 0; padding-inline-start: 22px; } .md li { margin: 3px 0; }
+.md table { border-collapse: collapse; width: 100%; font-size: 0.9rem; } .md td, .md th { border: 1px solid var(--line); padding: 6px 8px; text-align: start; }
+.tablewrap { overflow-x: auto; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; font-weight: 700; font-size: 0.86rem; color: var(--muted); }
+.field input { font-variant-numeric: tabular-nums; }
+.task { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.task:last-child { border-bottom: 0; }
+.task input { margin-top: 6px; width: 18px; height: 18px; accent-color: var(--primary); flex: none; }
+.task.done .t-title { text-decoration: line-through; color: var(--muted); }
+.t-title { font-weight: 700; } .t-detail { color: var(--muted); font-size: 0.9rem; }
+.team { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.member { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; }
+.member .role { font-weight: 800; } .member .note { color: var(--muted); font-size: 0.86rem; }
+.log li { margin: 4px 0; } .log time { color: var(--muted); font-size: 0.8rem; margin-inline-end: 6px; }
+.empty { text-align: center; color: var(--muted); padding: 30px 16px; }
+.notice { background: var(--info-bg); border-radius: 12px; padding: 10px 14px; font-weight: 600; }
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); inset-inline: 0; margin: auto; width: fit-content; max-width: calc(100% - 32px); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 10px; font-weight: 700; z-index: 20; }
+dialog { border: 0; padding: 0; background: transparent; max-width: 96vw; }
+dialog::backdrop { background: rgba(5, 10, 30, .8); }
+dialog img, dialog video { max-height: 88vh; max-width: 92vw; display: block; border-radius: 12px; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .2s; } }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="brand">
+      <h1><span class="en">D<b>o</b>se</span> وكالة التسويق</h1>
+      <div class="weeks" id="weeks" role="group" aria-label="الأسابيع"></div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <a href="#review" data-tab="review">المحتوى<span class="count" id="c-review" hidden></span></a>
+      <a href="#plan" data-tab="plan">خطة الأسبوع</a>
+      <a href="#report" data-tab="report">التقرير والأرقام</a>
+      <a href="#tasks" data-tab="tasks">مهامك<span class="count" id="c-tasks" hidden></span></a>
+      <a href="#team" data-tab="team">الفريق والطلبات</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section class="summary" id="summary">
+    <h2 id="sum-title">بيتحمّل…</h2>
+    <p id="sum-goal">الوكالة بتجهّز محتوى كل أسبوع هنا. أول ما الصفحة تتصل هتلاقي خطة الأسبوع والمحتوى اللي مستني موافقتك.</p>
+    <div class="stats" id="stats"></div>
+  </section>
+  <div id="view"></div>
+</main>
+<dialog id="viewer"><div id="viewer-body"></div></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const STATUS = {
+    review: ['مستني موافقتك', 's-review'], changes: ['محتاج تعديل', 's-changes'],
+    approved: ['متوافق عليه', 's-approved'], published: ['اتنشر', 's-published'],
+  };
+  const AUD = { sec: ['ثانوي', 'b-sec'], prep: ['تالتة إعدادي', 'b-prep'], both: ['ثانوي + إعدادي', 'b-both'], parents: ['أولياء الأمور', 'b-parents'] };
+  const ROLES = {
+    analyst: 'المحلل', strategist: 'المخطط الاستراتيجي', copywriter: 'كاتب المحتوى', designer: 'المصمم', video: 'المونتير',
+    community: 'مدير المجتمع', ads: 'مدير الإعلانات', qa: 'المراجع', account: 'مدير الحساب',
+  };
+  const METRICS = [
+    ['reach', 'الوصول (Reach)'], ['profileVisits', 'زيارات الصفحة'], ['linkClicks', 'ضغطات اللينك'], ['waChats', 'محادثات واتساب جديدة'],
+    ['requests', 'طلبات جلسات'], ['bookings', 'حجوزات'], ['paid', 'حجوزات مدفوعة'], ['adSpend', 'صرف الإعلانات (ج.م)'],
+  ];
+  const state = { weeks: [], week: null, items: [], metrics: null, tasks: [], briefs: [], log: [], tab: 'review', db: null, connected: false, failed: false };
+  let unsubItems = null, unsubMetrics = null;
+
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 2200); }
+
+  // Small, safe markdown: headings, lists, bold, tables, paragraphs (input escaped first).
+  function md(src) {
+    const lines = esc(src || '').split('\n'); let html = '', list = null, table = [];
+    const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    const flushTable = () => { if (!table.length) return; const rows = table.filter((r) => !/^\|\s*-/.test(r)); html += '<div class="tablewrap"><table>' + rows.map((r, i) => '<tr>' + r.replace(/^\||\|$/g, '').split('|').map((c) => `<${i ? 'td' : 'th'}>${inline(c.trim())}</${i ? 'td' : 'th'}>`).join('') + '</tr>').join('') + '</table></div>'; table = []; };
+    const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+    for (const l of lines) {
+      if (/^\|/.test(l)) { closeList(); table.push(l); continue; } else flushTable();
+      let m;
+      if ((m = l.match(/^(#{2,3})\s+(.*)/))) { closeList(); html += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+      else if ((m = l.match(/^\s*[-*]\s+(.*)/))) { if (list !== 'ul') { closeList(); html += '<ul>'; list = 'ul'; } html += `<li>${inline(m[1])}</li>`; }
+      else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== 'ol') { closeList(); html += '<ol>'; list = 'ol'; } html += `<li>${inline(m[1])}</li>`; }
+      else if (l.trim() === '') { closeList(); }
+      else { closeList(); html += `<p>${inline(l)}</p>`; }
+    }
+    closeList(); flushTable(); return html;
+  }
+
+  const fmtTime = (iso) => { try { return new Date(iso).toLocaleString('ar-EG', { weekday: 'short', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } };
+  const weekLabel = (w) => `الأسبوع ${w.n ?? ''}`;
+
+  function renderHeader() {
+    $('#weeks').innerHTML = state.weeks.map((w) => `<button class="chip" type="button" data-week="${esc(w.id)}" aria-pressed="${w.id === state.week}">${esc(weekLabel(w))}</button>`).join('');
+    document.querySelectorAll('#tabs a').forEach((a) => a.setAttribute('aria-current', a.dataset.tab === state.tab ? 'page' : 'false'));
+    const waiting = state.items.filter((i) => i.status === 'review').length;
+    const cr = $('#c-review'); cr.hidden = !waiting; cr.textContent = waiting;
+    const open = state.tasks.filter((t) => t.owner === 'you' && !t.done).length;
+    const ct = $('#c-tasks'); ct.hidden = !open; ct.textContent = open;
+  }
+
+  function renderSummary() {
+    const w = state.weeks.find((x) => x.id === state.week);
+    if (!state.connected) {
+      $('#sum-title').textContent = state.failed ? 'الصفحة مش قادرة توصل لبيانات الوكالة' : 'بيتحمّل…';
+      $('#sum-goal').textContent = state.failed ? 'اتأكد إنك مسجل دخول في claude.ai وافتح الصفحة تاني.' : 'الوكالة بتجهّز محتوى كل أسبوع هنا. أول ما الصفحة تتصل هتلاقي خطة الأسبوع والمحتوى اللي مستني موافقتك.';
+      $('#stats').innerHTML = ''; return;
+    }
+    if (!w) { $('#sum-title').textContent = 'لسه مفيش أسابيع'; $('#sum-goal').textContent = 'أول تشغيل للوكالة هيضيف خطة الأسبوع والمحتوى هنا.'; $('#stats').innerHTML = ''; return; }
+    $('#sum-title').textContent = `${weekLabel(w)}${w.theme ? ' — ' + w.theme : ''}`;
+    $('#sum-goal').textContent = [w.dates, w.summary || w.goal].filter(Boolean).join(' · ');
+    const counts = Object.keys(STATUS).map((k) => [k, state.items.filter((i) => i.status === k).length]).filter(([, n]) => n);
+    $('#stats').innerHTML = counts.map(([k, n]) => `<span class="stat ${STATUS[k][1]}">${n} ${STATUS[k][0]}</span>`).join('');
+  }
+
+  function itemCard(it) {
+    const [stLabel, stCls] = STATUS[it.status] || STATUS.review;
+    const aud = AUD[it.audience];
+    const assets = (it.assets || []).map((a, i) => a.kind === 'video'
+      ? `<video src="${esc(a.url)}" muted playsinline preload="metadata" data-open="${i}" aria-label="${esc(a.name || 'فيديو')}"></video>`
+      : `<img src="${esc(a.url)}" alt="${esc(a.name || 'تصميم')}" loading="lazy" data-open="${i}">`).join('');
+    return `<article class="card" data-item="${esc(it.id)}">
+      <div class="head"><div>
+        <div class="badges"><span class="badge b-format">${esc(it.format || '')}</span>${aud ? `<span class="badge ${aud[1]}">${aud[0]}</span>` : ''}</div>
+        <h3>${esc(it.title || '')}</h3>
+        <div class="meta"><span>${esc(it.day || '')} ${esc(it.date || '')}</span>${it.time ? `<span>${esc(it.time)}</span>` : ''}${it.platforms?.length ? `<span>${esc(it.platforms.join(' · '))}</span>` : ''}</div>
+      </div><span class="stat status ${stCls}">${stLabel}</span></div>
+      ${it.brief ? `<p class="brief">${esc(it.brief)}</p>` : ''}
+      ${assets ? `<div class="assets">${assets}</div>` : ''}
+      ${it.caption ? `<div class="caption" id="cap-${esc(it.id)}">${esc(it.caption)}</div>` : ''}
+      ${it.howTo ? `<div class="howto">${esc(it.howTo)}</div>` : ''}
+      ${it.feedback && it.status === 'changes' ? `<div class="feedback">ملاحظتك: ${esc(it.feedback)}</div>` : ''}
+      ${it.agencyNote ? `<div class="notice">${esc(it.agencyNote)}</div>` : ''}
+      <div class="actions">
+        ${it.caption ? `<button class="btn ghost" type="button" data-act="copy">نسخ الكابشن</button>` : ''}
+        ${it.status !== 'approved' && it.status !== 'published' ? `<button class="btn ok" type="button" data-act="approve">موافق</button>` : ''}
+        ${it.status !== 'published' ? `<button class="btn warnb" type="button" data-act="changes">اطلب تعديل</button>` : ''}
+        ${it.status === 'approved' ? `<button class="btn primary" type="button" data-act="published">اتنشر</button>` : ''}
+        ${it.status === 'published' || it.status === 'approved' ? `<button class="btn ghost" type="button" data-act="review">رجّعه للمراجعة</button>` : ''}
+      </div>
+      <div class="fb-form" hidden>
+        <label class="field" for="fb-${esc(it.id)}">إيه اللي محتاج يتغير؟</label>
+        <textarea id="fb-${esc(it.id)}" placeholder="مثال: خلّي العنوان أقصر، وغيّر اللون للأزرق"></textarea>
+        <div class="actions"><button class="btn primary" type="button" data-act="send-changes">ابعت للوكالة</button><button class="btn ghost" type="button" data-act="cancel">إلغاء</button></div>
+      </div>
+    </article>`;
+  }
+
+  function renderView() {
+    const v = $('#view');
+    if (!state.connected) { v.innerHTML = ''; return; }
+    const w = state.weeks.find((x) => x.id === state.week) || {};
+    if (state.tab === 'review') {
+      const items = [...state.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      v.innerHTML = items.length ? items.map(itemCard).join('') : `<div class="card empty">لسه مفيش محتوى للأسبوع ده. الوكالة بتنتج محتوى الأسبوع الجاي كل خميس.</div>`;
+    } else if (state.tab === 'plan') {
+      v.innerHTML = `<div class="card md">${w.plan ? md(w.plan) : '<p class="empty">الخطة بتتكتب في تشغيل الخميس.</p>'}</div>`;
+    } else if (state.tab === 'report') {
+      const m = state.metrics || {};
+      v.innerHTML = `<div class="card md">${w.report ? md(w.report) : '<p>التقرير بيتكتب بعد ما الأسبوع يخلص وتدخل أرقامه.</p>'}</div>
+        <form class="card" id="metrics-form">
+          <h3>أرقام ${esc(weekLabel(w))}</h3>
+          <p class="brief">دخّلها يوم الخميس من Meta Business Suite ← Insights، ومن لوحة إدارة Dose. المحلل بيقراها في تشغيل الخميس.</p>
+          <div class="grid2">${METRICS.map(([k, label]) => `<label class="field" for="m-${k}">${label}<input type="number" min="0" inputmode="numeric" id="m-${k}" name="${k}" value="${m[k] ?? ''}"></label>`).join('')}</div>
+          <label class="field" for="m-askedLessons">أكتر دروس الناس سألت عليها<input type="text" id="m-askedLessons" name="askedLessons" value="${esc(m.askedLessons ?? '')}" placeholder="مثال: التفاضل، قوانين نيوتن"></label>
+          <label class="field" for="m-notes">ملاحظات (أحسن بوست، تعليقات لافتة…)<textarea id="m-notes" name="notes">${esc(m.notes ?? '')}</textarea></label>
+          <div class="actions"><button class="btn primary" type="submit">احفظ الأرقام</button>${m.updatedAt ? `<span class="meta">آخر حفظ: ${esc(fmtTime(m.updatedAt))}</span>` : ''}</div>
+        </form>`;
+    } else if (state.tab === 'tasks') {
+      const mine = state.tasks.filter((t) => t.owner === 'you').sort((a, b) => Number(a.done) - Number(b.done) || (a.order ?? 0) - (b.order ?? 0));
+      const agency = state.tasks.filter((t) => t.owner !== 'you');
+      const row = (t, editable) => `<div class="task ${t.done ? 'done' : ''}">${editable ? `<input type="checkbox" id="t-${esc(t.id)}" data-task="${esc(t.id)}" ${t.done ? 'checked' : ''}>` : `<span class="badge ${t.done ? 's-approved' : 's-review'}">${t.done ? 'خلص' : 'شغالين'}</span>`}
+        <label for="t-${esc(t.id)}"><div class="t-title">${esc(t.title)}</div>${t.detail ? `<div class="t-detail">${esc(t.detail)}</div>` : ''}</label></div>`;
+      v.innerHTML = `<div class="card"><h3>مهامك</h3>${mine.length ? mine.map((t) => row(t, true)).join('') : '<p class="empty">مفيش مهام دلوقتي.</p>'}</div>
+        ${agency.length ? `<div class="card"><h3>الوكالة شغالة على</h3>${agency.map((t) => row(t, false)).join('')}</div>` : ''}`;
+    } else if (state.tab === 'team') {
+      const last = {}; for (const e of state.log) if (!last[e.role]) last[e.role] = e;
+      v.innerHTML = `<form class="card" id="brief-form"><h3>اطلب حاجة من الوكالة</h3>
+          <p class="brief">فكرة بوست، عرض جديد، مادة اتضافت، حاجة مش عاجباك… الوكالة بتقرا الطلبات في كل تشغيل وبترد هنا.</p>
+          <label class="field" for="brief-text">طلبك</label><textarea id="brief-text" required placeholder="مثال: عندنا مدرس فيزياء جديد، عاوزين بوست تعريف بيه"></textarea>
+          <div class="actions"><button class="btn primary" type="submit">ابعت الطلب</button></div></form>
+        ${state.briefs.length ? `<div class="card"><h3>طلباتك</h3>${[...state.briefs].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).map((b) => `<div class="task"><span class="badge ${b.status === 'done' ? 's-approved' : 's-review'}">${b.status === 'done' ? 'اتنفذ' : 'جديد'}</span><div><div class="t-title">${esc(b.text)}</div>${b.reply ? `<div class="t-detail">رد الوكالة: ${esc(b.reply)}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+        <div class="card"><h3>الفريق</h3><div class="team">${Object.entries(ROLES).map(([id, name]) => `<div class="member"><span class="role">${name}</span><span class="note">${last[id] ? esc(last[id].text) : 'لسه ماشتغلش'}</span>${last[id] ? `<time class="meta">${esc(fmtTime(last[id].at))}</time>` : ''}</div>`).join('')}</div></div>
+        ${state.log.length ? `<div class="card"><h3>آخر نشاط</h3><ul class="log">${state.log.slice(0, 20).map((e) => `<li><time>${esc(fmtTime(e.at))}</time><b>${esc(ROLES[e.role] || e.role)}:</b> ${esc(e.text)}</li>`).join('')}</ul></div>` : ''}`;
+    }
+  }
+
+  function render() {
+    renderHeader(); renderSummary();
+    // Don't redraw the section while the viewer is typing in it (live updates would wipe the text).
+    const a = document.activeElement;
+    if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT') && $('#view').contains(a) && a.type !== 'checkbox') { render.pending = true; return; }
+    render.pending = false; renderView();
+  }
+  document.addEventListener('focusout', () => setTimeout(() => { if (render.pending) render(); }, 0));
+
+  function routeFromHash() {
+    const h = location.hash.replace('#', '');
+    state.tab = ['review', 'plan', 'report', 'tasks', 'team'].includes(h) ? h : 'review';
+    render();
+  }
+
+  function selectWeek(id) {
+    if (!state.db || !id) return;
+    state.week = id;
+    try { localStorage.setItem('hq.week', id); } catch {}
+    if (unsubItems) unsubItems();
+    if (unsubMetrics) unsubMetrics();
+    state.items = []; state.metrics = null;
+    unsubItems = state.db.collection('items').where('week', '==', id).onSnapshot((s) => { state.items = s.docs.map((d) => ({ id: d.id, ...d.data() })); render(); }, () => toast('مقدرناش نحمّل المحتوى'));
+    unsubMetrics = state.db.doc('metrics/' + id).onSnapshot((d) => { state.metrics = d.exists ? d.data() : null; if (state.tab !== 'report' || !document.activeElement?.closest('#metrics-form')) render(); });
+    render();
+  }
+
+  async function updateItem(id, patch) {
+    try { await state.db.doc('items/' + id).update({ ...patch, updatedAt: new Date().toISOString() }); }
+    catch (e) { toast(e?.code === 'not_granted' ? 'مش مسموحلك تعدّل هنا' : 'الحفظ ما نجحش، جرّب تاني'); throw e; }
+  }
+
+  document.addEventListener('click', async (ev) => {
+    const chip = ev.target.closest('[data-week]'); if (chip) { selectWeek(chip.dataset.week); return; }
+    const media = ev.target.closest('[data-open]');
+    if (media) {
+      const viewer = $('#viewer'); const clone = media.cloneNode();
+      if (clone.tagName === 'VIDEO') { clone.controls = true; clone.muted = false; clone.autoplay = true; }
+      $('#viewer-body').replaceChildren(clone); viewer.showModal(); return;
+    }
+    if (ev.target.id === 'viewer') { ev.target.close(); return; }
+    const btn = ev.target.closest('[data-act]'); if (!btn) return;
+    const card = btn.closest('[data-item]'); const id = card?.dataset.item; const it = state.items.find((x) => x.id === id);
+    const act = btn.dataset.act;
+    if (act === 'copy') {
+      try { await navigator.clipboard.writeText(it.caption); toast('اتنسخ'); }
+      catch { const r = document.createRange(); r.selectNodeContents(card.querySelector('.caption')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('الكابشن متحدد، انسخه'); }
+    } else if (act === 'approve') { btn.disabled = true; await updateItem(id, { status: 'approved' }).catch(() => {}); toast('اتوافق عليه'); }
+    else if (act === 'published') { btn.disabled = true; await updateItem(id, { status: 'published', publishedAt: new Date().toISOString() }).catch(() => {}); toast('اتعلّم إنه اتنشر'); }
+    else if (act === 'review') { await updateItem(id, { status: 'review' }).catch(() => {}); }
+    else if (act === 'changes') { card.querySelector('.fb-form').hidden = false; card.querySelector('textarea').focus(); }
+    else if (act === 'cancel') { card.querySelector('.fb-form').hidden = true; }
+    else if (act === 'send-changes') {
+      const text = card.querySelector('textarea').value.trim();
+      if (!text) { toast('اكتب التعديل المطلوب الأول'); return; }
+      btn.disabled = true; document.activeElement?.blur(); await updateItem(id, { status: 'changes', feedback: text }).catch(() => {}); toast('اتبعت للوكالة'); render();
+    }
+  });
+
+  document.addEventListener('change', async (ev) => {
+    const t = ev.target.closest('[data-task]'); if (!t) return;
+    try { await state.db.doc('tasks/' + t.dataset.task).update({ done: t.checked, doneAt: t.checked ? new Date().toISOString() : null }); }
+    catch { t.checked = !t.checked; toast('الحفظ ما نجحش'); }
+  });
+
+  document.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (ev.target.id === 'metrics-form') {
+      const f = new FormData(ev.target); const data = { week: state.week, updatedAt: new Date().toISOString() };
+      for (const [k] of METRICS) { const v = f.get(k); data[k] = v === '' ? null : Number(v); }
+      data.askedLessons = String(f.get('askedLessons') || '').trim(); data.notes = String(f.get('notes') || '').trim();
+      try { await state.db.doc('metrics/' + state.week).set(data); document.activeElement?.blur(); toast('الأرقام اتحفظت'); } catch { toast('الحفظ ما نجحش'); }
+    } else if (ev.target.id === 'brief-form') {
+      const text = $('#brief-text').value.trim(); if (!text) return;
+      try { await state.db.collection('briefs').add({ text, status: 'new', createdAt: new Date().toISOString(), week: state.week }); $('#brief-text').value = ''; document.activeElement?.blur(); toast('الطلب وصل للوكالة'); }
+      catch { toast('الإرسال ما نجحش'); }
+    }
+  });
+
+  addEventListener('hashchange', routeFromHash);
+  routeFromHash();
+
+  (async () => {
+    const timer = setTimeout(() => { if (!state.connected) { state.failed = true; render(); } }, 10000);
+    const db = window.claude?.use ? await window.claude.use('db') : null;
+    if (!db) { clearTimeout(timer); state.failed = true; render(); return; }
+    state.db = db;
+    db.collection('weeks').onSnapshot((s) => {
+      clearTimeout(timer); state.connected = true;
+      state.weeks = s.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.n ?? 0) - (b.n ?? 0));
+      if (!state.week || !state.weeks.some((w) => w.id === state.week)) {
+        let saved = null; try { saved = localStorage.getItem('hq.week'); } catch {}
+        const current = state.weeks.find((w) => w.current) || state.weeks[state.weeks.length - 1];
+        selectWeek(state.weeks.some((w) => w.id === saved) ? saved : current?.id);
+      }
+      render();
+    }, () => { clearTimeout(timer); state.failed = true; render(); });
+    db.collection('tasks').onSnapshot((s) => { state.tasks = s.docs.map((d) => ({ id: d.id, ...d.data() })); render(); });
+    db.collection('briefs').onSnapshot((s) => { state.briefs = s.docs.map((d) => ({ id: d.id, ...d.data() })); if (!document.activeElement?.closest('#brief-form')) render(); });
+    db.collection('log').orderBy('at', 'desc').limit(40).onSnapshot((s) => { state.log = s.docs.map((d) => ({ id: d.id, ...d.data() })); if (state.tab === 'team' && !document.activeElement?.closest('#brief-form')) render(); });
+  })();
+})();
+</script>
