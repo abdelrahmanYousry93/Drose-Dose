@@ -1,0 +1,18 @@
+{
+ "pieces": [
+  {
+   "file": "dose-w1-link-stuck.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='row' style='justify-content:space-between;gap:40px'><div style='display:grid;gap:14px'><div class='h1' style='font-size:76px'>واقف في درس<br/><span class='accent'>ومش فاهمه؟</span></div><div class='lead muted' style='font-size:34px'>مش لازم تشترك شهر كامل علشان جزئية واحدة</div></div><div style='flex:none'><span class='pill' style='font-size:40px'>احجز شرح للدرس ده بس</span></div></div>"
+  },
+  {
+   "file": "dose-w1-link-parents.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "parents",
+   "body": "<div class='h1' style='font-size:58px'>ابنك محتاج يفهم <span class='accent'>الدرس اللي واقف معاه</span></div><div class='h2' style='font-size:44px;color:#475467'>مش درس شهري في المادة كلها</div><div class='row' style='gap:30px;font-size:28px;font-weight:700;color:#344054;white-space:nowrap'><span>✓ ادفع لشرح الدرس ده بس</span><span>✓ أونلاين مع مدرس متخصص</span><span>✓ تأكيد على واتساب</span></div>"
+  }
+ ]
+}

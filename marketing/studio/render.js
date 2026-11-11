@@ -91,17 +91,18 @@ body { font-family: Cairo, sans-serif; direction: rtl; color: #0B1F6B; }
 const mark = (size, dark) => `<svg viewBox="0 0 64 64" width="${size}" height="${size}"><g transform="rotate(-38 32 38)"><rect x="10" y="28" width="44" height="20" rx="10" fill="#0061FA"/><path d="M32 28h12a10 10 0 0 1 0 20H32z" fill="#FFC30A"/><rect x="15" y="32" width="10" height="4" rx="2" fill="#fff" opacity=".55"/></g><path d="M14 15 33 7l19 8-19 8z" fill="${dark ? '#fff' : '#0B1F6B'}"/><path d="M22 18.5v6c0 2.5 5 4.5 11 4.5s11-2 11-4.5v-6l-11 4.6z" fill="${dark ? '#fff' : '#0B1F6B'}"/><path d="M50 16v8.5" stroke="${dark ? '#fff' : '#0B1F6B'}" stroke-width="2" stroke-linecap="round"/><circle cx="50" cy="26" r="2.2" fill="#FFC30A"/></svg>`;
 const logo = (s, dark) => `<div class="logo">${mark(s * 1.25, dark)}<span class="latin" style="font-size:${s}px">D<span class="o">o</span>se</span><span class="ar-word" style="font-size:${s * 0.7}px">دروس</span></div>`;
 
-const SIZES = { post: [1080, 1350], story: [1080, 1920], square: [1080, 1080] };
+// link: the 1.91:1 card Facebook shows for link posts (tapping it opens the site).
+const SIZES = { post: [1080, 1350], story: [1080, 1920], square: [1080, 1080], link: [1200, 630] };
 const TAGS = { sec: ['tag-sec', 'ثانوي'], prep: ['tag-prep', 'تالتة إعدادي'], both: ['tag-both', 'ثانوي · تالتة إعدادي'], parents: ['tag-parents', 'لأولياء الأمور'] };
 
 function frame(p, [w, h]) {
   const bg = p.bg || 'light';
   const dark = bg === 'blue' || bg === 'navy';
-  const pad = h > 1400 ? '150px 80px 140px' : '90px 80px';
+  const pad = h > 1400 ? '150px 80px 140px' : h < 700 ? '48px 64px' : '90px 80px';
   const logoPos = p.logo || 'top';
   const tag = p.tag && TAGS[p.tag] ? `<span class="tag ${TAGS[p.tag][0]}">${p.tagText || TAGS[p.tag][1]}</span>` : '';
   const right = p.counter ? `<span class="footer ltr">${p.counter}</span>` : tag;
-  const top = logoPos === 'top' || right ? `<div class="top">${logoPos === 'top' ? logo(h > 1400 ? 56 : 50, dark) : '<span></span>'}${right}</div>` : '';
+  const top = logoPos === 'top' || right ? `<div class="top">${logoPos === 'top' ? logo(h > 1400 ? 56 : h < 700 ? 40 : 50, dark) : '<span></span>'}${right}</div>` : '';
   const body = `<div class="main ${logoPos === 'center' || p.center ? 'center' : ''}">${logoPos === 'center' ? logo(80, dark) : ''}${p.body || ''}</div>`;
   const sticker = p.sticker ? `<div class="sticker">${p.sticker}</div>` : '';
   const footer = p.footer ? `<div class="footer">${p.footer}</div>` : '';

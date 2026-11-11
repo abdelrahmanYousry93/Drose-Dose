@@ -32,7 +32,7 @@ public sealed class MetaSettings
 /// <summary>An approved post waiting for its time. Media are site-relative paths under /m/ (public JPEG/MP4 files).</summary>
 public sealed record QueuedPost(
     string Key, string Kind, string? Caption, string[] Media, DateTimeOffset PublishAt, string[]? Channels,
-    string? EditOf = null);
+    string? EditOf = null, string? Title = null);
 
 /// <summary>
 /// Publishes approved marketing posts to the Dose Facebook Page when their time comes. The agency only ever adds posts
@@ -108,15 +108,7 @@ public sealed class MarketingPublisher(
     {
         var m = meta.Value;
         var baseUrl = $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}";
-        // Media deployed with the site are served by it; newer ones come straight from the repo.
-        string Url(string media)
-        {
-            if (media.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return media;
-            var rel = media.TrimStart('/');
-            var deployed = env.WebRootPath is { } root && File.Exists(Path.Combine(root, rel));
-            return deployed || string.IsNullOrWhiteSpace(m.MediaBaseUrl)
-                ? $"{site.Value.AppBaseUrl.TrimEnd('/')}/{rel}" : $"{m.MediaBaseUrl.TrimEnd('/')}/{rel}";
-        }
+        string Url(string media) => MediaUrl(media);
         var client = http.CreateClient("meta");
         var token = await PageTokenAsync(ct);
 
@@ -152,6 +144,9 @@ public sealed class MarketingPublisher(
             }
             case "video":
                 return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = caption }));
+            case "link":
+                // A link post: Facebook shows the share page's image as a big card; tapping it opens the site.
+                return Id(await Post($"{baseUrl}/feed", new() { ["message"] = caption, ["link"] = SharePageUrl(post.Key) }));
             case "edit":
             {
                 // Replace the text of a post this publisher already made (EditOf = that post's queue key).
@@ -169,6 +164,50 @@ public sealed class MarketingPublisher(
 
     static (DateTime At, object Result)? pageCheck;
 
+    /// <summary>Media deployed with the site are served by it; newer ones come straight from the repo.</summary>
+    public string MediaUrl(string media)
+    {
+        var m = meta.Value;
+        if (media.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return media;
+        var rel = media.TrimStart('/');
+        var deployed = env.WebRootPath is { } root && File.Exists(Path.Combine(root, rel));
+        return deployed || string.IsNullOrWhiteSpace(m.MediaBaseUrl)
+            ? $"{site.Value.AppBaseUrl.TrimEnd('/')}/{rel}" : $"{m.MediaBaseUrl.TrimEnd('/')}/{rel}";
+    }
+
+    /// <summary>The share page of a "link" post: its image and title become the clickable card on Facebook.</summary>
+    public string SharePageUrl(string key) => $"{site.Value.AppBaseUrl.TrimEnd('/')}/p/{Uri.EscapeDataString(key)}";
+
+    /// <summary>Where a click on a post lands: the home page, tagged with the post.</summary>
+    public string LandingUrl(string key) => $"{site.Value.AppBaseUrl.TrimEnd('/')}/?src=fb-{Uri.EscapeDataString(key)}";
+
+    /// <summary>
+    /// Small HTML page for /p/{key}: Open Graph tags (image, title, description) that Facebook turns into a big clickable
+    /// card, then an immediate redirect of real visitors to the site. Null when the key isn't in the schedule.
+    /// </summary>
+    public async Task<string?> SharePageAsync(string key, CancellationToken ct)
+    {
+        var post = (await ReadQueueAsync(ct)).FirstOrDefault(p => p.Key == key && p.Kind == "link");
+        if (post is null || post.Media.Length == 0) return null;
+        static string H(string? v) => System.Net.WebUtility.HtmlEncode(v ?? "");
+        var title = post.Title ?? "دروس Dose — احجز شرح للدرس اللي واقف معاك بس";
+        var description = (post.Caption ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+        var landing = LandingUrl(key);
+        return $"""
+            <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+            <title>{H(title)}</title>
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="دروس Dose">
+            <meta property="og:title" content="{H(title)}">
+            <meta property="og:description" content="{H(description)}">
+            <meta property="og:image" content="{H(MediaUrl(post.Media[0]))}">
+            <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+            <meta property="og:url" content="{H(SharePageUrl(key))}">
+            <meta http-equiv="refresh" content="0;url={H(landing)}">
+            </head><body><a href="{H(landing)}">{H(title)}</a></body></html>
+            """;
+    }
+
     /// <summary>
     /// Adds the booking link (site URL + ?src=fb-{key}) at the end of the caption unless the caption already has a link.
     /// Instagram-style "link in bio" lines are replaced, since Facebook captions can hold a clickable link.
@@ -176,8 +215,9 @@ public sealed class MarketingPublisher(
     public string WithLink(QueuedPost post)
     {
         var caption = (post.Caption ?? "").Replace("اللينك في البايو", "اللينك تحت").Trim();
+        if (post.Kind == "link") return caption.Replace("اللينك تحت", "اضغط على الصورة");
         if (caption.Contains("http", StringComparison.OrdinalIgnoreCase)) return caption;
-        var link = $"{site.Value.AppBaseUrl.TrimEnd('/')}/?src=fb-{Uri.EscapeDataString(post.Key)}";
+        var link = LandingUrl(post.Key);
         return $"{caption}\n\n👈 احجز الدرس اللي محتاجه من هنا:\n{link}".Trim();
     }
 

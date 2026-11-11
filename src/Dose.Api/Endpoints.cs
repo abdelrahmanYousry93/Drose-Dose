@@ -29,6 +29,13 @@ public static class Endpoints
 
     public static void MapDoseEndpoints(this WebApplication app)
     {
+        // Share page of a scheduled Facebook link post (Open Graph card + redirect to the site).
+        app.MapGet("/p/{key}", async (string key, MarketingPublisher publisher, CancellationToken ct) =>
+            await publisher.SharePageAsync(key, ct) is { } html
+                ? Results.Content(html, "text/html; charset=utf-8")
+                : Results.Redirect("/"))
+            .DisableRateLimiting();
+
         var api = app.MapGroup("/api");
 
         // Platform health check: the web app itself is up (200) even while the database is unreachable, so the host

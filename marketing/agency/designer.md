@@ -14,7 +14,7 @@
 ] }
 ```
 
-Piece fields: `size` post|story|square · `bg` light|blue|navy|yellow · `tag` sec|prep|both|parents (or `tagText`) ·
+Piece fields: `size` post|story|square|link (1200×630 card for Facebook link posts — the whole card opens the site) · `bg` light|blue|navy|yellow · `tag` sec|prep|both|parents (or `tagText`) ·
 `logo` top|center|none · `counter` e.g. "2 / 5" (replaces the tag, shown LTR) · `center` true centers the body ·
 `sticker` adds the dashed sticker area · `footer` small line at the bottom.
 

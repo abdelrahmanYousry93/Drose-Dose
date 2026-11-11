@@ -53,7 +53,9 @@ pushed change takes effect within ~5 minutes without waiting for a deploy.
 2. For each approved feed item (not stories — stickers can't be added by API) build a queue entry:
    `{"key": "<item id>", "kind": "photo"|"album"|"video", "caption": "<caption without the parents' variant section>",
    "media": ["/m/<week>/<file>.jpg", …], "publishAt": "<ISO with +02:00 (Egypt)>", "channels": ["facebook"]}`.
-   Kind: 1 image → photo, several images → album (in carousel order), reel → video (`/m/<week>/<file>.mp4`).
+   Kind: single-image post → **link** (preferred: render a 1200×630 `size: "link"` version of the design; Facebook shows it
+   as a big card and tapping it opens the site; add a short `title`), several images → album (in carousel order; the
+   caption gets a clickable link automatically), reel → video (`/m/<week>/<file>.mp4`). `photo` only if no card exists.
    `publishAt` from the item's date and time (Egypt time); if an item has two times, use the later one for Facebook.
    The media files must exist in `src/Dose.Web/public/m/<week>/` (re-render with the 3rd argument if missing).
 3. Remove queue entries whose item is no longer approved, and entries more than 7 days old.

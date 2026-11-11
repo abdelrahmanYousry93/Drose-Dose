@@ -116,4 +116,30 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
             .GetStringAsync("/api/marketing/status");
         Assert.Contains("Invalid token", status);
     }
+
+    [Fact]
+    public async Task Link_posts_show_the_post_image_as_a_clickable_card()
+    {
+        RequireDb();
+        var key = "t-" + Guid.NewGuid().ToString("N")[..8];
+        var queue = Path.GetTempFileName();
+        await File.WriteAllTextAsync(queue, $$"""[ { "key": "{{key}}", "kind": "link", "title": "عنوان الكارت", "caption": "واقف في درس؟\nاللينك في البايو", "media": ["/m/w01/card.jpg"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-1):O}}" } ]""");
+        var graph = new FakeGraph();
+        await using var f = Api(queue, graph);
+        using (var scope = f.Services.CreateScope())
+            await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
+
+        Assert.Single(graph.Calls);
+        Assert.Contains("/123/feed", graph.Calls[0].Url);
+        Assert.Contains("link=" + Uri.EscapeDataString($"https://dose.test/p/{key}"), graph.Calls[0].Body);
+        Assert.DoesNotContain("src%3Dfb", graph.Calls[0].Body); // no extra text link: the card is the link
+
+        var client = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test"), AllowAutoRedirect = false });
+        var html = await client.GetStringAsync($"/p/{key}");
+        Assert.Contains("og:image\" content=\"https://dose.test/m/w01/card.jpg\"", html);
+        Assert.Contains("عنوان الكارت", html);
+        Assert.Contains($"url=https://dose.test/?src=fb-{key}", html);
+        var unknown = await client.GetAsync("/p/nothing-here");
+        Assert.Equal(HttpStatusCode.Redirect, unknown.StatusCode);
+    }
 }
