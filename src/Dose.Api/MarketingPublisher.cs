@@ -35,7 +35,7 @@ public sealed class MetaSettings
 /// <summary>An approved post waiting for its time. Media are site-relative paths under /m/ (public JPEG/MP4 files).</summary>
 public sealed record QueuedPost(
     string Key, string Kind, string? Caption, string[] Media, DateTimeOffset PublishAt, string[]? Channels,
-    string? EditOf = null, string? Title = null, string[]? InstagramMedia = null);
+    string? EditOf = null, string? Title = null, string[]? InstagramMedia = null, string? Cta = null);
 
 /// <summary>
 /// Publishes approved marketing posts to the Dose Facebook Page when their time comes. The agency only ever adds posts
@@ -251,7 +251,25 @@ public sealed class MarketingPublisher(
                 // Make sure Facebook has read the card (image + title) before the post goes out.
                 await Post($"https://graph.facebook.com/{m.GraphVersion}/", new() { ["id"] = SharePageUrl(post.Key), ["scrape"] = "true" });
                 // A link post: Facebook shows the share page's image as a big card; tapping it opens the site.
-                return Id(await Post($"{baseUrl}/feed", new() { ["message"] = caption, ["link"] = SharePageUrl(post.Key) }));
+                // Card posts carry a button under the card ("Book now" by default; "cta": "none" in the queue turns it off).
+                var fields = new Dictionary<string, string> { ["message"] = caption, ["link"] = SharePageUrl(post.Key) };
+                var cta = (post.Cta ?? "BOOK_TRAVEL").Trim().ToUpperInvariant();
+                if (cta != "NONE")
+                {
+                    try
+                    {
+                        return Id(await Post($"{baseUrl}/feed", new(fields)
+                        {
+                            ["call_to_action"] = JsonSerializer.Serialize(new { type = cta, value = new { link = LandingUrl(post.Key) } }),
+                        }));
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        // Never lose the post over the button: publish the plain card instead.
+                        log.LogWarning(ex, "Facebook refused the {Cta} button on {Key}; posting the card without it", cta, post.Key);
+                    }
+                }
+                return Id(await Post($"{baseUrl}/feed", fields));
             case "rescrape":
                 // Ask Facebook to read a link card again (after its share page changed); existing posts show the new card.
                 await Post($"https://graph.facebook.com/{m.GraphVersion}/", new() { ["id"] = SharePageUrl(post.EditOf!), ["scrape"] = "true" });

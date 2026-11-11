@@ -143,7 +143,11 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         Assert.Contains("scrape=true", graph.Calls[0].Body); // Facebook reads the card first
         Assert.Contains("/123/feed", graph.Calls[1].Url);
         Assert.Contains("link=" + Uri.EscapeDataString($"https://dose.test/p/{key}"), graph.Calls[1].Body);
-        Assert.DoesNotContain("src%3Dfb", graph.Calls[1].Body); // no extra text link: the card is the link
+        // No extra text link in the caption (the card is the link), and a "Book now" button under the card.
+        var form = graph.Calls[1].Body.Split('&').Select(kv => kv.Split('=')).ToDictionary(kv => kv[0], kv => Uri.UnescapeDataString(kv[1].Replace('+', ' ')));
+        Assert.DoesNotContain("src=fb", form["message"]);
+        Assert.Contains("\"type\":\"BOOK_TRAVEL\"", form["call_to_action"]);
+        Assert.Contains($"https://dose.test/?src=fb-{key}", form["call_to_action"]);
 
         var client = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test"), AllowAutoRedirect = false });
         var people = await client.GetAsync($"/p/{key}");
