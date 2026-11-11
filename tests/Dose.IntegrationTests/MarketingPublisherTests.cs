@@ -17,11 +17,17 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
     private sealed class FakeGraph : HttpMessageHandler
     {
         public readonly List<(string Url, string Body)> Calls = [];
+        public readonly List<string> Gets = [];
         public bool Fail;
         private int n;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
         {
-            if (req.Method == HttpMethod.Get) return new(HttpStatusCode.OK) { Content = new StringContent("""{"name":"Dose"}""") };
+            if (req.Method == HttpMethod.Get)
+            {
+                Gets.Add(req.RequestUri!.ToString());
+                return new(HttpStatusCode.OK) { Content = new StringContent(req.RequestUri!.Query.Contains("fields=access_token")
+                    ? """{"access_token":"page-token","id":"123"}""" : """{"name":"Dose","id":"u1"}""") };
+            }
             Calls.Add((req.RequestUri!.ToString(), await req.Content!.ReadAsStringAsync(ct)));
             if (Fail) return new(HttpStatusCode.BadRequest) { Content = new StringContent("""{"error":{"message":"Invalid token"}}""") };
             n++;
@@ -66,6 +72,8 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         Assert.Contains("/123/feed", graph.Calls[2].Url);
         Assert.Contains("attached_media%5B1%5D", graph.Calls[2].Body);
         Assert.Contains("/123/photos", graph.Calls[3].Url);
+        // Posts use the Page's own token, read with the configured (user) key.
+        Assert.All(graph.Calls, c => Assert.Contains("access_token=page-token", c.Body));
 
         // A second run publishes nothing again.
         using (var scope = f.Services.CreateScope())

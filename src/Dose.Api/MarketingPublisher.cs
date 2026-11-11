@@ -79,10 +79,11 @@ public sealed class MarketingPublisher(
         string Url(string media) => media.StartsWith("http", StringComparison.OrdinalIgnoreCase)
             ? media : $"{site.Value.AppBaseUrl.TrimEnd('/')}/{media.TrimStart('/')}";
         var client = http.CreateClient("meta");
+        var token = await PageTokenAsync(ct);
 
         async Task<JsonElement> Post(string url, Dictionary<string, string> form)
         {
-            form["access_token"] = m.PageAccessToken!;
+            form["access_token"] = token;
             using var res = await client.PostAsync(url, new FormUrlEncodedContent(form), ct);
             var body = await res.Content.ReadAsStringAsync(ct);
             var json = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body).RootElement.Clone();
@@ -116,6 +117,26 @@ public sealed class MarketingPublisher(
 
     static (DateTime At, object Result)? pageCheck;
 
+    /// <summary>
+    /// Posting needs the Page's own token. When the configured key is the owner's (user) token, the Page token is read
+    /// from it (GET /{page-id}?fields=access_token); a Page token is used as is.
+    /// </summary>
+    async Task<string> PageTokenAsync(CancellationToken ct)
+    {
+        var m = meta.Value;
+        try
+        {
+            using var res = await http.CreateClient("meta").GetAsync(
+                $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}?fields=access_token&access_token={Uri.EscapeDataString(m.PageAccessToken!)}", ct);
+            if (res.IsSuccessStatusCode
+                && JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct)).RootElement.TryGetProperty("access_token", out var t)
+                && t.GetString() is { Length: > 0 } pageToken)
+                return pageToken;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException) { log.LogWarning(ex, "Could not read the Page token; using the configured key"); }
+        return m.PageAccessToken!;
+    }
+
     /// <summary>Reads the Page's name with the token (no posting) to prove the key works; cached for 10 minutes.</summary>
     async Task<object?> CheckPageAsync(CancellationToken ct)
     {
@@ -128,8 +149,13 @@ public sealed class MarketingPublisher(
             using var res = await http.CreateClient("meta").GetAsync(
                 $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}?fields=name&access_token={Uri.EscapeDataString(m.PageAccessToken!)}", ct);
             var json = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct)).RootElement;
+            string? keyType = null;
+            using (var me = await http.CreateClient("meta").GetAsync(
+                $"https://graph.facebook.com/{m.GraphVersion}/me?fields=id&access_token={Uri.EscapeDataString(m.PageAccessToken!)}", ct))
+                if (me.IsSuccessStatusCode && JsonDocument.Parse(await me.Content.ReadAsStringAsync(ct)).RootElement.TryGetProperty("id", out var id))
+                    keyType = id.GetString() == m.PageId ? "page" : "user";
             result = res.IsSuccessStatusCode
-                ? new { ok = true, name = json.GetProperty("name").GetString() }
+                ? new { ok = true, name = json.GetProperty("name").GetString(), keyType }
                 : new { ok = false, error = json.TryGetProperty("error", out var e) && e.TryGetProperty("message", out var msg) ? msg.GetString() : $"HTTP {(int)res.StatusCode}" };
         }
         catch (Exception ex) when (ex is not OperationCanceledException) { result = new { ok = false, error = ex.Message }; }
