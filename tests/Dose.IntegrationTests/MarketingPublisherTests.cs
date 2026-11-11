@@ -28,7 +28,12 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
                 return new(HttpStatusCode.OK) { Content = new StringContent(req.RequestUri!.Query.Contains("fields=access_token")
                     ? """{"access_token":"page-token","id":"123"}""" : """{"name":"Dose","id":"u1"}""") };
             }
-            Calls.Add((req.RequestUri!.ToString(), await req.Content!.ReadAsStringAsync(ct)));
+            Calls.Add((req.RequestUri!.ToString(), req.Content is null ? "" : await req.Content.ReadAsStringAsync(ct)));
+            if (req.RequestUri!.Host == "rupload.facebook.com")
+                return new(HttpStatusCode.OK) { Content = new StringContent("""{"success":true}""") };
+            if (req.RequestUri!.AbsolutePath.EndsWith("/video_reels"))
+                return new(HttpStatusCode.OK) { Content = new StringContent(Calls[^1].Body.Contains("upload_phase=start")
+                    ? """{"video_id":"v1","upload_url":"https://rupload.facebook.com/video-upload/v27.0/v1"}""" : """{"success":true,"post_id":"reel_post"}""") };
             if (Fail) return new(HttpStatusCode.BadRequest) { Content = new StringContent("""{"error":{"message":"Invalid token"}}""") };
             n++;
             return new(HttpStatusCode.OK) { Content = new StringContent($$"""{"id":"m{{n}}","post_id":"page_p{{n}}"}""") };
@@ -147,5 +152,28 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
 
         var unknown = await client.GetAsync("/p/nothing-here");
         Assert.Equal(HttpStatusCode.Redirect, unknown.StatusCode);
+    }
+
+    [Fact]
+    public async Task Reels_are_uploaded_by_url_and_published()
+    {
+        RequireDb();
+        var key = "t-" + Guid.NewGuid().ToString("N")[..8];
+        var queue = Path.GetTempFileName();
+        await File.WriteAllTextAsync(queue, $$"""[ { "key": "{{key}}", "kind": "video", "caption": "ريل", "media": ["/m/w01/r.mp4"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-1):O}}" } ]""");
+        var graph = new FakeGraph();
+        await using var f = Api(queue, graph);
+        using (var scope = f.Services.CreateScope())
+            await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
+
+        Assert.Equal(3, graph.Calls.Count);
+        Assert.Contains("/123/video_reels", graph.Calls[0].Url);
+        Assert.Contains("upload_phase=start", graph.Calls[0].Body);
+        Assert.Equal("https://rupload.facebook.com/video-upload/v27.0/v1", graph.Calls[1].Url);
+        Assert.Contains("upload_phase=finish", graph.Calls[2].Body);
+        Assert.Contains("video_state=PUBLISHED", graph.Calls[2].Body);
+        var status = await f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test") })
+            .GetStringAsync("/api/marketing/status");
+        Assert.Contains("reel_post", status);
     }
 }

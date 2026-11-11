@@ -143,7 +143,24 @@ public sealed class MarketingPublisher(
                 return Id(await Post($"{baseUrl}/feed", form));
             }
             case "video":
-                return Id(await Post($"{baseUrl}/videos", new() { ["file_url"] = Url(post.Media[0]), ["description"] = caption }));
+            {
+                // Page Reels API (needs only pages_manage_posts): start an upload, let Facebook fetch the file, publish.
+                var start = await Post($"{baseUrl}/video_reels", new() { ["upload_phase"] = "start" });
+                var videoId = start.GetProperty("video_id").GetString()!;
+                using (var upload = new HttpRequestMessage(HttpMethod.Post, $"https://rupload.facebook.com/video-upload/{m.GraphVersion}/{videoId}"))
+                {
+                    upload.Headers.TryAddWithoutValidation("Authorization", $"OAuth {token}");
+                    upload.Headers.TryAddWithoutValidation("file_url", Url(post.Media[0]));
+                    using var res = await client.SendAsync(upload, ct);
+                    if (!res.IsSuccessStatusCode)
+                        throw new InvalidOperationException($"Meta upload {(int)res.StatusCode}: {await res.Content.ReadAsStringAsync(ct)}");
+                }
+                var done = await Post($"{baseUrl}/video_reels", new()
+                {
+                    ["upload_phase"] = "finish", ["video_id"] = videoId, ["video_state"] = "PUBLISHED", ["description"] = caption,
+                });
+                return done.TryGetProperty("post_id", out var pid) && pid.GetString() is { Length: > 0 } p ? p : videoId;
+            }
             case "link":
                 // Make sure Facebook has read the card (image + title) before the post goes out.
                 await Post($"https://graph.facebook.com/{m.GraphVersion}/", new() { ["id"] = SharePageUrl(post.Key), ["scrape"] = "true" });
