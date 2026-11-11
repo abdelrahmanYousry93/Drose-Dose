@@ -26,7 +26,8 @@
   ],
   "publishAt": "2026-11-16T20:30:00+02:00",
   "channels": [
-   "facebook"
+   "facebook",
+   "instagram"
   ]
  },
  {
@@ -38,9 +39,13 @@
   ],
   "publishAt": "2026-11-18T14:00:00+02:00",
   "channels": [
-   "facebook"
+   "facebook",
+   "instagram"
   ],
-  "title": "دروس Dose — ادفع لشرح الدرس اللي ابنك محتاجه بس"
+  "title": "دروس Dose — ادفع لشرح الدرس اللي ابنك محتاجه بس",
+  "instagramMedia": [
+   "/m/w01/dose-w1-parents.jpg"
+  ]
  },
  {
   "key": "w01-01p2-edit1",

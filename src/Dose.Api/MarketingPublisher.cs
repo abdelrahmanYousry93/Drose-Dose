@@ -366,8 +366,21 @@ public sealed class MarketingPublisher(
                 $"https://graph.facebook.com/{m.GraphVersion}/me?fields=id&access_token={Uri.EscapeDataString(m.PageAccessToken!)}", ct))
                 if (me.IsSuccessStatusCode && JsonDocument.Parse(await me.Content.ReadAsStringAsync(ct)).RootElement.TryGetProperty("id", out var id))
                     keyType = id.GetString() == m.PageId ? "page" : "user";
+            // Instagram: can the key read the linked business account (needs instagram_basic)?
+            string? instagram = null;
+            try
+            {
+                var pageToken = await PageTokenAsync(ct);
+                using var ig = await http.CreateClient("meta").GetAsync(
+                    $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}?fields=instagram_business_account%7Busername%7D&access_token={Uri.EscapeDataString(pageToken)}", ct);
+                var igJson = JsonDocument.Parse(await ig.Content.ReadAsStringAsync(ct)).RootElement;
+                instagram = ig.IsSuccessStatusCode
+                    ? igJson.TryGetProperty("instagram_business_account", out var acc) && acc.TryGetProperty("username", out var u) ? u.GetString() : "not linked"
+                    : igJson.TryGetProperty("error", out var ie) && ie.TryGetProperty("message", out var im) ? $"error: {im.GetString()}" : "error";
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException) { instagram = $"error: {ex.Message}"; }
             result = res.IsSuccessStatusCode
-                ? new { ok = true, name = json.GetProperty("name").GetString(), keyType }
+                ? new { ok = true, name = json.GetProperty("name").GetString(), keyType, instagram }
                 : new { ok = false, error = json.TryGetProperty("error", out var e) && e.TryGetProperty("message", out var msg) ? msg.GetString() : $"HTTP {(int)res.StatusCode}" };
         }
         catch (Exception ex) when (ex is not OperationCanceledException) { result = new { ok = false, error = ex.Message }; }
