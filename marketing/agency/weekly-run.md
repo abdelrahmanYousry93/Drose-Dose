@@ -26,7 +26,8 @@ Always pass `if_version` from your last read when updating an existing doc.
 3. **Strategist** → create `weeks/<next>` (status planning, `current` stays on this week until Saturday) with goal, theme, plan.
    Follow the month arc but adapt to the report, the most-asked lessons and the briefs.
 4. **Copywriter + Designer + Video** → write `marketing/weeks/<next>/spec.json` (see designer.md), render with
-   `node marketing/studio/render.js marketing/weeks/<next>/spec.json /tmp/<next>`; look at every PNG and one reel frame;
+   `node marketing/studio/render.js marketing/weeks/<next>/spec.json /tmp/<next> src/Dose.Web/public/m/<next>`
+   (the 3rd argument writes the JPEG/MP4 copies the site serves for the Facebook publisher); look at every PNG and one reel frame;
    fix and re-render anything clipped or off-brand.
 5. **QA** → check every piece against brand.md hard rules and what is bookable. Anything that depends on an owner task
    (e.g. promo codes not created yet) gets that dependency in its `brief`.
@@ -43,6 +44,23 @@ Always pass `if_version` from your last read when updating an existing doc.
 2. Answer new `briefs` (if a brief asks for a new piece, add it to the next week's items).
 3. Move `current: true` to the week that starts today (if it has items) and set the previous week `done`.
 4. One `log` line per role that did something. If nothing to do, write one `account` log line saying so.
+
+## Daily — publisher sync (Facebook Page)
+The site publishes `marketing/social-queue.json` to the Dose Facebook Page by itself (job every 5 minutes, see
+`src/Dose.Api/MarketingPublisher.cs`); the queue ships with each deploy (push to main → deploy in ~5 minutes).
+1. Read every HQ item whose week is current or next. **Only items with `status: approved` may be in the queue.**
+2. For each approved feed item (not stories — stickers can't be added by API) build a queue entry:
+   `{"key": "<item id>", "kind": "photo"|"album"|"video", "caption": "<caption without the parents' variant section>",
+   "media": ["/m/<week>/<file>.jpg", …], "publishAt": "<ISO with +02:00 (Egypt)>", "channels": ["facebook"]}`.
+   Kind: 1 image → photo, several images → album (in carousel order), reel → video (`/m/<week>/<file>.mp4`).
+   `publishAt` from the item's date and time (Egypt time); if an item has two times, use the later one for Facebook.
+   The media files must exist in `src/Dose.Web/public/m/<week>/` (re-render with the 3rd argument if missing).
+3. Remove queue entries whose item is no longer approved, and entries more than 7 days old.
+4. Read `GET https://lionfish-app-n6c49.ondigitalocean.app/api/marketing/status`: for each post with `publishedAtUtc`, set the
+   HQ item `status: published` (+ `publishedAt`); for each with `lastError`, set `agencyNote` with the error and add an
+   owner task if it needs him (e.g. expired token).
+5. If the queue changed, commit `marketing/social-queue.json` (+ media) to main and push. One `log` line (role `account`).
+   Never put an item in the queue that the owner has not approved.
 
 ## Never
 - Publish to social networks, spend money, or message students (Phase 1 has no such access anyway).

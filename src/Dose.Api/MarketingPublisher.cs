@@ -14,7 +14,7 @@ public sealed class MetaSettings
     public const string SectionName = "Meta";
     public string? PageId { get; init; }
     public string? PageAccessToken { get; init; }
-    public string GraphVersion { get; init; } = "v23.0";
+    public string GraphVersion { get; init; } = "v27.0";
     /// <summary>Queue file written by the marketing agency; copied into the image by the Dockerfile.</summary>
     public string QueuePath { get; init; } = "marketing/queue.json";
     public bool Enabled => !string.IsNullOrWhiteSpace(PageId) && !string.IsNullOrWhiteSpace(PageAccessToken);

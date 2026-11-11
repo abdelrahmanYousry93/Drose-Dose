@@ -59,7 +59,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
 
         // Album: two unpublished photos, then one feed post attaching both; then the single photo. Nothing for tomorrow.
         Assert.Equal(4, graph.Calls.Count);
-        Assert.Contains("/v23.0/123/photos", graph.Calls[0].Url);
+        Assert.Contains("/v27.0/123/photos", graph.Calls[0].Url);
         Assert.Contains("published=false", graph.Calls[0].Body);
         Assert.Contains("url=https%3A%2F%2Fdose.test%2Fm%2Fw02%2F1.jpg", graph.Calls[0].Body);
         Assert.Contains("/123/feed", graph.Calls[2].Url);

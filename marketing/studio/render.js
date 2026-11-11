@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Dose Studio renderer: turns a week spec (JSON) into ready-to-post PNGs and MP4 reels in the Dose brand.
 //
-//   node marketing/studio/render.js marketing/weeks/2026-W2/spec.json [outDir]
+//   node marketing/studio/render.js marketing/weeks/w02/spec.json [outDir] [publicDir]
+//   publicDir (e.g. src/Dose.Web/public/m/w02): also writes JPEG copies of images and the MP4s there, so the site
+//   serves them at /m/w02/... for the Facebook publisher.
 //
 // Spec shape (see marketing/agency/designer.md for the full guide):
 // {
@@ -20,11 +22,13 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const [specPath, outArg] = process.argv.slice(2);
+const [specPath, outArg, publicArg] = process.argv.slice(2);
 if (!specPath) { console.error('usage: render.js spec.json [outDir]'); process.exit(1); }
 const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
 const out = path.resolve(outArg || path.join(path.dirname(specPath), 'out'));
 fs.mkdirSync(out, { recursive: true });
+const pub = publicArg ? path.resolve(publicArg) : null;
+if (pub) fs.mkdirSync(pub, { recursive: true });
 
 function fontDir() {
   const candidates = [
@@ -114,6 +118,8 @@ function frame(p, [w, h]) {
     await page.setContent(`<html lang="ar"><head><style>${CSS}</style></head><body>${html}</body></html>`);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: file });
+    if (pub && file.endsWith('.png') && !file.includes('.reel-'))
+      await page.screenshot({ path: path.join(pub, path.basename(file).replace(/\.png$/, '.jpg')), type: 'jpeg', quality: 90 });
   };
   const made = [];
   for (const p of spec.pieces) {
@@ -139,6 +145,7 @@ function frame(p, [w, h]) {
         '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-movflags', '+faststart', path.join(out, p.file));
       execFileSync('ffmpeg', args, { stdio: 'inherit' });
       fs.rmSync(tmp, { recursive: true, force: true });
+      if (pub) fs.copyFileSync(path.join(out, p.file), path.join(pub, p.file));
     } else {
       const size = SIZES[p.size || 'post'];
       await shot(frame(p, size), size, path.join(out, p.file));
