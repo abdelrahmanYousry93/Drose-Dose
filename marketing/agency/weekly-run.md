@@ -73,3 +73,10 @@ pushed change takes effect within ~5 minutes without waiting for a deploy.
 - Publish to social networks, spend money, or message students (Phase 1 has no such access anyway).
 - Delete the owner's feedback, metrics or briefs.
 - Invent metrics, testimonials, teacher names or availability.
+
+
+## Numbers source (analyst)
+Every run, read `https://lionfish-app-n6c49.ondigitalocean.app/api/marketing/report?days=7`:
+- `funnel`: per post code (`fb-<key>`, `ig-bio`, ...) → visits, whatsApp clicks, holds (bookings started), requests, paid.
+- `engagement`: per `<key>|facebook` / `<key>|instagram` → reactions/likes, comments, shares, and reach/saves when the key has insights permissions (null otherwise).
+Write the week's totals into HQ `metrics` and name the best and worst post by paid, then holds, then visits. Never invent numbers; null stays "unknown".

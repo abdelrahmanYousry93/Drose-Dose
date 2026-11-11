@@ -360,3 +360,14 @@ internal sealed class MarketingPostConfig : IEntityTypeConfiguration<Dose.Domain
         e.HasIndex(x => new { x.Key, x.Channel }).IsUnique();
     }
 }
+
+internal sealed class MarketingTouchConfig : IEntityTypeConfiguration<Dose.Domain.Administration.MarketingTouch>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Administration.MarketingTouch> e)
+    {
+        e.Property(x => x.Source).HasMaxLength(60);
+        e.Property(x => x.Step).HasMaxLength(20);
+        e.Property(x => x.Reference).HasMaxLength(40);
+        e.HasIndex(x => new { x.CreatedAtUtc, x.Source });
+    }
+}

@@ -103,6 +103,36 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.ToTable("MarketingPosts");
                 });
 
+            modelBuilder.Entity("Dose.Domain.Administration.MarketingTouch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Step")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc", "Source");
+
+                    b.ToTable("MarketingTouches");
+                });
+
             modelBuilder.Entity("Dose.Domain.Administration.SystemSetting", b =>
                 {
                     b.Property<string>("Key")

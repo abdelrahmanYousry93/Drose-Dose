@@ -333,6 +333,8 @@ public sealed class MarketingPublisher(
     /// Posting needs the Page's own token. When the configured key is the owner's (user) token, the Page token is read
     /// from it (GET /{page-id}?fields=access_token); a Page token is used as is.
     /// </summary>
+    public Task<string> PageTokenForReadAsync(CancellationToken ct) => PageTokenAsync(ct);
+
     async Task<string> PageTokenAsync(CancellationToken ct)
     {
         var m = meta.Value;

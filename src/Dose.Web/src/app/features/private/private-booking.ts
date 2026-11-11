@@ -2,6 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Api, ApiError, Lookup, ServiceType, Slot, Slots, Stage } from '../../core/api';
+import { MarketingTracker } from '../../core/marketing-tracker';
 import { errorMessage, fmtDate, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { StudentContext } from '../../core/student-context';
@@ -149,6 +150,7 @@ interface Day { key: string; label: string; slots: Slot[] }
 })
 export class PrivateBooking {
   private readonly api = inject(Api);
+  private readonly tracker = inject(MarketingTracker);
   private readonly router = inject(Router);
   private readonly context = inject(StudentContext);
   protected readonly Math = Math;
@@ -279,6 +281,7 @@ export class PrivateBooking {
         size: this.size(), teacherId: p.teacherId, startUtc: p.startUtc, scopeText: this.scope.trim() || null,
       });
       myBookings.add(hold.reference, hold.accessToken);
+      this.tracker.track('hold', hold.reference);
       await this.router.navigate(['/b', hold.accessToken]);
     } catch (e) {
       this.error.set(errorMessage(e));

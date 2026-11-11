@@ -32,6 +32,7 @@ builder.Services.AddOptions<PublicSettings>().Bind(builder.Configuration.GetSect
 builder.Services.AddOptions<MetaSettings>().Bind(builder.Configuration.GetSection(MetaSettings.SectionName));
 builder.Services.AddHttpClient("meta", c => c.Timeout = TimeSpan.FromSeconds(60));
 builder.Services.AddScoped<MarketingPublisher>();
+builder.Services.AddScoped<MarketingReport>();
 
 builder.Services.AddDoseApplication();
 builder.Services.AddHttpContextAccessor();

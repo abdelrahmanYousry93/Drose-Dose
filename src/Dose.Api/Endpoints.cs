@@ -53,6 +53,19 @@ public static class Endpoints
             Results.Ok(new { status = "ok", database = await DatabaseUpAsync(db, ct) ? "ok" : "unavailable" }))
             .DisableRateLimiting();
         // What the marketing publisher has queued and published (no secrets) — read by the marketing agency.
+        // Marketing funnel: the site reports steps of visitors who came from a post link (no personal data).
+        api.MapPost("/track", async (TrackRequest req, MarketingReport report, CancellationToken ct) =>
+        {
+            await report.TrackAsync(req.Source, req.Step, req.Reference, ct);
+            return Results.NoContent();
+        });
+        // Per-post funnel and engagement for the marketing agency's weekly report (aggregates only).
+        api.MapGet("/marketing/report", async (int? days, MarketingReport report, CancellationToken ct) => Results.Ok(new
+        {
+            since = DateTime.UtcNow.AddDays(-Math.Clamp(days ?? 30, 1, 365)),
+            funnel = await report.FunnelAsync(DateTime.UtcNow.AddDays(-Math.Clamp(days ?? 30, 1, 365)), ct),
+            engagement = await report.EngagementAsync(ct),
+        }));
         api.MapGet("/marketing/status", async (MarketingPublisher publisher, CancellationToken ct) =>
             Results.Ok(await publisher.StatusAsync(ct)));
         api.MapGet("/health/db", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
@@ -157,3 +170,5 @@ public static class Endpoints
 }
 
 public sealed record LoginRequest(string? Email, string? Password);
+
+public sealed record TrackRequest(string? Source, string? Step, string? Reference);

@@ -5,6 +5,7 @@ import { TranslatePipe } from './core/i18n';
 import { LangSwitch } from './shared/lang-switch';
 import { Logo } from './shared/logo';
 import { PwaBanners } from './shared/pwa-banners';
+import { MarketingTracker } from './core/marketing-tracker';
 
 @Component({
   selector: 'app-root',
@@ -34,4 +35,8 @@ import { PwaBanners } from './shared/pwa-banners';
 })
 export class App {
   protected readonly publicSettings = inject(PublicSettingsService);
+
+  constructor() {
+    inject(MarketingTracker).start();
+  }
 }

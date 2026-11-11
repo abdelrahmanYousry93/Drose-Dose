@@ -2,6 +2,7 @@ import { Component, WritableSignal, computed, inject, input, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Api, Lookup, PriceOptions, ServiceType, Stage } from '../../core/api';
+import { MarketingTracker } from '../../core/marketing-tracker';
 import { errorMessage, fmtMoney, myRequests } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
@@ -160,6 +161,7 @@ const TIMES = [['صباحاً', 'morning'], ['بعد الظهر', 'afternoon'], 
 })
 export class RequestSession {
   private readonly api = inject(Api);
+  private readonly tracker = inject(MarketingTracker);
   private readonly settings = inject(PublicSettingsService);
   private readonly context = inject(StudentContext);
 
@@ -293,6 +295,7 @@ export class RequestSession {
         mode: this.mode, preferredTierId: this.mode === 'Group' && !this.friends ? this.tierId : null, notes: this.notes || null,
         groupSize: this.friends ? this.groupSize : null,
       });
+      this.tracker.track('request', res.reference);
       this.context.setSupport({ step: 'support.step.requestSent', reference: res.reference, studentName: this.studentName });
       myRequests.add({
         reference: res.reference, sentAtUtc: new Date().toISOString(),

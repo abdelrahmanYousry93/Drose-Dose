@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, SessionDetails } from '../../core/api';
+import { MarketingTracker } from '../../core/marketing-tracker';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
@@ -84,6 +85,7 @@ import { TeacherCard } from '../../shared/teacher-card';
 })
 export class SessionDetailsPage {
   private readonly api = inject(Api);
+  private readonly tracker = inject(MarketingTracker);
   private readonly router = inject(Router);
   private readonly publicSettings = inject(PublicSettingsService);
   private readonly context = inject(StudentContext);
@@ -117,6 +119,7 @@ export class SessionDetailsPage {
     try {
       const hold = await this.api.hold(this.id());
       myBookings.add(hold.reference, hold.accessToken);
+      this.tracker.track('hold', hold.reference);
       await this.router.navigate(['/b', hold.accessToken]);
     } catch (e) {
       this.bookError.set(errorMessage(e));
