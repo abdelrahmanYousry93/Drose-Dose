@@ -25,6 +25,10 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
             if (req.Method == HttpMethod.Get)
             {
                 Gets.Add(req.RequestUri!.ToString());
+                if (req.RequestUri!.Query.Contains("fields=instagram_business_account"))
+                    return new(HttpStatusCode.OK) { Content = new StringContent("""{"instagram_business_account":{"id":"ig1"},"id":"123"}""") };
+                if (req.RequestUri!.Query.Contains("fields=status_code"))
+                    return new(HttpStatusCode.OK) { Content = new StringContent("""{"status_code":"FINISHED"}""") };
                 return new(HttpStatusCode.OK) { Content = new StringContent(req.RequestUri!.Query.Contains("fields=access_token")
                     ? """{"access_token":"page-token","id":"123"}""" : """{"name":"Dose","id":"u1"}""") };
             }
@@ -51,6 +55,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         b.UseSetting("Meta:QueuePath", queuePath);
         b.UseSetting("Meta:QueueUrl", "");
         b.UseSetting("Meta:MediaBaseUrl", "");
+        b.UseSetting("Meta:InstagramPollSeconds", "0");
         b.ConfigureServices(s => s.AddHttpClient("meta").ConfigurePrimaryHttpMessageHandler(() => graph));
     });
 
@@ -175,5 +180,36 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         var status = await f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test") })
             .GetStringAsync("/api/marketing/status");
         Assert.Contains("reel_post", status);
+    }
+
+    [Fact]
+    public async Task Posts_marked_for_instagram_go_to_the_linked_business_account()
+    {
+        RequireDb();
+        var key = "t-" + Guid.NewGuid().ToString("N")[..8];
+        var queue = Path.GetTempFileName();
+        await File.WriteAllTextAsync(queue, $$"""
+          [ { "key": "{{key}}-a", "kind": "album", "caption": "كاروسيل — اللينك في البايو", "media": ["/m/1.jpg", "/m/2.jpg"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-2):O}}", "channels": ["instagram"] },
+            { "key": "{{key}}-l", "kind": "link", "caption": "كارت", "media": ["/m/card.jpg"], "instagramMedia": ["/m/post.jpg"], "publishAt": "{{DateTimeOffset.UtcNow.AddMinutes(-1):O}}", "channels": ["facebook", "instagram"] } ]
+          """);
+        var graph = new FakeGraph();
+        await using var f = Api(queue, graph);
+        using (var scope = f.Services.CreateScope())
+            await scope.ServiceProvider.GetRequiredService<MarketingPublisher>().RunAsync(CancellationToken.None);
+
+        var ig = graph.Calls.Where(c => c.Url.Contains("/ig1/")).ToList();
+        // Album: 2 children + carousel container + publish; link post on Instagram: the 4:5 image + publish.
+        Assert.Equal(6, ig.Count);
+        Assert.Contains("is_carousel_item=true", ig[0].Body);
+        Assert.Contains("media_type=CAROUSEL", ig[2].Body);
+        Assert.Contains("children=", ig[2].Body);
+        Assert.EndsWith("/ig1/media_publish", ig[3].Url);
+        Assert.Contains(Uri.EscapeDataString("https://dose.test/m/post.jpg"), ig[4].Body);
+        Assert.Contains(System.Net.WebUtility.UrlEncode("اللينك في البايو"), ig[2].Body); // Instagram keeps "link in bio"
+        Assert.Contains(graph.Calls, c => c.Url.Contains("/123/feed")); // the same link post also went to Facebook
+
+        var status = await f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test") })
+            .GetStringAsync("/api/marketing/status");
+        Assert.Contains("\"channel\":\"instagram\"", status);
     }
 }

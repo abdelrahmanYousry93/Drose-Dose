@@ -51,8 +51,11 @@ The site publishes `marketing/social-queue.json` to the Dose Facebook Page by it
 pushed change takes effect within ~5 minutes without waiting for a deploy.
 1. Read every HQ item whose week is current or next. **Only items with `status: approved` may be in the queue.**
 2. For each approved feed item (not stories — stickers can't be added by API) build a queue entry:
-   `{"key": "<item id>", "kind": "photo"|"album"|"video", "caption": "<caption without the parents' variant section>",
-   "media": ["/m/<week>/<file>.jpg", …], "publishAt": "<ISO with +02:00 (Egypt)>", "channels": ["facebook"]}`.
+   `{"key": "<item id>", "kind": "photo"|"album"|"video"|"link", "caption": "<caption without the parents' variant section>",
+   "media": ["/m/<week>/<file>.jpg", …], "instagramMedia": ["/m/<week>/<4:5 file>.jpg"] (link posts: the feed design for
+   Instagram), "publishAt": "<ISO with +02:00 (Egypt)>", "channels": ["facebook", "instagram"]}`. Instagram account:
+   `dorse.dose`, linked to the Page; "instagram" works only once the Page key has the Instagram permissions — check
+   /api/marketing/status for instagram errors and drop the channel if they say the permission is missing.
    Kind: single-image post → **link** (preferred: render a 1200×630 `size: "link"` version of the design; Facebook shows it
    as a big card and tapping it opens the site; add a short `title`), several images → album (in carousel order; the
    caption gets a clickable link automatically), reel → video (`/m/<week>/<file>.mp4`). `photo` only if no card exists.

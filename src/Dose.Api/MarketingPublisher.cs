@@ -15,6 +15,9 @@ public sealed class MetaSettings
     public string? PageId { get; init; }
     public string? PageAccessToken { get; init; }
     public string GraphVersion { get; init; } = "v27.0";
+    /// <summary>Optional: the Instagram business account id; read from the Page when empty.</summary>
+    public string? InstagramUserId { get; init; }
+    public int InstagramPollSeconds { get; init; } = 5;
     /// <summary>Queue file written by the marketing agency; copied into the image by the Dockerfile.</summary>
     public string QueuePath { get; init; } = "marketing/queue.json";
     /// <summary>
@@ -32,7 +35,7 @@ public sealed class MetaSettings
 /// <summary>An approved post waiting for its time. Media are site-relative paths under /m/ (public JPEG/MP4 files).</summary>
 public sealed record QueuedPost(
     string Key, string Kind, string? Caption, string[] Media, DateTimeOffset PublishAt, string[]? Channels,
-    string? EditOf = null, string? Title = null);
+    string? EditOf = null, string? Title = null, string[]? InstagramMedia = null);
 
 /// <summary>
 /// Publishes approved marketing posts to the Dose Facebook Page when their time comes. The agency only ever adds posts
@@ -82,26 +85,109 @@ public sealed class MarketingPublisher(
         if (!meta.Value.Enabled) return;
         var now = DateTime.UtcNow;
         var due = (await ReadQueueAsync(ct))
-            .Where(p => (p.Channels is null || p.Channels.Contains("facebook")) && p.PublishAt.UtcDateTime <= now
-                        && p.PublishAt.UtcDateTime > now.AddDays(-2))
+            .Where(p => p.PublishAt.UtcDateTime <= now && p.PublishAt.UtcDateTime > now.AddDays(-2))
             .OrderBy(p => p.PublishAt).ToList();
         foreach (var post in due)
+        foreach (var channel in (post.Channels ?? ["facebook"]).Where(c => c is "facebook" or "instagram").Distinct())
         {
-            var row = await db.Set<MarketingPost>().FirstOrDefaultAsync(x => x.Key == post.Key && x.Channel == "facebook", ct);
+            // Edits and card refreshes only exist on Facebook.
+            if (channel == "instagram" && post.Kind is "edit" or "rescrape") continue;
+            var row = await db.Set<MarketingPost>().FirstOrDefaultAsync(x => x.Key == post.Key && x.Channel == channel, ct);
             if (row is { PublishedAtUtc: not null } || row?.Attempts >= 3) continue;
-            if (row is null) { row = new MarketingPost(post.Key, "facebook", now); db.Add(row); }
+            if (row is null) { row = new MarketingPost(post.Key, channel, now); db.Add(row); }
             try
             {
-                row.Published(await PublishToPageAsync(post, ct), DateTime.UtcNow);
-                log.LogInformation("Published marketing post {Key} to the Facebook Page", post.Key);
+                var id = channel == "instagram" ? await PublishToInstagramAsync(post, ct) : await PublishToPageAsync(post, ct);
+                row.Published(id, DateTime.UtcNow);
+                log.LogInformation("Published marketing post {Key} to {Channel}", post.Key, channel);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 row.Failed(ex.Message);
-                log.LogError(ex, "Publishing marketing post {Key} failed", post.Key);
+                log.LogError(ex, "Publishing marketing post {Key} to {Channel} failed", post.Key, channel);
             }
             await db.SaveChangesAsync(ct);
         }
+    }
+
+    /// <summary>
+    /// Instagram (the business account linked to the Page) through the Content Publishing API: create a media container,
+    /// wait until Instagram has fetched it, publish. Captions keep "link in bio" (Instagram captions can't hold links).
+    /// </summary>
+    async Task<string> PublishToInstagramAsync(QueuedPost post, CancellationToken ct)
+    {
+        var m = meta.Value;
+        var client = http.CreateClient("meta");
+        var token = await PageTokenAsync(ct);
+        var graph = $"https://graph.facebook.com/{m.GraphVersion}";
+
+        async Task<JsonElement> Call(HttpMethod method, string url, Dictionary<string, string>? form = null)
+        {
+            form ??= [];
+            form["access_token"] = token;
+            using var req = method == HttpMethod.Get
+                ? new HttpRequestMessage(method, $"{url}{(url.Contains('?') ? '&' : '?')}{string.Join('&', form.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"))}")
+                : new HttpRequestMessage(method, url) { Content = new FormUrlEncodedContent(form) };
+            using var res = await client.SendAsync(req, ct);
+            var json = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct) is { Length: > 0 } b ? b : "{}").RootElement.Clone();
+            if (!res.IsSuccessStatusCode)
+                throw new InvalidOperationException(json.TryGetProperty("error", out var e) && e.TryGetProperty("message", out var msg)
+                    ? $"Instagram {(int)res.StatusCode}: {msg.GetString()}" : $"Instagram {(int)res.StatusCode}");
+            return json;
+        }
+
+        var igUser = m.InstagramUserId;
+        if (string.IsNullOrWhiteSpace(igUser))
+        {
+            var page = await Call(HttpMethod.Get, $"{graph}/{m.PageId}", new() { ["fields"] = "instagram_business_account" });
+            igUser = page.TryGetProperty("instagram_business_account", out var ig) ? ig.GetProperty("id").GetString() : null;
+            if (string.IsNullOrWhiteSpace(igUser)) throw new InvalidOperationException("No Instagram business account is linked to the Page.");
+        }
+
+        async Task WaitReady(string container)
+        {
+            for (var i = 0; i < 30; i++)
+            {
+                var st = await Call(HttpMethod.Get, $"{graph}/{container}", new() { ["fields"] = "status_code" });
+                var code = st.TryGetProperty("status_code", out var c) ? c.GetString() : "FINISHED";
+                if (code == "FINISHED") return;
+                if (code is "ERROR" or "EXPIRED") throw new InvalidOperationException($"Instagram could not process the media ({code}).");
+                await Task.Delay(TimeSpan.FromSeconds(m.InstagramPollSeconds), ct);
+            }
+            throw new InvalidOperationException("Instagram took too long to process the media.");
+        }
+
+        var caption = post.Caption ?? "";
+        var media = post.InstagramMedia is { Length: > 0 } im ? im : post.Media;
+        string container;
+        switch (post.Kind)
+        {
+            case "photo" or "link":
+                container = (await Call(HttpMethod.Post, $"{graph}/{igUser}/media",
+                    new() { ["image_url"] = MediaUrl(media[0]), ["caption"] = caption })).GetProperty("id").GetString()!;
+                break;
+            case "album":
+            {
+                var children = new List<string>();
+                foreach (var item in media.Take(10))
+                    children.Add((await Call(HttpMethod.Post, $"{graph}/{igUser}/media",
+                        new() { ["image_url"] = MediaUrl(item), ["is_carousel_item"] = "true" })).GetProperty("id").GetString()!);
+                foreach (var child in children) await WaitReady(child);
+                container = (await Call(HttpMethod.Post, $"{graph}/{igUser}/media",
+                    new() { ["media_type"] = "CAROUSEL", ["children"] = string.Join(',', children), ["caption"] = caption })).GetProperty("id").GetString()!;
+                break;
+            }
+            case "video":
+                container = (await Call(HttpMethod.Post, $"{graph}/{igUser}/media",
+                    new() { ["media_type"] = "REELS", ["video_url"] = MediaUrl(media[0]), ["caption"] = caption, ["share_to_feed"] = "true" }))
+                    .GetProperty("id").GetString()!;
+                break;
+            default:
+                throw new InvalidOperationException($"Post kind '{post.Kind}' can't go to Instagram.");
+        }
+        await WaitReady(container);
+        return (await Call(HttpMethod.Post, $"{graph}/{igUser}/media_publish", new() { ["creation_id"] = container }))
+            .GetProperty("id").GetString()!;
     }
 
     async Task<string> PublishToPageAsync(QueuedPost post, CancellationToken ct)
