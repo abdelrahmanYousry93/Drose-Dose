@@ -21,6 +21,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         private int n;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
         {
+            if (req.Method == HttpMethod.Get) return new(HttpStatusCode.OK) { Content = new StringContent("""{"name":"Dose"}""") };
             Calls.Add((req.RequestUri!.ToString(), await req.Content!.ReadAsStringAsync(ct)));
             if (Fail) return new(HttpStatusCode.BadRequest) { Content = new StringContent("""{"error":{"message":"Invalid token"}}""") };
             n++;

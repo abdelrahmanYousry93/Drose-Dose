@@ -114,6 +114,29 @@ public sealed class MarketingPublisher(
         }
     }
 
+    static (DateTime At, object Result)? pageCheck;
+
+    /// <summary>Reads the Page's name with the token (no posting) to prove the key works; cached for 10 minutes.</summary>
+    async Task<object?> CheckPageAsync(CancellationToken ct)
+    {
+        if (!meta.Value.Enabled) return null;
+        if (pageCheck is { } c && c.At > DateTime.UtcNow.AddMinutes(-10)) return c.Result;
+        object result;
+        try
+        {
+            var m = meta.Value;
+            using var res = await http.CreateClient("meta").GetAsync(
+                $"https://graph.facebook.com/{m.GraphVersion}/{m.PageId}?fields=name&access_token={Uri.EscapeDataString(m.PageAccessToken!)}", ct);
+            var json = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct)).RootElement;
+            result = res.IsSuccessStatusCode
+                ? new { ok = true, name = json.GetProperty("name").GetString() }
+                : new { ok = false, error = json.TryGetProperty("error", out var e) && e.TryGetProperty("message", out var msg) ? msg.GetString() : $"HTTP {(int)res.StatusCode}" };
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException) { result = new { ok = false, error = ex.Message }; }
+        pageCheck = (DateTime.UtcNow, result);
+        return result;
+    }
+
     /// <summary>Public, secret-free status the agency reads to mark items as published.</summary>
     public async Task<object> StatusAsync(CancellationToken ct)
     {
@@ -122,6 +145,7 @@ public sealed class MarketingPublisher(
         return new
         {
             enabled = meta.Value.Enabled,
+            page = await CheckPageAsync(ct),
             queued = ReadQueue().Select(p => new { p.Key, p.Kind, p.PublishAt }),
             posts = rows,
         };
