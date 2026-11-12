@@ -25,6 +25,9 @@ Always pass `if_version` from your last read when updating an existing doc.
    briefs/feedback and the report's 3 changes to its pending (`review`/`changes`) items — then do step 9.
 3. **Strategist** → create `weeks/<next>` (status planning, `current` stays on this week until Saturday) with goal, theme, plan.
    Follow the month arc but adapt to the report, the most-asked lessons and the briefs.
+   **Owner rule (12 Nov): at least one feed post on Facebook AND Instagram every single day** (stories don't count —
+   they can't be auto-published). Days without a reel/carousel/post get a light piece: engagement question, study tip
+   to save, or a message line. While the site has no bookable sessions, these pieces never say «احجز».
 4. **Copywriter + Designer + Video** → write `marketing/weeks/<next>/spec.json` (see designer.md), render with
    `node marketing/studio/render.js marketing/weeks/<next>/spec.json /tmp/<next> src/Dose.Web/public/m/<next>`
    (the 3rd argument writes the JPEG/MP4 copies the site serves for the Facebook publisher); look at every PNG and one reel frame;
@@ -50,6 +53,8 @@ The site publishes `marketing/social-queue.json` to the Dose Facebook Page by it
 `src/Dose.Api/MarketingPublisher.cs`). It reads the queue and new media straight from this repo's main branch, so a
 pushed change takes effect within ~5 minutes without waiting for a deploy.
 1. Read every HQ item whose week is current or next. **Only items with `status: approved` may be in the queue.**
+   If any of the next 2 days has no approved feed post for both Facebook and Instagram, notify the owner (push) which
+   day is empty and which `review` item would fill it.
 2. For each approved feed item (not stories — stickers can't be added by API) build a queue entry:
    `{"key": "<item id>", "kind": "photo"|"album"|"video"|"link", "caption": "<caption without the parents' variant section>",
    "media": ["/m/<week>/<file>.jpg", …], "instagramMedia": ["/m/<week>/<4:5 file>.jpg"] (link posts: the feed design for

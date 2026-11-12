@@ -1,0 +1,64 @@
+{
+ "pieces": [
+  {
+   "file": "dose-w2-d07.png",
+   "size": "post",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:88px'>غلطة كتير<br/>بنعملها 🙈</div><div class='lead muted'>نبدأ بالدرس اللي فاهمينه<br/>علشان نحس إننا خلّصنا كتير</div><div class='box'><div class='h2' style='font-size:48px'>ابدأ بالدرس اللي واقف معاك</div><div class='small'>وانت لسه مركّز في أول المذاكرة</div></div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w2-d07-link.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:76px'>ابدأ مذاكرتك <span class='accent'>بالدرس اللي واقف معاك</span></div><div class='lead muted' style='font-size:36px'>مش باللي فاهمه — وانت لسه مركّز</div>"
+  },
+  {
+   "file": "dose-w2-d08.png",
+   "size": "post",
+   "bg": "navy",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>3 أسئلة<br/><span class='accent'>بعد كل حصة</span></div><div class='checks'><div>فهمت إيه بالظبط؟</div><div>إيه اللي لسه مش واضح؟</div><div>هسأل فيه مين؟</div></div><div class='lead'>احفظ البوست وجرّبها 🔖</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w2-d08-link.png",
+   "size": "link",
+   "bg": "navy",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:80px'>3 أسئلة <span class='accent'>بعد كل حصة</span></div><div class='lead' style='font-size:34px'>فهمت إيه؟ إيه اللي مش واضح؟ هسأل فيه مين؟</div>"
+  },
+  {
+   "file": "dose-w2-d09.png",
+   "size": "post",
+   "bg": "yellow",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:96px'>كمّل الجملة:</div><div class='h2' style='font-size:64px'>«أنا بفهم أكتر لما…»</div><div class='lead'>اكتبها في الكومنتات 👇</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w2-d09-link.png",
+   "size": "link",
+   "bg": "yellow",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>كمّل الجملة: «أنا بفهم أكتر لما…»</div><div class='lead' style='font-size:38px'>اكتبها في الكومنتات 👇</div>"
+  },
+  {
+   "file": "dose-w2-d10.png",
+   "size": "post",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:88px'>ليلة الامتحان<br/><span class='accent'>4 حاجات بس</span></div><div class='checks'><div>راجع ملخصك مش الكتاب كله</div><div>حل سؤالين من اللي غلطت فيهم</div><div>جهّز أدواتك وبطاقتك</div><div>نام بدري</div></div><div class='lead muted'>احفظ البوست 🔖</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w2-d10-link.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:80px'>ليلة الامتحان: <span class='accent'>4 حاجات بس</span></div><div class='lead muted' style='font-size:32px'>راجع ملخصك • حل سؤالين غلطت فيهم • جهّز أدواتك • نام بدري</div>"
+  }
+ ]
+}

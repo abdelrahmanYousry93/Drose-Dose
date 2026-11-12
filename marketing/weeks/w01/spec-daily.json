@@ -1,0 +1,109 @@
+{
+ "pieces": [
+  {
+   "file": "dose-w1-d07.png",
+   "size": "post",
+   "bg": "navy",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:100px'>إيه أكتر مادة<br/><span class='accent'>بتوقفك؟</span></div><div class='lead'>اكتبها في الكومنتات 👇</div><div class='checks'><div>رياضيات</div><div>فيزيا / علوم</div><div>كيميا</div><div>لغات</div></div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d07-link.png",
+   "size": "link",
+   "bg": "navy",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>إيه أكتر مادة <span class='accent'>بتوقفك؟</span></div><div class='lead' style='font-size:38px'>اكتبها في الكومنتات 👇</div>"
+  },
+  {
+   "file": "dose-w1-d08.png",
+   "size": "post",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:92px'>ذاكر <span class='accent'>25 دقيقة</span><br/>وريّح 5</div><div class='lead muted'>تركيزك بيفضل عالي أطول<br/>لما المذاكرة تبقى على دفعات قصيرة</div><div class='box'><div class='small'>✓ الموبايل بعيد عنك وانت بتذاكر<br/>✓ كل 4 دفعات خد راحة أطول</div></div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d08-link.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>ذاكر <span class='accent'>25 دقيقة</span> وريّح 5</div><div class='lead muted' style='font-size:36px'>تركيزك بيفضل عالي أطول لما المذاكرة على دفعات قصيرة</div>"
+  },
+  {
+   "file": "dose-w1-d09.png",
+   "size": "post",
+   "bg": "blue",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:92px'>المادة مش كلها<br/><span class='yellow'>واقفة معاك</span></div><div class='lead'>غالبًا هو درس واحد أو جزئية واحدة…<br/>فليه تدفع على المادة كلها؟</div><div class='h2' style='font-size:52px'>ادفع على قد اللي محتاجه</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d09-link.png",
+   "size": "link",
+   "bg": "blue",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:80px'>المادة مش كلها <span class='yellow'>واقفة معاك</span></div><div class='lead' style='font-size:38px'>غالبًا درس واحد… ادفع على قد اللي محتاجه</div>"
+  },
+  {
+   "file": "dose-w1-d10.png",
+   "size": "post",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:96px'>بتذاكر<br/><span class='accent'>لوحدك</span> ولا<br/><span class='accent'>مع صحابك؟</span></div><div class='lead muted'>جاوب في الكومنتات 👇</div><div class='row' style='gap:30px'><span class='pill'>لوحدي</span><span class='pill'>مع صحابي</span></div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d10-link.png",
+   "size": "link",
+   "bg": "light",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:80px'>بتذاكر <span class='accent'>لوحدك</span> ولا <span class='accent'>مع صحابك؟</span></div><div class='lead muted' style='font-size:38px'>جاوب في الكومنتات 👇</div>"
+  },
+  {
+   "file": "dose-w1-d11.png",
+   "size": "post",
+   "bg": "navy",
+   "tag": "sec",
+   "body": "<div class='h1' style='font-size:84px'>قبل الشهري:<br/><span class='accent'>اعرف الدرس اللي واقف معاك</span></div><div class='checks'><div>حل امتحان قديم في وقته</div><div>علّم كل سؤال غلطت فيه</div><div>شوف الغلط بيتكرر في أنهي درس</div></div><div class='lead'>ده الدرس اللي محتاج تفهمه الأول</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d11-link.png",
+   "size": "link",
+   "bg": "navy",
+   "tag": "sec",
+   "body": "<div class='h1' style='font-size:74px'>قبل الشهري: <span class='accent'>اعرف الدرس اللي واقف معاك</span></div><div class='lead' style='font-size:34px'>حل امتحان قديم ← علّم أخطاءك ← شوف بتتكرر في أنهي درس</div>"
+  },
+  {
+   "file": "dose-w1-d12.png",
+   "size": "post",
+   "bg": "yellow",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:96px'>منشن صاحبك<br/>اللي بتذاكر معاه 👇</div><div class='lead'>أو اللي دايمًا يقولك<br/>«اشرحهالي تاني» 😅</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d12-link.png",
+   "size": "link",
+   "bg": "yellow",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>منشن صاحبك اللي بتذاكر معاه 👇</div><div class='lead' style='font-size:38px'>أو اللي دايمًا يقولك «اشرحهالي تاني» 😅</div>"
+  },
+  {
+   "file": "dose-w1-d13.png",
+   "size": "post",
+   "bg": "blue",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:88px'>الدرس اللي واقف معاك<br/><span class='yellow'>مش لازم يوقفك</span></div><div class='lead'>قولنا في الكومنتات:<br/>إيه الدرس اللي عايزنا نشرحه؟</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w1-d13-link.png",
+   "size": "link",
+   "bg": "blue",
+   "tag": "both",
+   "body": "<div class='h1' style='font-size:78px'>الدرس اللي واقف معاك <span class='yellow'>مش لازم يوقفك</span></div><div class='lead' style='font-size:38px'>قولنا في الكومنتات: إيه الدرس اللي عايزنا نشرحه؟</div>"
+  }
+ ]
+}
