@@ -1,32 +1,110 @@
-{ "pieces": [
-  { "file": "dose-w02-reel.mp4", "reel": true, "secondsPerScene": 3, "scenes": [
-    { "bg": "navy", "body": "<div class='h1' style='font-size:112px'>عاوز تفهم<br/><span class='yellow'>درس واحد</span> بس؟</div>" },
-    { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:100px'>لوحدك</div><div class='lead muted'>جلسة خاصة في الميعاد<br/>اللي يناسبك</div>" },
-    { "bg": "light", "body": "<div class='num' style='margin:0 auto'>2</div><div class='h1' style='font-size:100px'>جروب مفتوح</div><div class='lead muted'>انضم لطلاب بيحجزوا<br/>نفس الدرس</div>" },
-    { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>3</div><div class='h1' style='font-size:100px'>مع صحابك</div><div class='lead'>احجز مرة واحدة<br/>وابعتلهم كود الدعوة</div>" },
-    { "bg": "light", "logo": "center", "body": "<div class='h2'>اختار طريقتك</div><div class='lead muted'>اللينك في البايو</div>" }
-  ] },
-  { "file": "dose-w02-story-poll.png", "size": "story", "bg": "navy",
-    "body": "<div class='h1' style='text-align:center;font-size:96px'>بتذاكر <span class='yellow'>لوحدك</span><br/>ولا مع <span class='yellow'>صحابك</span>؟</div><div class='lead' style='text-align:center'>صوّت 👇</div>",
-    "sticker": "مكان ملصق الاستطلاع" },
-  { "file": "dose-w02-carousel-1.png", "size": "post", "bg": "light", "tag": "both",
-    "body": "<div class='h1' style='font-size:104px'>ذاكر مع<br/><span class='accent'>صحابك</span><br/>وادفعوا أقل</div><div class='lead muted'>إزاي تحجزوا جلسة واحدة لكلكم؟</div>",
-    "footer": "اسحب ← 4 خطوات" },
-  { "file": "dose-w02-carousel-2.png", "size": "post", "bg": "light", "counter": "1 / 4",
-    "body": "<div class='num'>1</div><div class='h1'>اختار المادة<br/>والدرس</div><div class='lead muted'>من «جلسة خاصة أو مجموعة»، وفي<br/>«مين هيحضر؟» اختار <b class='accent'>«أنا وصحابي»</b></div>" },
-  { "file": "dose-w02-carousel-3.png", "size": "post", "bg": "light", "counter": "2 / 4",
-    "body": "<div class='num'>2</div><div class='h1'>حدد عددكم<br/>واختار الميعاد</div><div class='lead muted'>وادفع مرة واحدة للكل بسعر المجموعة،<br/>وتقسموها بينكم براحتكم</div>" },
-  { "file": "dose-w02-carousel-4.png", "size": "post", "bg": "light", "counter": "3 / 4",
-    "body": "<div class='num'>3</div><div class='h1'>هيوصلك<br/><span class='accent'>كود دعوة</span></div><div class='lead muted'>بعد تأكيد الدفع — ابعته لصحابك<br/>على واتساب أو الجروب بتاعكم</div>" },
-  { "file": "dose-w02-carousel-5.png", "size": "post", "bg": "light", "counter": "4 / 4",
-    "body": "<div class='num'>4</div><div class='h1'>كل واحد يدخل<br/>بالكود ويكتب اسمه</div><div class='lead muted'>من غير ما يدفع تاني —<br/>ويوصله تذكير قبل الجلسة</div>" },
-  { "file": "dose-w02-carousel-6.png", "size": "post", "bg": "blue", "logo": "center",
-    "body": "<div class='h1' style='font-size:84px'>الدرس اللي واقف<br/>معاكم كلكم…</div><div class='lead'>احجزوه مرة واحدة</div><div><span class='pill'>اللينك في البايو</span></div>" },
-  { "file": "dose-w02-story-question.png", "size": "story", "bg": "blue",
-    "body": "<div class='h1' style='text-align:center;font-size:92px'>عندك سؤال<br/>عن <span class='yellow'>الحجز</span>؟</div><div class='lead' style='text-align:center'>السعر، الدفع، الميعاد، الإلغاء…<br/>اسأل وهنرد في الستوري</div>",
-    "sticker": "مكان ملصق الأسئلة" },
-  { "file": "dose-w02-compare.png", "size": "post", "bg": "light", "tag": "both",
-    "body": "<div class='h2'>خاصة ولا جروب<br/>ولا <span class='accent'>صحابك</span>؟</div><div style='display:grid;gap:18px'><div class='box'><div class='h2' style='font-size:44px'>جلسة خاصة</div><div class='small'>إنت والمدرس بس، في الميعاد اللي تختاره</div></div><div class='box'><div class='h2' style='font-size:44px'>جروب مفتوح</div><div class='small'>طلاب تانيين بيحجزوا نفس الدرس — سعر أقل للفرد</div></div><div class='box' style='outline:4px solid #FFC30A'><div class='h2' style='font-size:44px'>أنا وصحابي</div><div class='small'>تحجزوا مرة واحدة وتبعتوا كود الدعوة</div></div></div>" },
-  { "file": "dose-w02-story-code.png", "size": "story", "bg": "yellow", "logo": "top",
-    "body": "<div class='h2' style='text-align:center'>أول حجز ليك</div><div class='h1' style='text-align:center;font-size:190px'>15%</div><div class='h2' style='text-align:center'>خصم</div><div style='text-align:center'><span class='box ltr' style='font-size:84px;font-weight:800;padding:20px 60px'>IG15</span></div><div class='lead' style='text-align:center'>اكتب الكود في صفحة الحجز</div>" }
-] }
+{
+  "pieces": [
+    {
+      "file": "dose-w02-reel.mp4",
+      "reel": true,
+      "secondsPerScene": 3,
+      "scenes": [
+        {
+          "bg": "navy",
+          "body": "<div class='h1' style='font-size:112px'>عاوز تفهم<br/><span class='yellow'>درس واحد</span> بس؟</div>"
+        },
+        {
+          "bg": "light",
+          "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:100px'>لوحدك</div><div class='lead muted'>جلسة خاصة في الميعاد<br/>اللي يناسبك</div>"
+        },
+        {
+          "bg": "light",
+          "body": "<div class='num' style='margin:0 auto'>2</div><div class='h1' style='font-size:100px'>جروب مفتوح</div><div class='lead muted'>انضم لطلاب بيحجزوا<br/>نفس الدرس</div>"
+        },
+        {
+          "bg": "blue",
+          "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>3</div><div class='h1' style='font-size:100px'>مع صحابك</div><div class='lead'>احجز مرة واحدة<br/>وابعتلهم كود الدعوة</div>"
+        },
+        {
+          "bg": "light",
+          "logo": "center",
+          "body": "<div class='h2'>اختار طريقتك</div><div class='lead muted'>اللينك في البايو</div>"
+        }
+      ]
+    },
+    {
+      "file": "dose-w02-story-poll.png",
+      "size": "story",
+      "bg": "navy",
+      "body": "<div class='h1' style='text-align:center;font-size:96px'>بتذاكر <span class='yellow'>لوحدك</span><br/>ولا مع <span class='yellow'>صحابك</span>؟</div><div class='lead' style='text-align:center'>صوّت 👇</div>",
+      "sticker": "مكان ملصق الاستطلاع"
+    },
+    {
+      "file": "dose-w02-carousel-1.png",
+      "size": "post",
+      "bg": "light",
+      "tag": "both",
+      "body": "<div class='h1' style='font-size:104px'>ذاكر مع<br/><span class='accent'>صحابك</span><br/>وادفعوا أقل</div><div class='lead muted'>إزاي تحجزوا جلسة واحدة لكلكم؟</div>",
+      "footer": "اسحب ← 4 خطوات"
+    },
+    {
+      "file": "dose-w02-carousel-2.png",
+      "size": "post",
+      "bg": "light",
+      "counter": "1 / 4",
+      "body": "<div class='num'>1</div><div class='h1'>اختار المادة<br/>والدرس</div><div class='lead muted'>من «جلسة خاصة أو مجموعة»، وفي<br/>«مين هيحضر؟» اختار <b class='accent'>«أنا وصحابي»</b></div>"
+    },
+    {
+      "file": "dose-w02-carousel-3.png",
+      "size": "post",
+      "bg": "light",
+      "counter": "2 / 4",
+      "body": "<div class='num'>2</div><div class='h1'>حدد عددكم<br/>واختار الميعاد</div><div class='lead muted'>وادفع مرة واحدة للكل بسعر المجموعة،<br/>وتقسموها بينكم براحتكم</div>"
+    },
+    {
+      "file": "dose-w02-carousel-4.png",
+      "size": "post",
+      "bg": "light",
+      "counter": "3 / 4",
+      "body": "<div class='num'>3</div><div class='h1'>هيوصلك<br/><span class='accent'>كود دعوة</span></div><div class='lead muted'>بعد تأكيد الدفع — ابعته لصحابك<br/>على واتساب أو الجروب بتاعكم</div>"
+    },
+    {
+      "file": "dose-w02-carousel-5.png",
+      "size": "post",
+      "bg": "light",
+      "counter": "4 / 4",
+      "body": "<div class='num'>4</div><div class='h1'>كل واحد يدخل<br/>بالكود ويكتب اسمه</div><div class='lead muted'>من غير ما يدفع تاني —<br/>ويوصله تذكير قبل الجلسة</div>"
+    },
+    {
+      "file": "dose-w02-carousel-6.png",
+      "size": "post",
+      "bg": "blue",
+      "logo": "center",
+      "body": "<div class='h1' style='font-size:84px'>الدرس اللي واقف<br/>معاكم كلكم…</div><div class='lead'>احجزوه مرة واحدة</div><div><span class='pill'>اللينك في البايو</span></div>"
+    },
+    {
+      "file": "dose-w02-story-question.png",
+      "size": "story",
+      "bg": "blue",
+      "body": "<div class='h1' style='text-align:center;font-size:92px'>عندك سؤال<br/>عن <span class='yellow'>الحجز</span>؟</div><div class='lead' style='text-align:center'>السعر، الدفع، الميعاد، الإلغاء…<br/>اسأل وهنرد في الستوري</div>",
+      "sticker": "مكان ملصق الأسئلة"
+    },
+    {
+      "file": "dose-w02-compare.png",
+      "size": "post",
+      "bg": "light",
+      "tag": "both",
+      "body": "<div class='h2'>خاصة ولا جروب<br/>ولا <span class='accent'>صحابك</span>؟</div><div style='display:grid;gap:18px'><div class='box'><div class='h2' style='font-size:44px'>جلسة خاصة</div><div class='small'>إنت والمدرس بس، في الميعاد اللي تختاره</div></div><div class='box'><div class='h2' style='font-size:44px'>جروب مفتوح</div><div class='small'>طلاب تانيين بيحجزوا نفس الدرس — سعر أقل للفرد</div></div><div class='box' style='outline:4px solid #FFC30A'><div class='h2' style='font-size:44px'>أنا وصحابي</div><div class='small'>تحجزوا مرة واحدة وتبعتوا كود الدعوة</div></div></div>"
+    },
+    {
+      "file": "dose-w02-story-code.png",
+      "size": "story",
+      "bg": "yellow",
+      "logo": "top",
+      "body": "<div class='h2' style='text-align:center'>أول حجز ليك</div><div class='h1' style='text-align:center;font-size:190px'>15%</div><div class='h2' style='text-align:center'>خصم</div><div style='text-align:center'><span class='box ltr' style='font-size:84px;font-weight:800;padding:20px 60px'>IG15</span></div><div class='lead' style='text-align:center'>اكتب الكود في صفحة الحجز</div>"
+    },
+    {
+      "file": "dose-w02-story-code-fb.png",
+      "size": "story",
+      "bg": "yellow",
+      "logo": "top",
+      "body": "<div class='h2' style='text-align:center'>أول حجز ليك</div><div class='h1' style='text-align:center;font-size:190px'>15%</div><div class='h2' style='text-align:center'>خصم</div><div style='text-align:center'><span class='box ltr' style='font-size:84px;font-weight:800;padding:20px 60px'>FB15</span></div><div class='lead' style='text-align:center'>اكتب الكود في صفحة الحجز</div>"
+    }
+  ]
+}
