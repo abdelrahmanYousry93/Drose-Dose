@@ -346,7 +346,7 @@ public sealed class MarketingPublisher(
         if (post.Kind == "link") return caption.Replace("اللينك تحت", "اضغط على الصورة");
         if (caption.Contains("http", StringComparison.OrdinalIgnoreCase)) return caption;
         var link = LandingUrl(post.Key);
-        return $"{caption}\n\n👈 احجز الدرس اللي محتاجه من هنا:\n{link}".Trim();
+        return $"{caption}\n\n👈 اعرف أكتر عن Dose:\n{link}".Trim();
     }
 
     /// <summary>

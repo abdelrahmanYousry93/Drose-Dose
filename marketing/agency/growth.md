@@ -39,3 +39,8 @@ owner has time to approve:
 Followers per channel (owner enters them in HQ metrics on Thursday until the API gives them), reel likes/comments/shares
 from `/api/marketing/report`, and site visits from `?src=` links. Target for the first month: a few hundred to ~1,000
 real followers; judge formats by saves and shares, not likes.
+
+## Caption link line
+Facebook captions get a link line automatically. While the site has no bookable sessions it reads
+"👈 اعرف أكتر عن Dose:" (never "احجز"). To control it per post, end the caption with your own line and link
+(`https://drwsdose.com/?src=fb-<key>`): a caption that already contains a link is posted as written.
