@@ -260,7 +260,9 @@ public sealed class MarketingPublisher(
                     {
                         return Id(await Post($"{baseUrl}/feed", new(fields)
                         {
-                            ["call_to_action"] = JsonSerializer.Serialize(new { type = cta, value = new { link = LandingUrl(post.Key) } }),
+                            // The button must point at the share page too: Facebook builds the card from the button's link, and the
+                            // home page has no card image. People opening the share page are redirected to the tagged landing page.
+                            ["call_to_action"] = JsonSerializer.Serialize(new { type = cta, value = new { link = SharePageUrl(post.Key) } }),
                         }));
                     }
                     catch (InvalidOperationException ex)
