@@ -314,6 +314,9 @@ export const ar = {
     "allGrades": "كل الصفوف",
     "title": "فلترة الجلسات"
   },
+  "follow": {
+    "title": "تابعنا:"
+  },
   "followUps": {
     "choice": {
       "PayDifference": "هيدفع الفرق",

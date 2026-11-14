@@ -1,0 +1,28 @@
+{
+  "pieces": [
+    { "file": "dose-g01-reel.mp4", "reel": true, "secondsPerScene": 2.6,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>POV 👀</div><div class='h1' style='font-size:104px'>المدرس قال:<br/><span class='yellow'>«دي سهلة»</span></div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:100px'>وإنت لسه<br/>في أول سطر 😅</div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:92px'>مش عيب إنك<br/>ماتفهمش</div>" },
+        { "bg": "blue", "body": "<div class='h1' style='font-size:92px'>العيب إنك<br/><span class='yellow'>تسكت</span> 🤐</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>تابع Dose</div><div class='lead muted'>كل يوم حيلة تفهّمك أسرع</div>" }
+      ] },
+    { "file": "dose-g02-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='h1' style='font-size:100px'>قاعدة <span class='yellow'>الـ 3 مرات</span><br/>لأي قانون</div><div class='lead'>جرّبها النهارده ⏱️</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:96px'>اقراه وافهمه</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>2</div><div class='h1' style='font-size:92px'>اكتبه من دماغك</div><div class='lead muted'>من غير ما تبص</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>3</div><div class='h1' style='font-size:92px'>حل بيه مسألة</div><div class='lead'>دلوقتي، مش بكرة</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظ الريل 📌</div><div class='lead muted'>وتابع Dose للحيلة الجاية</div>" }
+      ] },
+    { "file": "dose-g03-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='h1' style='font-size:96px'>مكسوف تسأل<br/>المدرس؟ 🙈</div>" },
+        { "bg": "light", "body": "<div class='lead muted'>بدل «مش فاهم»</div><div class='h1' style='font-size:84px'>قول:<br/>«فهمت لحد<br/><span class='accent'>الخطوة دي</span>»</div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:88px'>المدرس هيعرف<br/>يكمّل منين</div>" },
+        { "bg": "blue", "body": "<div class='h1' style='font-size:92px'>وإنت هتفهم<br/><span class='yellow'>أسرع بكتير</span></div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك 👇</div><div class='lead muted'>وتابع Dose</div>" }
+      ] }
+  ]
+}

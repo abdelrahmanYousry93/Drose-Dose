@@ -18,7 +18,7 @@ Always pass `if_version` from your last read when updating an existing doc.
 ## Thursday — production run (produces next week)
 1. **Read**: `weeks`, last week's `items`, `metrics/<this week>`, open `briefs`, `tasks`; `brand.md`, `roles.md`, the plan
    doc (Claude Docs 1ab5e093-3a4a-4e7a-9bb2-50b570abdb65) for the month arc; the live site's public catalog
-   (`GET https://lionfish-app-n6c49.ondigitalocean.app/api/catalog/stages`, `/api/sessions`) to know what is bookable.
+   (`GET https://drwsdose.com/api/catalog/stages`, `/api/sessions`) to know what is bookable.
 2. **Analyst** → `weeks/<this week>.report` (markdown: numbers table, what worked, what didn't, 3 changes for next week).
    If no metrics were entered, say so plainly and base the report on approvals/feedback only. Never invent numbers.
    *Next week already produced* (its `weeks` doc exists with items): skip steps 3–8; instead refresh it — apply any new
@@ -68,7 +68,7 @@ pushed change takes effect within ~5 minutes without waiting for a deploy.
    The media files must exist in `src/Dose.Web/public/m/<week>/` (re-render with the 3rd argument if missing).
 3. Remove queue entries whose item is no longer approved (before they are published), and published entries more than
    7 days old — **except `link` entries: keep them, their card page (/p/<key>) is read from the queue.**
-4. Read `GET https://lionfish-app-n6c49.ondigitalocean.app/api/marketing/status`: for each post with `publishedAtUtc`, set the
+4. Read `GET https://drwsdose.com/api/marketing/status`: for each post with `publishedAtUtc`, set the
    HQ item `status: published` (+ `publishedAt`); for each with `lastError`, set `agencyNote` with the error and add an
    owner task if it needs him (e.g. expired token).
 5. If the queue changed, commit `marketing/social-queue.json` (+ media) to main and push. One `log` line (role `account`).
@@ -81,7 +81,12 @@ pushed change takes effect within ~5 minutes without waiting for a deploy.
 
 
 ## Numbers source (analyst)
-Every run, read `https://lionfish-app-n6c49.ondigitalocean.app/api/marketing/report?days=7`:
+Every run, read `https://drwsdose.com/api/marketing/report?days=7`:
 - `funnel`: per post code (`fb-<key>`, `ig-bio`, ...) → visits, whatsApp clicks, holds (bookings started), requests, paid.
 - `engagement`: per `<key>|facebook` / `<key>|instagram` → reactions/likes, comments, shares, and reach/saves when the key has insights permissions (null otherwise).
 Write the week's totals into HQ `metrics` and name the best and worst post by paid, then holds, then visits. Never invent numbers; null stays "unknown".
+
+## Growth track
+See `growth.md`: a daily growth reel (6 pm, produced 2 days ahead), plus each Thursday a study sheet, a group pack and a
+boost proposal. Growth items carry `track: "growth"` and are queued by the daily sync like any approved feed item
+(reel → `kind: "video"`, media `/m/gNN/<file>.mp4`).

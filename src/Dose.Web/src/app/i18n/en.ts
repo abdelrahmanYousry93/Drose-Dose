@@ -316,6 +316,9 @@ export const en: typeof ar = {
     "allGrades": "All grades",
     "title": "Filter sessions"
   },
+  "follow": {
+    "title": "Follow us:"
+  },
   "followUps": {
     "choice": {
       "PayDifference": "Will pay the difference",
