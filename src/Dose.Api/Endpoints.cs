@@ -94,19 +94,24 @@ public static class Endpoints
 
         // ---------- Booking (authorized by the secret link token) ----------
         var booking = api.MapGroup("").RequireRateLimiting(BookingRateLimit);
-        booking.MapPost("/bookings/holds", async (CreateHoldRequest req, BookingService svc, CancellationToken ct) =>
-            Results.Ok(await svc.CreateHoldAsync(req.SessionId, ct)));
+        booking.MapPost("/bookings/holds", async (CreateHoldRequest req, BookingService svc, OwnerAlerts alerts, CancellationToken ct) =>
+        {
+            var hold = await svc.CreateHoldAsync(req.SessionId, ct);
+            await alerts.HoldStartedAsync(hold.Reference);
+            return Results.Ok(hold);
+        });
         booking.MapGet("/b/{token}", async (string token, BookingService svc, HttpContext http, CancellationToken ct) =>
         {
             http.Response.Headers.CacheControl = "no-store";
             return Results.Ok(await svc.GetViewAsync(token, ct));
         });
-        booking.MapPost("/b/{token}/details", async (string token, SubmitDetailsRequest req, BookingService svc, CancellationToken ct) =>
+        booking.MapPost("/b/{token}/details", async (string token, SubmitDetailsRequest req, BookingService svc, OwnerAlerts alerts, CancellationToken ct) =>
         {
             await svc.SubmitDetailsAsync(token, req, ct);
+            await alerts.DetailsSubmittedAsync(token);
             return Results.NoContent();
         });
-        booking.MapPost("/b/{token}/payment-proofs", async (string token, HttpRequest request, BookingService svc, CancellationToken ct) =>
+        booking.MapPost("/b/{token}/payment-proofs", async (string token, HttpRequest request, BookingService svc, OwnerAlerts alerts, CancellationToken ct) =>
         {
             var form = await request.ReadFormAsync(ct);
             var file = form.Files.GetFile("screenshot");
@@ -115,6 +120,7 @@ public static class Endpoints
                     extensions: new Dictionary<string, object?> { ["code"] = BookingErrors.InvalidFile });
             await using var stream = file.OpenReadStream();
             await svc.SubmitPaymentProofAsync(token, methodId, stream, file.Length, form["senderReference"], ct);
+            await alerts.ProofUploadedAsync(token);
             return Results.NoContent();
         }).DisableAntiforgery();
         booking.MapGet("/b/{token}/join", async (string token, BookingService svc, CancellationToken ct) =>

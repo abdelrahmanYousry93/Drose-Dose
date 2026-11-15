@@ -19,7 +19,12 @@ public static class Phase3Endpoints
         api.MapGet("/price-options", async (Guid serviceTypeId, Guid gradeId, Guid studyTrackId, Guid subjectId,
             SessionRequestService s, CancellationToken ct) =>
             await s.PriceOptionsAsync(serviceTypeId, gradeId, studyTrackId, subjectId, ct) is { } o ? Results.Ok(o) : Results.NoContent());
-        api.MapPost("/session-requests", (CreateSessionRequest req, SessionRequestService s, CancellationToken ct) => s.CreateAsync(req, ct))
+        api.MapPost("/session-requests", async (CreateSessionRequest req, SessionRequestService s, OwnerAlerts alerts, CancellationToken ct) =>
+            {
+                var created = await s.CreateAsync(req, ct);
+                await alerts.RequestCreatedAsync(created.Reference);
+                return created;
+            })
             .RequireRateLimiting(Endpoints.BookingRateLimit);
 
         var b = api.MapGroup("/b/{token}").RequireRateLimiting(Endpoints.BookingRateLimit);

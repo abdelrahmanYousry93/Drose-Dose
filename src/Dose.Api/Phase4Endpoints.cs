@@ -66,8 +66,12 @@ public static class Phase4Endpoints
             return Results.NoContent();
         });
         teacher.MapGet("/availability", (TeacherAreaService s, ClaimsPrincipal u, CancellationToken ct) => s.AvailabilityAsync(UserId(u), ct));
-        teacher.MapPost("/availability", async (SubmitAvailabilityRequest r, TeacherAreaService s, ClaimsPrincipal u, CancellationToken ct) =>
-            Results.Ok(new { id = await s.SubmitAvailabilityAsync(UserId(u), r, ct) }));
+        teacher.MapPost("/availability", async (SubmitAvailabilityRequest r, TeacherAreaService s, OwnerAlerts alerts, ClaimsPrincipal u, CancellationToken ct) =>
+        {
+            var id = await s.SubmitAvailabilityAsync(UserId(u), r, ct);
+            await alerts.AvailabilitySubmittedAsync(id);
+            return Results.Ok(new { id });
+        });
         teacher.MapPost("/availability/{id:guid}/withdraw", async (Guid id, TeacherAreaService s, ClaimsPrincipal u, CancellationToken ct) =>
         {
             await s.WithdrawAvailabilityAsync(UserId(u), id, ct);

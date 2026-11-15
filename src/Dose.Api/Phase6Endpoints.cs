@@ -22,7 +22,12 @@ public static class Phase6Endpoints
 
         api.MapGet("/private/slots", (Guid gradeId, Guid subjectId, Guid studyTrackId, Guid serviceTypeId, int size,
                 PrivateBookingService s, CancellationToken ct) => s.SlotsAsync(gradeId, subjectId, studyTrackId, serviceTypeId, size, ct));
-        api.MapPost("/private/bookings", (CreatePrivateBookingRequest req, PrivateBookingService s, CancellationToken ct) => s.CreateAsync(req, ct));
+        api.MapPost("/private/bookings", async (CreatePrivateBookingRequest req, PrivateBookingService s, OwnerAlerts alerts, CancellationToken ct) =>
+        {
+            var hold = await s.CreateAsync(req, ct);
+            await alerts.HoldStartedAsync(hold.Reference);
+            return hold;
+        });
 
         api.MapGet("/invites/{code}", (string code, PrivateBookingService s, CancellationToken ct) => s.InviteInfoAsync(code, ct));
         api.MapPost("/invites/{code}/join", (string code, JoinGroupRequest req, PrivateBookingService s, CancellationToken ct) => s.JoinAsync(code, req, ct));
@@ -37,8 +42,12 @@ public static class Phase6Endpoints
         var teacher = app.MapGroup("/api/teacher").RequireAuthorization(Endpoints.TeacherPolicy);
         teacher.MapGet("/proposals", async (TeacherAreaService t, AdminSessionService s, ClaimsPrincipal u, CancellationToken ct) =>
             await s.ProposalsAsync((await t.TeacherForUserAsync(UserId(u), ct)).Id, ct));
-        teacher.MapPost("/proposals", async (TeacherProposalRequest req, TeacherAreaService t, AdminSessionService s, ClaimsPrincipal u, CancellationToken ct) =>
-            Results.Ok(new { id = await s.ProposeAsync((await t.TeacherForUserAsync(UserId(u), ct)).Id, req, Actor(u), ct) }));
+        teacher.MapPost("/proposals", async (TeacherProposalRequest req, TeacherAreaService t, AdminSessionService s, OwnerAlerts alerts, ClaimsPrincipal u, CancellationToken ct) =>
+        {
+            var id = await s.ProposeAsync((await t.TeacherForUserAsync(UserId(u), ct)).Id, req, Actor(u), ct);
+            await alerts.SessionProposedAsync(id);
+            return Results.Ok(new { id });
+        });
         teacher.MapGet("/pricing-preview", (Guid serviceTypeId, Guid gradeId, Guid studyTrackId, Guid subjectId, AdminSessionService s, CancellationToken ct) =>
             s.PreviewPricingAsync(new PricingPreviewRequest(serviceTypeId, gradeId, studyTrackId, subjectId, "Group"), ct));
     }
