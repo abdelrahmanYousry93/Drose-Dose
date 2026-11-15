@@ -44,3 +44,6 @@ real followers; judge formats by saves and shares, not likes.
 Facebook captions get a link line automatically. While the site has no bookable sessions it reads
 "👈 اعرف أكتر عن Dose:" (never "احجز"). To control it per post, end the caption with your own line and link
 (`https://drwsdose.com/?src=fb-<key>`): a caption that already contains a link is posted as written.
+
+## Algorithm discipline
+Read `algorithm.md` first — it applies to every growth reel (niche, fixed hashtags, one CTA, `?src=` codes).

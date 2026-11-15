@@ -90,3 +90,6 @@ Write the week's totals into HQ `metrics` and name the best and worst post by pa
 See `growth.md`: a daily growth reel (6 pm, produced 2 days ahead), plus each Thursday a study sheet, a group pack and a
 boost proposal. Growth items carry `track: "growth"` and are queued by the daily sync like any approved feed item
 (reel → `kind: "video"`, media `/m/gNN/<file>.mp4`).
+
+## Algorithm discipline
+Before producing, queueing or proposing an ad, read `algorithm.md` and follow it for every platform.
