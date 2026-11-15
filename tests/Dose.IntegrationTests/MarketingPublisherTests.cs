@@ -49,6 +49,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         b.UseEnvironment("Production");
         b.UseSetting("ConnectionStrings:Dose", fx.ConnectionString);
         b.UseSetting("Jobs:Enabled", "false");
+        b.UseSetting("Seed:LaunchCatalog", "false");
         b.UseSetting("Public:AppBaseUrl", "https://dose.test");
         b.UseSetting("Meta:PageId", "123");
         b.UseSetting("Meta:PageAccessToken", "test-token");
@@ -147,7 +148,7 @@ public sealed class MarketingPublisherTests(DatabaseFixture fx)
         var form = graph.Calls[1].Body.Split('&').Select(kv => kv.Split('=')).ToDictionary(kv => kv[0], kv => Uri.UnescapeDataString(kv[1].Replace('+', ' ')));
         Assert.DoesNotContain("src=fb", form["message"]);
         Assert.Contains("\"type\":\"BOOK_TRAVEL\"", form["call_to_action"]);
-        Assert.Contains($"https://dose.test/?src=fb-{key}", form["call_to_action"]);
+        Assert.Contains($"https://dose.test/p/{key}", form["call_to_action"]); // the share page, so the card keeps its image
 
         var client = f.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://dose.test"), AllowAutoRedirect = false });
         var people = await client.GetAsync($"/p/{key}");

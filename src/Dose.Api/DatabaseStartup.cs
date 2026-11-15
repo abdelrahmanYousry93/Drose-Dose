@@ -87,6 +87,9 @@ public sealed class DatabaseStartup(
             await DevelopmentSeeder.FillSampleEnglishAsync(db);
             await DevelopmentSeeder.FillSampleSchedulingAsync(db, DateTime.UtcNow);
         }
+        // One-time launch catalog (teachers, free time, first group sessions); off in tests via Seed:LaunchCatalog=false.
+        if (config.GetValue("Seed:LaunchCatalog", !isDev))
+            await LaunchCatalog.EnsureAsync(db, DateTime.UtcNow, ct);
     }
 
     void StartJobs()

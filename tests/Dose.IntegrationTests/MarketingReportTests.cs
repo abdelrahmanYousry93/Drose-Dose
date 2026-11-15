@@ -19,6 +19,7 @@ public sealed class MarketingReportTests(DatabaseFixture fx)
         b.UseEnvironment("Production");
         b.UseSetting("ConnectionStrings:Dose", fx.ConnectionString);
         b.UseSetting("Jobs:Enabled", "false");
+        b.UseSetting("Seed:LaunchCatalog", "false");
         b.UseSetting("Meta:PageId", "");
         b.UseSetting("Meta:PageAccessToken", "");
     });

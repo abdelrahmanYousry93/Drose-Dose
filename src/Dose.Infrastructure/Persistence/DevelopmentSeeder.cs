@@ -148,7 +148,7 @@ public static class DevelopmentSeeder
     public static async Task FillSampleSchedulingAsync(DoseDbContext db, DateTime nowUtc)
     {
         var teacher = await db.Teachers.FirstOrDefaultAsync(t => t.DisplayNameAr == "مدرس تجريبي (بيانات تجريبية)");
-        if (teacher is null) return;
+        if (teacher is null || !teacher.IsPublished) return; // unpublished once the launch teachers exist
         if (!await db.TeacherSubjects.AnyAsync(x => x.TeacherId == teacher.Id))
             foreach (var sid in await db.Subjects.Select(s => s.Id).ToListAsync())
                 db.TeacherSubjects.Add(new TeacherSubject { TeacherId = teacher.Id, SubjectId = sid });
