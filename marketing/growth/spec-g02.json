@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g04-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>خرافة ولا حقيقة؟ 🤔</div><div class='h1' style='font-size:92px'>كل ما تقعد<br/>على الكتاب أكتر<br/><span class='yellow'>هتفهم أكتر</span></div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:120px'><span class='accent'>خرافة</span> ❌</div><div class='lead muted'>الساعات لوحدها مش بتفهّمك</div>" },
+        { "bg": "light", "body": "<div class='lead muted'>الحقيقة ✅</div><div class='h1' style='font-size:88px'>اعرف إنت<br/><span class='accent'>واقف فين</span><br/>بالظبط</div>" },
+        { "bg": "blue", "body": "<div class='h1' style='font-size:88px'>وركّز على الجزء<br/>اللي <span class='yellow'>مش فاهمه</span></div><div class='lead'>مش تعيد الكتاب كله</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك 👇</div><div class='lead muted'>اللي قاعد على الكتاب طول اليوم<br/>وتابع Dose</div>" }
+      ] }
+  ]
+}
