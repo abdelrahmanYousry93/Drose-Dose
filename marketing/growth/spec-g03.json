@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g05-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>امتحان الشهر قرّب؟ 📅</div><div class='h1' style='font-size:100px'>حيلة<br/><span class='yellow'>الورقة الواحدة</span></div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:92px'>لخّص الدرس<br/>في ورقة واحدة</div><div class='lead muted'>القوانين وأهم فكرة بس</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>2</div><div class='h1' style='font-size:92px'>علّم <span class='accent'>بلون تاني</span><br/>اللي مش فاكره</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>3</div><div class='h1' style='font-size:88px'>ليلة الامتحان<br/>راجع <span class='yellow'>الملوّن</span> بس</div><div class='lead'>مش الكتاب كله</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظ الريل 📌</div><div class='lead muted'>وتابع Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
