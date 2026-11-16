@@ -27,6 +27,26 @@ B = [
    'المول عدد، زي الدستة بالظبط:<br/>الدستة = 12<br/><b>المول = <span class="ltr">6.02 × 10²³</span></b>'),
 ]
 
+# Second set of 8
+B2 = [
+  ('percent', 'النسبة المئوية', 'رياضيات', '#0061fa',
+   '<b>النسبة = الجزء ÷ الكل × 100</b><br/>خصم <span class="ltr">20%</span> على 150 جنيه = 30 جنيه<br/>يعني تدفع 120 بس.'),
+  ('pythagoras', 'فيثاغورس', 'رياضيات', '#0061fa',
+   'في المثلث القائم الزاوية:<br/><b class="ltr">a² + b² = c²</b><br/>الضلعين 3 و 4 ← الوتر 5'),
+  ('photosynthesis', 'البناء الضوئي', 'علوم', '#07b24c',
+   'بياخد: <span class="ltr">CO₂</span> + ميه + ضوء الشمس<br/>ويطلّع: <b>جلوكوز + أكسجين</b><br/>يعني النبات بيعمل أكله بنفسه.'),
+  ('cell', 'الخلية', 'علوم', '#07b24c',
+   'الخلية النباتية فيها حاجتين زيادة:<br/><b>جدار خلوي + بلاستيدات خضراء</b><br/>والحيوانية مفيهاش الاتنين.'),
+  ('kana', 'كان وإنّ', 'عربي', '#d97706',
+   '<b>كان</b>: الاسم مرفوع والخبر منصوب<br/><b>كان الجوُّ جميلاً</b><br/><b>إنّ</b> العكس: <b>إنّ الجوَّ جميلٌ</b>'),
+  ('passive', 'Passive Voice', 'إنجليزي', '#d97706',
+   '<b class="ltr">be + V3</b><br/>المهم الحدث، مش مين عمله:<br/><b class="ltr">The window was broken.</b>'),
+  ('newton', 'قانون نيوتن التاني', 'فيزياء', '#7c3aed',
+   '<b class="ltr">F = m × a</b><br/>القوة = الكتلة × العجلة<br/>نفس الزقة ← الأخف يسرّع أكتر'),
+  ('ph', 'الأحماض والقواعد', 'كيمياء', '#7c3aed',
+   'على مقياس <span class="ltr">pH</span>:<br/>أقل من 7 ← <b>حمض</b> (الليمون)<br/>أكتر من 7 ← <b>قاعدة</b> (الصابون)'),
+]
+
 def qr_svg(url):
     q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, border=0, image_factory=qrcode.image.svg.SvgPathImage)
     q.add_data(url); q.make(fit=True)
@@ -58,8 +78,9 @@ def card(slug, name, subj, color, fact):
  </div>
 </div>'''
 
-pages = [B[i:i + 4] for i in range(0, len(B), 4)]
-html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>Dose bottles SES26</title><style>
+def build(items, out):
+    pages = [items[i:i + 4] for i in range(0, len(items), 4)]
+    html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>Dose bottles SES26</title><style>
 @font-face{{font-family:Cairo;font-weight:400;src:url("file://{fonts}/cairo-arabic-400-normal.woff2")}}
 @font-face{{font-family:Cairo;font-weight:700;src:url("file://{fonts}/cairo-arabic-700-normal.woff2")}}
 @font-face{{font-family:Cairo;font-weight:800;src:url("file://{fonts}/cairo-arabic-800-normal.woff2")}}
@@ -95,5 +116,8 @@ body{{font-family:Cairo,sans-serif;color:#0f1b3d;-webkit-print-color-adjust:exac
 </style></head><body>
 {''.join('<div class="page">' + ''.join(card(*b) for b in p) + '</div>' for p in pages)}
 </body></html>'''
-open(os.path.join(here, 'bottles.html'), 'w', encoding='utf-8').write(html)
-print('ok', len(B))
+    open(os.path.join(here, out), 'w', encoding='utf-8').write(html)
+
+build(B, 'bottles.html')
+build(B2, 'bottles-2.html')
+print('ok', len(B), len(B2))
