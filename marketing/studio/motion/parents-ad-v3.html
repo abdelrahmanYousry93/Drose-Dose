@@ -1,0 +1,182 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/*FONTS*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0B1F6B; }
+body { font-family: Cairo, sans-serif; color: #0B1F6B; }
+.scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 140px 90px; gap: 50px; opacity: 0; overflow: hidden; }
+.navy { background: radial-gradient(circle at 50% 30%, #18338f 0%, #0B1F6B 60%, #071447 100%); color: #fff; }
+.night { background: linear-gradient(180deg, #050d33 0%, #0B1F6B 100%); color: #fff; }
+.light { background: linear-gradient(160deg, #eaf2ff 0%, #ffffff 55%, #fff6d6 100%); }
+.blue { background: radial-gradient(circle at 50% 45%, #2b7bff 0%, #0061FA 45%, #0B3FB0 100%); color: #fff; }
+.yellow { background: #FFC30A; }
+[data-in] { will-change: transform, opacity; }
+.h1 { font-weight: 900; font-size: 104px; line-height: 1.2; }
+.h2 { font-weight: 800; font-size: 76px; line-height: 1.3; }
+.lead { font-weight: 700; font-size: 52px; line-height: 1.5; }
+.small { font-weight: 700; font-size: 40px; }
+.y { color: #FFC30A; } .b { color: #0061FA; } .muted { color: #475467; } .white { color: #fff; }
+.card { background: #fff; border-radius: 40px; box-shadow: 0 30px 70px rgba(11,31,107,.18); }
+/* calendar */
+.cal { width: 560px; height: 600px; position: relative; color: #0B1F6B; }
+.cal .top { height: 150px; background: #FFC30A; border-radius: 40px 40px 0 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 58px; }
+.cal .rings { position: absolute; top: -34px; inset-inline: 0; display: flex; justify-content: space-around; padding: 0 120px; }
+.cal .rings i { width: 26px; height: 80px; background: #0B1F6B; border-radius: 13px; border: 6px solid #fff; display: block; }
+.cal .month { position: absolute; top: 210px; inset-inline: 0; font-weight: 900; font-size: 110px; }
+.cal .due { position: absolute; bottom: 70px; inset-inline: 0; font-weight: 800; font-size: 46px; color: #e5484d; }
+/* bills */
+.pile { position: relative; width: 760px; height: 520px; }
+.bill { position: absolute; width: 380px; height: 190px; border-radius: 24px; background: linear-gradient(135deg, #12B76A, #0a8f52); border: 8px solid #d8f5e6; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 64px; box-shadow: 0 16px 30px rgba(0,0,0,.18); }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; max-width: 900px; }
+.chip { background: #0B1F6B; color: #fff; border-radius: 999px; padding: 14px 38px; font-weight: 800; font-size: 44px; }
+/* night */
+.stars i { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: .7; }
+.clock { width: 330px; height: 330px; border-radius: 50%; background: #fff; border: 16px solid #FFC30A; position: relative; }
+.clock .hand { position: absolute; left: 50%; bottom: 50%; transform-origin: 50% 100%; background: #0B1F6B; border-radius: 8px; }
+.clock .hh { width: 18px; height: 90px; margin-left: -9px; }
+.clock .mh { width: 12px; height: 125px; margin-left: -6px; background: #0061FA; }
+.clock .dot { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: #FFC30A; }
+.time { font-weight: 900; font-size: 64px; color: #FFC30A; }
+/* steps */
+.steps { display: flex; flex-direction: column; gap: 34px; width: 900px; }
+.step { display: flex; align-items: center; gap: 34px; padding: 34px 40px; text-align: right; }
+.step .n { flex: none; width: 110px; height: 110px; border-radius: 50%; background: #0061FA; color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 60px; }
+.step .t { font-weight: 800; font-size: 54px; line-height: 1.3; }
+.ticks { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px 26px; }
+.tick { background: #0B1F6B; color: #fff; border-radius: 999px; padding: 14px 34px; font-weight: 800; font-size: 40px; }
+.tick b { color: #FFC30A; }
+.url { background: #0B1F6B; color: #fff; border-radius: 999px; padding: 26px 70px; font-weight: 900; font-size: 72px; direction: ltr; }
+.code { border: 6px dashed #0B1F6B; border-radius: 30px; padding: 24px 50px; font-weight: 800; font-size: 50px; background: rgba(255,255,255,.55); }
+.code b { font-size: 64px; letter-spacing: 3px; direction: ltr; display: inline-block; }
+.logo { display: flex; align-items: center; gap: 22px; direction: ltr; }
+.logo .latin { font-weight: 900; font-size: 120px; color: #0061FA; letter-spacing: -2px; } .logo .latin span { color: #FFC30A; }
+.logo .ar { font-weight: 900; font-size: 90px; color: #0B1F6B; }
+.blue .logo .latin { color: #fff; } .blue .logo .ar { color: #fff; }
+.burst { position: absolute; width: 1600px; height: 1600px; border-radius: 50%; border: 60px solid rgba(255,195,10,.18); }
+.sub { position: absolute; bottom: 120px; inset-inline: 0; font-weight: 700; font-size: 34px; opacity: .75; }
+
+/* hook: phone lock screen */
+.hook { background: radial-gradient(circle at 50% 35%, #1b2a5c 0%, #070b1f 70%); color: #fff; }
+.phone { width: 700px; height: 1300px; border-radius: 90px; background: linear-gradient(180deg, #24304f, #10172e); border: 14px solid #000; box-shadow: 0 40px 120px rgba(0,0,0,.6); position: relative; overflow: hidden; }
+.phone .clock-big { position: absolute; top: 150px; inset-inline: 0; font-weight: 800; font-size: 190px; letter-spacing: 4px; direction: ltr; }
+.phone .date { position: absolute; top: 120px; inset-inline: 0; font-weight: 700; font-size: 40px; opacity: .8; }
+.notif { position: absolute; inset-inline: 34px; background: rgba(255,255,255,.94); color: #111; border-radius: 40px; padding: 30px 34px; display: flex; gap: 24px; align-items: center; text-align: right; box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+.notif .ic { flex: none; width: 92px; height: 92px; border-radius: 24px; background: #25D366; display: grid; place-items: center; font-size: 54px; }
+.notif .ic.money { background: #FFC30A; }
+.notif .who { font-weight: 800; font-size: 38px; } .notif .who small { font-weight: 600; color: #667085; font-size: 30px; margin-inline-start: 12px; }
+.notif .txt { font-weight: 700; font-size: 40px; line-height: 1.35; }
+.hookq { position: absolute; bottom: 150px; inset-inline: 0; font-weight: 900; font-size: 120px; color: #FFC30A; text-shadow: 0 10px 40px rgba(0,0,0,.6); }
+
+.cap { position: absolute; bottom: 210px; inset-inline: 60px; display: flex; justify-content: center; z-index: 50; }
+.cap span.box { background: rgba(7,20,71,.82); color: #fff; border-radius: 28px; padding: 18px 34px; font-weight: 800; font-size: 50px; line-height: 1.4; max-width: 960px; }
+.cap .w { opacity: .35; } .cap .w.on { opacity: 1; color: #FFC30A; } .cap .w.done { opacity: 1; }
+</style></head><body>
+<section class="scene hook" data-start="0" data-end="4.44">
+  <div class="phone" data-shake="1.83">
+    <div class="date">الثلاثاء</div><div class="clock-big">10:30</div>
+    <div class="notif" style="top:470px" data-in="1.83" data-a="notif"><div class="ic">💬</div><div><div class="who">ابني <small>الآن</small></div><div class="txt">ماما الدرس اتأخر… هرجع الساعة 11 😕</div></div></div>
+  </div>
+  <div class="hookq" data-in="3.49" data-a="pop">حصلت معاك؟ 😟</div>
+</section>
+<section class="scene navy" data-start="4.29" data-end="5.87">
+  <div class="h2" data-in="4.39" data-a="up">كل أول شهر…</div>
+  <div class="cal card" data-in="4.44" data-a="pop"><div class="rings"><i></i><i></i></div><div class="top">دروس الشهر</div>
+    <div class="month" data-in="4.59" data-out="4.99" data-a="flip">سبتمبر</div>
+    <div class="month" data-in="4.99" data-out="5.39" data-a="flip">أكتوبر</div>
+    <div class="month" data-in="5.39" data-a="flip">نوفمبر</div>
+    <div class="due" data-in="4.79" data-a="fade">مطلوب الدفع ⟵ تاني</div></div>
+</section>
+<section class="scene light" data-start="5.72" data-end="8.14">
+  <div class="h2" data-in="5.77" data-a="up">💸 نفس الفلوس…<br><span class="b">لكل مادة</span></div>
+  <div class="chips"><span class="chip" data-in="6.02" data-a="pop">رياضيات</span><span class="chip" data-in="6.30" data-a="pop">فيزياء</span><span class="chip" data-in="6.58" data-a="pop">كيمياء</span><span class="chip" data-in="6.86" data-a="pop">إنجليزي</span><span class="chip" data-in="7.14" data-a="pop">عربي</span></div>
+  <div class="pile"><div class="bill" style="left:190px;top:330px" data-in="6.07" data-a="drop" data-rot="-4">ج.م</div><div class="bill" style="left:150px;top:270px" data-in="6.35" data-a="drop" data-rot="5">ج.م</div><div class="bill" style="left:230px;top:210px" data-in="6.63" data-a="drop" data-rot="-7">ج.م</div><div class="bill" style="left:170px;top:150px" data-in="6.91" data-a="drop" data-rot="3">ج.م</div><div class="bill" style="left:210px;top:90px" data-in="7.19" data-a="drop" data-rot="-3">ج.م</div></div>
+</section>
+<section class="scene light" data-start="8.14" data-end="10.88">
+  <div class="h2" data-in="8.24" data-a="up">وفي الآخر…</div>
+  <svg width="560" height="560" viewBox="0 0 2 2" data-in="8.44" data-a="pop">
+    <rect x="0.02" y="0.02" width="0.94" height="0.94" rx="0.08" fill="#0061FA"/><rect x="1.04" y="0.02" width="0.94" height="0.94" rx="0.08" fill="#FFC30A"/>
+    <rect x="0.02" y="1.04" width="0.94" height="0.94" rx="0.08" fill="#0B1F6B"/>
+    <rect x="1.04" y="1.04" width="0.94" height="0.94" rx="0.08" fill="none" stroke="#e5484d" stroke-width="0.04" stroke-dasharray="0.08 0.06" data-blink="9.18"/>
+    <text x="1.51" y="1.66" font-size="0.6" font-weight="900" fill="#e5484d" text-anchor="middle" font-family="Cairo">؟</text></svg>
+  <div class="h1" data-in="9.18" data-a="pop">لسه واقف في<br><span class="b">درس واحد</span></div>
+</section>
+<section class="scene blue" data-start="10.85" data-end="16.07">
+  <div class="burst" data-in="10.93" data-a="ring"></div>
+  <div class="h1" data-in="10.93" data-a="pop">مش لازم كده.</div>
+  <div class="logo" data-in="12.39" data-a="pop"><span class="latin">D<span>o</span>se</span><span class="ar">دروس</span></div>
+  <div class="h2" data-in="13.40" data-a="up">ادفع للدرس اللي محتاجه <span class="y">بس</span></div>
+</section>
+<section class="scene light" data-start="16.03" data-end="19.98">
+  <div class="h2" data-in="16.07" data-a="up">إزاي؟ <span class="b">3 خطوات</span></div>
+  <div class="steps">
+    <div class="step card" data-in="16.23" data-a="slide"><div class="n">1</div><div class="t">اختار الدرس اللي واقف فيه</div></div>
+    <div class="step card" data-in="17.12" data-a="slide"><div class="n">2</div><div class="t">اختار ميعاد يناسبك<br><span class="muted small">لوحدك أو مع صحابك</span></div></div>
+    <div class="step card" data-in="18.21" data-a="slide"><div class="n">3</div><div class="t">اتعلّم أونلاين من البيت 🏠</div></div>
+  </div>
+  <div class="ticks"><span class="tick" data-in="18.71" data-a="pop"><b>✓</b> مدرس متخصص</span><span class="tick" data-in="18.93" data-a="pop"><b>✓</b> من غير مشاوير</span><span class="tick" data-in="19.15" data-a="pop"><b>✓</b> من غير اشتراك شهري</span></div>
+</section>
+<section class="scene yellow" data-start="19.93" data-end="27.78">
+  <div class="logo" data-in="20.04" data-a="pop"><span class="latin">D<span style="color:#fff">o</span>se</span><span class="ar">دروس</span></div>
+  <div class="h1" data-in="20.14" data-a="up">احجز أول درس<br>النهارده</div>
+  <div class="url" data-in="20.93" data-a="pop">drwsdose.com</div>
+  <div class="code" data-in="22.23" data-a="pop">كود <b>WA15</b><br>خصم 15% على أول حجز</div>
+  <div class="sub" data-in="23.04" data-a="fade">ثانوي وإعدادي · أونلاين</div>
+</section>
+<div class="cap"><span class="box" id="cap"></span></div>
+<script>
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const clamp = (x) => Math.max(0, Math.min(1, x));
+
+const SHIFT = 0;
+for (const el of document.querySelectorAll('section:not(.hook), section:not(.hook) *')) {
+  for (const k of ['start','end','in','out','spin','draw','blink']) if (el.dataset && el.dataset[k] !== undefined) el.dataset[k] = (+el.dataset[k] + SHIFT).toFixed(2);
+}
+const len = 0;
+window.seek = (t) => {
+  for (const s of document.querySelectorAll('.scene')) {
+    const a = +s.dataset.start, b = +s.dataset.end, f = 0.35;
+    s.style.opacity = t < a || t > b ? 0 : Math.min(clamp((t - a) / f) || (a === 0 ? 1 : 0), clamp((b - t) / f));
+    if (a === 0 && t < f) s.style.opacity = 1;
+    if (s.classList.contains('hook') && t > b) s.style.opacity = 0;
+  }
+  for (const el of document.querySelectorAll('[data-in]')) {
+    const p = clamp((t - el.dataset.in) / 0.5), out = el.dataset.out ? clamp((t - el.dataset.out) / 0.3) : 0;
+    const rot = el.dataset.rot ? `rotate(${el.dataset.rot}deg)` : '';
+    let tr = '', op = ease(p);
+    switch (el.dataset.a) {
+      case 'up': tr = `translateY(${(1 - ease(p)) * 70}px)`; break;
+      case 'pop': tr = `scale(${0.4 + 0.6 * back(p)})`; break;
+      case 'slide': tr = `translateX(${(1 - ease(p)) * -160}px)`; break;
+      case 'drop': tr = `translateY(${(1 - back(p)) * -420}px) ${rot}`; op = clamp(p * 3); break;
+      case 'flip': tr = `rotateX(${(1 - ease(p)) * 90 + out * -90}deg)`; op = ease(p) * (1 - out); break;
+      case 'notif': tr = `translateY(${(1 - back(p)) * -260}px)`; break;
+      case 'ring': tr = `scale(${0.2 + 1.2 * ease(clamp((t - el.dataset.in) / 1.6))})`; op = 1 - clamp((t - el.dataset.in) / 2.2); break;
+      default: tr = '';
+    }
+    el.style.opacity = op; el.style.transform = tr;
+  }
+  for (const h of document.querySelectorAll('[data-spin]')) {
+    const p = ease(clamp((t - h.dataset.spin) / 3.5));
+    h.style.transform = `rotate(${+h.dataset.from + (h.dataset.to - h.dataset.from) * p}deg)`;
+  }
+  for (const d of document.querySelectorAll('[data-draw]')) d.style.strokeDashoffset = len * (1 - ease(clamp((t - d.dataset.draw) / d.dataset.dur)));
+  for (const ph of document.querySelectorAll('[data-shake]')) {
+    let dx = 0; for (const at of ph.dataset.shake.split(',').map(Number)) { const u = t - at; if (u > 0 && u < 0.5) dx += Math.sin(u * 90) * 14 * (1 - u / 0.5); }
+    ph.style.transform = `translateX(${dx}px)`;
+  }
+  for (const k of document.querySelectorAll('[data-blink]')) k.style.opacity = t < +k.dataset.blink ? 1 : (Math.sin((t - k.dataset.blink) * 9) > 0 ? 1 : 0.15);
+};
+const CAPS = [[0.35, 1.666, "الساعة عشرة ونص…"], [1.826, 3.441, "وابنك لسه ما رجعش من الدرس"], [4.591, 5.548, "وكل أول شهر…"], [5.768, 7.686, "نفس الفلوس، لكل مادة"], [8.236, 9.02, "وفي الآخر…"], [9.18, 10.479, "لسه واقف في درس واحد"], [10.929, 11.838, "مش لازم كده."], [12.388, 13.281, "مع Dose،"], [13.401, 15.725, "بتدفع للدرس اللي ابنك محتاجه بس"], [16.175, 18.05, "اختار الدرس، اختار الميعاد،"], [18.21, 19.535, "ويتعلّم أونلاين من البيت"], [20.035, 23.911, "احجز أول درس النهارده، بكود WA15"]];
+const capEl = document.getElementById('cap');
+const _seek = window.seek;
+window.seek = (t) => {
+  _seek(t);
+  const c = CAPS.find(([a, b]) => t >= a - 0.08 && t <= b + 0.25);
+  if (!c) { capEl.parentElement.style.opacity = 0; return; }
+  capEl.parentElement.style.opacity = 1;
+  const words = c[2].split(' '); const p = (t - c[0]) / Math.max(0.3, c[1] - c[0]);
+  const k = Math.min(words.length - 1, Math.floor(p * words.length));
+  capEl.innerHTML = words.map((w, i) => `<span class="w ${i < k ? 'done' : i === k ? 'on' : ''}">${w}</span>`).join(' ');
+};
+window.seek(0);
+</script></body></html>
