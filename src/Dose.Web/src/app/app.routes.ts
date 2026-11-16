@@ -50,6 +50,17 @@ export const routes: Routes = [
   },
   { path: 'join', redirectTo: '' },
   {
+    // Partners: impact calculator + non-binding dose pledges (event QR target), and the live dose counter.
+    path: 'partners',
+    loadComponent: () => import('./features/partners/partners').then((m) => m.Partners),
+    title: 'titles.partners',
+  },
+  {
+    path: 'partners/wall',
+    loadComponent: () => import('./features/partners/partners-wall').then((m) => m.PartnersWall),
+    title: 'titles.partnersWall',
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/admin/admin').then((m) => m.AdminLogin),
     title: 'titles.login',

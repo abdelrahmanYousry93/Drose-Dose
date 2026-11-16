@@ -190,6 +190,18 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
              + $"\n🔖 {r.Reference}\n\n👤 {r.StudentName}\n📱 {Chat(r.ContactPhoneE164)}\n\n{Admin}";
     });
 
+    public Task PledgeAsync(Guid id) => Try(async () =>
+    {
+        var p = await db.PartnerPledges.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (p is null) return null;
+        return $"🤝 جهة عاوزة تتشارك مع Dose\n\n🏢 {p.Organization}\n🎯 {PartnerService.InterestAr(p.Interest)}"
+             + (p.Doses > 0 ? $"\n💊 تعهد بـ {p.Doses} جرعة" + (p.ShowOnWall ? " (موافقين يظهر الاسم)" : " (من غير اسم)") : "")
+             + (string.IsNullOrWhiteSpace(p.Note) ? "" : $"\n📝 {p.Note}")
+             + (p.Source is null ? "" : $"\n📍 جاي من: {p.Source}")
+             + $"\n🔖 {p.Reference}\n\n👤 {p.ContactName}" + (p.Role is null ? "" : $" — {p.Role}")
+             + $"\n📱 {Chat(p.ContactPhoneE164)}\n\n{Admin}/partners";
+    });
+
     public Task AvailabilitySubmittedAsync(Guid id) => Try(async () =>
     {
         var a = await db.TeacherAvailabilities.AsNoTracking().Where(x => x.Id == id)

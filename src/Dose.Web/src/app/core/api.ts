@@ -82,6 +82,12 @@ export interface PaymentProofAdmin {
 export interface Setting { key: string; value: string; descriptionAr: string | null }
 
 /** Error carrying the API's stable error code (see DomainExceptionHandler). */
+export interface PledgeBody {
+  organization: string; contactName: string; contactPhone: string; role: string | null;
+  interest: string; doses: number | null; showOnWall: boolean; note: string | null; source: string | null;
+}
+export interface PledgeWall { totalDoses: number; organizations: number; names: { organization: string; doses: number }[]; lastAtUtc: string | null }
+
 export class ApiError extends Error {
   constructor(public readonly code: string, message: string, public readonly status: number) { super(message); }
 }
@@ -159,6 +165,8 @@ export class Api {
   joinGroup(code: string, body: JoinGroupBody) {
     return this.post<{ reference: string; accessToken: string }>(`/invites/${encodeURIComponent(code)}/join`, body);
   }
+  pledge(body: PledgeBody) { return this.post<{ reference: string }>('/partners/pledges', body); }
+  pledgeWall(src?: string | null) { return this.get<PledgeWall>('/partners/wall', { src }); }
   createRequest(body: SessionRequestBody) { return this.post<{ reference: string; whatsAppMessage: string }>('/session-requests', body); }
 
   // Auth & admin

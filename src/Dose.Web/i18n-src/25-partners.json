@@ -1,0 +1,302 @@
+{
+ "titles.partners": [
+  "شركاء Dose — اكتب روشتة لطالب",
+  "Dose partners — write a student a prescription"
+ ],
+ "titles.partnersWall": [
+  "عدّاد الجرعات",
+  "Dose counter"
+ ],
+ "titles.adminPartners": [
+  "الشركاء والتعهدات",
+  "Partners & pledges"
+ ],
+ "adminNav.partners": [
+  "الشركاء",
+  "Partners"
+ ],
+ "partners.bName": [
+  "Dose® فهم",
+  "Dose® Understanding"
+ ],
+ "partners.bFor": [
+  "دواعي الاستعمال: الوقوف في درس واحد",
+  "Indication: being stuck on one lesson"
+ ],
+ "partners.bDose": [
+  "الجرعة: جلسة شرح واحدة — 60 دقيقة أونلاين",
+  "Dosage: one explanation session — 60 minutes online"
+ ],
+ "partners.bSide": [
+  "آثار جانبية: ثقة زيادة في الامتحان",
+  "Side effects: extra confidence in exams"
+ ],
+ "partners.bNo": [
+  "لا يحتاج اشتراك شهري",
+  "No monthly subscription required"
+ ],
+ "partners.heroTitle": [
+  "اكتب روشتة لطالب",
+  "Write a student a prescription"
+ ],
+ "partners.heroBody": [
+  "كل جرعة = طالب فهم الدرس اللي كان واقف فيه. جهتكم تقدر تتعهد بعدد جرعات لطلاب محتاجين، وإحنا نوصّلها ونبعتلكم تقرير بالأثر.",
+  "Every dose = one student who finally understands the lesson they were stuck on. Your organization can pledge doses for students in need; we deliver them and send you an impact report."
+ ],
+ "partners.calcTitle": [
+  "احسبها: ميزانيتكم تعمل إيه؟",
+  "Do the math: what does your budget do?"
+ ],
+ "partners.budget": [
+  "الميزانية (جنيه)",
+  "Budget (EGP)"
+ ],
+ "partners.dosePrice": [
+  "سعر الجرعة للطالب",
+  "Price per dose per student"
+ ],
+ "partners.monthly": [
+  "اشتراك الدروس الشهري للمادة",
+  "Monthly tutoring fee per subject"
+ ],
+ "partners.months": [
+  "شهور السنة الدراسية",
+  "Months in the school year"
+ ],
+ "partners.calcNote": [
+  "الأرقام تقديرية — غيّرها حسب الواقع عندكم.",
+  "These are estimates — change them to match your reality."
+ ],
+ "partners.oldWay": [
+  "بالطريقة المعتادة",
+  "The usual way"
+ ],
+ "partners.oldWayV": [
+  "{n} طالب يحضروا دروس مادة واحدة سنة كاملة",
+  "{n} students take one subject's tutoring for a whole year"
+ ],
+ "partners.doseWay": [
+  "بـ Dose",
+  "With Dose"
+ ],
+ "partners.doseWayV": [
+  "{n} جرعة = {n} مرة طالب فهم الدرس اللي واقف فيه",
+  "{n} doses = {n} times a student understood the lesson they were stuck on"
+ ],
+ "partners.times": [
+  "أثر أكبر {x} مرة",
+  "{x}× the reach"
+ ],
+ "partners.pledgeThese": [
+  "اتعهد بالـ {n} جرعة",
+  "Pledge these {n} doses"
+ ],
+ "partners.liveTitle": [
+  "لحد دلوقتي",
+  "So far"
+ ],
+ "partners.liveBody": [
+  "{doses} جرعة اتعهدت بيها {orgs} جهة",
+  "{doses} doses pledged by {orgs} organizations"
+ ],
+ "partners.liveEmpty": [
+  "لسه مفيش تعهدات — جهتكم ممكن تبقى الأولى.",
+  "No pledges yet — your organization could be the first."
+ ],
+ "partners.seeWall": [
+  "شوف العدّاد",
+  "See the counter"
+ ],
+ "partners.waysTitle": [
+  "طرق الشراكة",
+  "Ways to partner"
+ ],
+ "partners.i.fund": [
+  "نمول جرعات لطلاب",
+  "We'll fund doses for students"
+ ],
+ "partners.i.fundHint": [
+  "مسؤولية مجتمعية: بنعمل أكواد شرح مجانية للطلاب اللي تختاروهم أو نختارهم معاكم، وتقرير بالأثر.",
+  "CSR: free-lesson codes for students you choose (or we choose together), with an impact report."
+ ],
+ "partners.i.students": [
+  "عندنا طلاب محتاجين دعم",
+  "We have students who need support"
+ ],
+ "partners.i.studentsHint": [
+  "جمعية أو مدرسة مجتمعية: طلابكم يحجزوا شرح أونلاين بسعر خاص.",
+  "An NGO or community school: your students book online help at a special price."
+ ],
+ "partners.i.employees": [
+  "ميزة لأولاد الموظفين",
+  "A benefit for employees' children"
+ ],
+ "partners.i.employeesHint": [
+  "شركة: جرعات شرح لأولاد الموظفين بدل ما تصرفوا بدل دروس شهري.",
+  "A company: lesson doses for employees' children instead of a monthly tutoring allowance."
+ ],
+ "partners.i.content": [
+  "شراكة محتوى أو توعية",
+  "Content or outreach partnership"
+ ],
+ "partners.i.contentHint": [
+  "محتوى، فعاليات، أو توصيل Dose لجمهوركم.",
+  "Content, events, or introducing Dose to your audience."
+ ],
+ "partners.i.other": [
+  "حاجة تانية",
+  "Something else"
+ ],
+ "partners.i.otherHint": [
+  "قولولنا في الملاحظات.",
+  "Tell us in the notes."
+ ],
+ "partners.formTitle": [
+  "ابعتولنا",
+  "Get in touch"
+ ],
+ "partners.formLead": [
+  "ده تعهد مبدئي — مفيش دفع دلوقتي. هنكلمكم خلال 48 ساعة.",
+  "This is a non-binding pledge — no payment now. We'll reach out within 48 hours."
+ ],
+ "partners.org": [
+  "اسم الجهة",
+  "Organization"
+ ],
+ "partners.name": [
+  "اسمك",
+  "Your name"
+ ],
+ "partners.role": [
+  "وظيفتك",
+  "Your role"
+ ],
+ "partners.phone": [
+  "موبايل / واتساب",
+  "Mobile / WhatsApp"
+ ],
+ "partners.interest": [
+  "نوع الشراكة",
+  "Partnership type"
+ ],
+ "partners.doses": [
+  "عدد الجرعات اللي تتعهدوا بيها",
+  "Doses you'd like to pledge"
+ ],
+ "partners.showOnWall": [
+  "موافقين اسم الجهة يظهر على عدّاد الجرعات",
+  "Show our organization's name on the dose counter"
+ ],
+ "partners.note": [
+  "ملاحظات",
+  "Notes"
+ ],
+ "partners.send": [
+  "ابعت التعهد",
+  "Send the pledge"
+ ],
+ "partners.sendOther": [
+  "ابعت",
+  "Send"
+ ],
+ "partners.sending": [
+  "بنبعت…",
+  "Sending…"
+ ],
+ "partners.required": [
+  "مطلوب",
+  "Required"
+ ],
+ "partners.badPhone": [
+  "رقم الموبايل مش صحيح",
+  "The mobile number is not valid"
+ ],
+ "partners.badDoses": [
+  "اكتب عدد الجرعات",
+  "Enter the number of doses"
+ ],
+ "partners.doneTitle": [
+  "وصلنا — شكرًا!",
+  "Received — thank you!"
+ ],
+ "partners.doneBody": [
+  "رقم التعهد {ref}. هنكلمكم خلال 48 ساعة نتفق على التفاصيل.",
+  "Pledge number {ref}. We'll reach out within 48 hours to agree the details."
+ ],
+ "partners.doneDoses": [
+  "{n} طالب هيفهموا الدرس اللي واقفين فيه بفضلكم.",
+  "{n} students will understand the lesson they were stuck on, thanks to you."
+ ],
+ "partners.another": [
+  "تعهد تاني",
+  "Another pledge"
+ ],
+ "wall.title": [
+  "عدّاد جرعات الفهم",
+  "Doses of understanding"
+ ],
+ "wall.unit": [
+  "جرعة",
+  "doses"
+ ],
+ "wall.sub": [
+  "اتعهد بيها {orgs} جهة لطلاب واقفين في درس",
+  "pledged by {orgs} organizations for students stuck on a lesson"
+ ],
+ "wall.empty": [
+  "أول جهة تتعهد هيبقى اسمها أول اسم هنا",
+  "The first organization to pledge will be the first name here"
+ ],
+ "wall.scan": [
+  "اعمل سكان واكتب روشتة لطالب",
+  "Scan and write a student a prescription"
+ ],
+ "wall.names": [
+  "شكرًا لـ",
+  "Thank you"
+ ],
+ "adminPartners.lead": [
+  "التعهدات اللي جت من صفحة الشركاء. اتواصل خلال 48 ساعة. «إخفاء» بيشيل التعهد من العدّاد.",
+  "Pledges from the partners page. Reach out within 48 hours. 'Hide' removes a pledge from the counter."
+ ],
+ "adminPartners.empty": [
+  "لسه مفيش تعهدات.",
+  "No pledges yet."
+ ],
+ "adminPartners.when": [
+  "الوقت",
+  "When"
+ ],
+ "adminPartners.contact": [
+  "التواصل",
+  "Contact"
+ ],
+ "adminPartners.onWall": [
+  "على العدّاد",
+  "On the counter"
+ ],
+ "adminPartners.hide": [
+  "إخفاء",
+  "Hide"
+ ],
+ "adminPartners.show": [
+  "إظهار",
+  "Show"
+ ],
+ "adminPartners.hidden": [
+  "مخفي",
+  "Hidden"
+ ],
+ "adminPartners.yes": [
+  "بالاسم",
+  "With name"
+ ],
+ "adminPartners.no": [
+  "من غير اسم",
+  "Anonymous"
+ ],
+ "adminPartners.wallLink": [
+  "افتح العدّاد",
+  "Open the counter"
+ ]
+}

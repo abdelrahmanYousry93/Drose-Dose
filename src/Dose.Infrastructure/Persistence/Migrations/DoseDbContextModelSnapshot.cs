@@ -133,6 +133,71 @@ namespace Dose.Infrastructure.Persistence.Migrations
                     b.ToTable("MarketingTouches");
                 });
 
+            modelBuilder.Entity("Dose.Domain.Administration.PartnerPledge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContactName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContactPhoneE164")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Doses")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Hidden")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Interest")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Organization")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("ShowOnWall")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.ToTable("PartnerPledges");
+                });
+
             modelBuilder.Entity("Dose.Domain.Administration.SystemSetting", b =>
                 {
                     b.Property<string>("Key")

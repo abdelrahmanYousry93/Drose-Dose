@@ -371,3 +371,20 @@ internal sealed class MarketingTouchConfig : IEntityTypeConfiguration<Dose.Domai
         e.HasIndex(x => new { x.CreatedAtUtc, x.Source });
     }
 }
+
+internal sealed class PartnerPledgeConfig : IEntityTypeConfiguration<Dose.Domain.Administration.PartnerPledge>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Administration.PartnerPledge> e)
+    {
+        e.Property(x => x.Reference).HasMaxLength(12);
+        e.HasIndex(x => x.Reference).IsUnique();
+        e.Property(x => x.Organization).HasMaxLength(120);
+        e.Property(x => x.ContactName).HasMaxLength(100);
+        e.Property(x => x.ContactPhoneE164).HasMaxLength(20);
+        e.Property(x => x.Role).HasMaxLength(100);
+        e.Property(x => x.Interest).HasMaxLength(20);
+        e.Property(x => x.Note).HasMaxLength(1000);
+        e.Property(x => x.Source).HasMaxLength(60);
+        e.HasIndex(x => x.CreatedAtUtc);
+    }
+}

@@ -50,6 +50,7 @@ public sealed class DoseDbContext(DbContextOptions<DoseDbContext> options)
     public DbSet<TeacherSubject> TeacherSubjects => Set<TeacherSubject>();
     public DbSet<Domain.Administration.MarketingPost> MarketingPosts => Set<Domain.Administration.MarketingPost>();
     public DbSet<Domain.Administration.MarketingTouch> MarketingTouches => Set<Domain.Administration.MarketingTouch>();
+    public DbSet<Domain.Administration.PartnerPledge> PartnerPledges => Set<Domain.Administration.PartnerPledge>();
 
     public Task LockSessionAsync(Guid sessionId, CancellationToken ct)
     {

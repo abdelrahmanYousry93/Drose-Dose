@@ -18,6 +18,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-funnel').then((m) => m.AdminFunnel),
       },
       {
+        path: 'partners', title: 'titles.adminPartners',
+        loadComponent: () => import('./admin-partners').then((m) => m.AdminPartners),
+      },
+      {
         path: 'users', title: 'titles.adminUsers',
         loadComponent: () => import('./admin-users').then((m) => m.AdminUsers),
       },
