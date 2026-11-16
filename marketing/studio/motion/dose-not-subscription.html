@@ -1,0 +1,202 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/*FONTS*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0B1F6B; }
+body { font-family: Cairo, sans-serif; color: #0B1F6B; }
+.scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 150px 80px 360px; gap: 46px; opacity: 0; overflow: hidden; }
+.dark { background: radial-gradient(circle at 50% 30%, #1b2a5c 0%, #070b1f 75%); color: #fff; }
+.light { background: linear-gradient(160deg, #eaf2ff 0%, #ffffff 55%, #fff6d6 100%); }
+.blue { background: radial-gradient(circle at 50% 45%, #2b7bff 0%, #0061FA 45%, #0B3FB0 100%); color: #fff; }
+.yellow { background: #FFC30A; }
+.h1 { font-weight: 900; font-size: 108px; line-height: 1.2; }
+.h2 { font-weight: 800; font-size: 74px; line-height: 1.3; }
+.lead { font-weight: 700; font-size: 50px; line-height: 1.45; }
+.y { color: #FFC30A; } .b { color: #0061FA; } .r { color: #e5484d; } .muted { color: #5b6785; }
+.card { background: #fff; border-radius: 40px; box-shadow: 0 30px 70px rgba(11,31,107,.18); }
+.emoji { font-size: 230px; line-height: 1; }
+/* poll */
+.poll { width: 900px; padding: 46px; display: grid; gap: 28px; color: #0B1F6B; text-align: right; }
+.poll .q { font-weight: 900; font-size: 56px; }
+.opt { position: relative; border: 5px solid #dbe5f7; border-radius: 28px; padding: 30px 36px; font-weight: 800; font-size: 54px; display: flex; align-items: center; gap: 24px; overflow: hidden; }
+.opt .fill { position: absolute; inset-block: 0; inset-inline-start: 0; background: #e8f8ee; z-index: 0; width: 0; }
+.opt > span { position: relative; z-index: 1; }
+.opt .mark { margin-inline-start: auto; font-size: 64px; }
+.opt.win { border-color: #07b24c; }
+.opt.lose { border-color: #f3c3c4; color: #9aa3b5; }
+.finger { position: absolute; font-size: 130px; z-index: 5; }
+/* month grid */
+.month { width: 880px; padding: 40px; color: #0B1F6B; }
+.month .tt { font-weight: 900; font-size: 54px; margin-bottom: 26px; }
+.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.day { height: 104px; border-radius: 18px; background: #e5484d; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 38px; }
+.day.one { background: #0061FA; box-shadow: 0 0 0 8px #FFC30A; }
+.paid { position: absolute; font-weight: 900; font-size: 92px; color: #e5484d; border: 12px solid #e5484d; border-radius: 26px; padding: 6px 40px; transform: rotate(-12deg); background: rgba(255,255,255,.9); }
+/* dose */
+.capsule { width: 520px; height: 220px; border-radius: 110px; display: flex; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,.3); }
+.capsule i { flex: 1; } .capsule i:first-child { background: #fff; } .capsule i:last-child { background: #FFC30A; }
+.logo { display: flex; align-items: center; gap: 24px; direction: ltr; }
+.logo .latin { font-weight: 900; font-size: 120px; color: #fff; letter-spacing: -2px; } .logo .latin span { color: #FFC30A; }
+.logo .ar { font-weight: 900; font-size: 92px; color: #fff; }
+.yellow .logo .latin { color: #0061FA; } .yellow .logo .latin span { color: #fff; } .yellow .logo .ar { color: #0B1F6B; }
+/* steps */
+.steps { display: flex; flex-direction: column; gap: 30px; width: 900px; }
+.step { display: flex; align-items: center; gap: 32px; padding: 32px 40px; text-align: right; }
+.step .n { flex: none; width: 108px; height: 108px; border-radius: 50%; background: #0061FA; color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 58px; }
+.step .t { font-weight: 800; font-size: 56px; line-height: 1.3; }
+.stamp { font-weight: 900; font-size: 84px; color: #07b24c; border: 12px solid #07b24c; border-radius: 28px; padding: 4px 44px; transform: rotate(-6deg); background: #fff; }
+/* comment */
+.post { width: 900px; padding: 34px 38px; text-align: right; display: grid; gap: 22px; }
+.post .who { display: flex; align-items: center; gap: 18px; font-weight: 800; font-size: 40px; }
+.post .av { width: 76px; height: 76px; border-radius: 50%; background: #0061FA; display: grid; place-items: center; font-size: 40px; }
+.cmt { display: flex; align-items: center; gap: 18px; background: #f0f2f5; border-radius: 999px; padding: 22px 32px; font-weight: 700; font-size: 46px; color: #0f1b3d; min-height: 104px; }
+.cmt .caret { width: 5px; height: 54px; background: #0061FA; }
+.bubbles { display: grid; gap: 18px; width: 900px; }
+.bubble { justify-self: start; background: #fff; border-radius: 34px; padding: 18px 32px; font-weight: 800; font-size: 44px; box-shadow: 0 10px 30px rgba(11,31,107,.12); }
+.arrow { font-size: 120px; }
+.url { background: #0B1F6B; color: #fff; border-radius: 999px; padding: 24px 70px; font-weight: 900; font-size: 70px; direction: ltr; }
+.burst { position: absolute; width: 1600px; height: 1600px; border-radius: 50%; border: 60px solid rgba(255,195,10,.2); }
+.cap { position: absolute; bottom: 150px; inset-inline: 60px; display: flex; justify-content: center; z-index: 50; }
+.cap span.box { background: rgba(7,20,71,.85); color: #fff; border-radius: 28px; padding: 18px 34px; font-weight: 800; font-size: 52px; line-height: 1.4; max-width: 960px; }
+.cap .w { opacity: .35; } .cap .w.on { opacity: 1; color: #FFC30A; } .cap .w.done { opacity: 1; }
+</style></head><body>
+
+<!-- 1-3: hook — headache: pill or a monthly pharmacy subscription? -->
+<section class="scene dark" data-start="L1" data-end="L3e+0.3">
+  <div class="emoji" data-in="L1" data-a="pop" data-shake="L1+0.3">🤕</div>
+  <div class="h2" data-in="L1+0.1" data-a="up">لما راسك بتوجعك…</div>
+  <div class="poll card" data-in="L2" data-a="pop">
+    <div class="q">إنت بتعمل إيه؟ 👇</div>
+    <div class="opt" data-win="L3"><div class="fill" data-fill="L3"></div><span>💊 باخد قرص</span><span class="mark" data-in="L3+0.2" data-a="pop">✅</span></div>
+    <div class="opt" data-lose="L3"><span>📅 بشترك في الصيدلية بالشهر</span><span class="mark" data-in="L3+0.3" data-a="pop">❌</span></div>
+  </div>
+  <div class="finger" style="top:1180px;left:560px" data-tap="L3-0.4">👆</div>
+</section>
+
+<!-- 4-5: but tutoring makes you pay the whole month for one lesson -->
+<section class="scene light" data-start="L4-0.15" data-end="L5e+0.35">
+  <div class="h2" data-in="L4" data-a="up">طب ليه في الدروس…</div>
+  <div class="month card" data-in="L4+0.2" data-a="pop" style="position:relative">
+    <div class="tt">اشتراك شهر كامل 💸</div>
+    <div class="grid" id="grid"></div>
+    <div class="paid" style="top:250px;left:170px" data-in="L4e-0.3" data-a="stamp">مدفوع ✓</div>
+  </div>
+  <div class="h1" data-in="L5" data-a="pop">علشان <span class="b">درس واحد</span>؟!</div>
+</section>
+
+<!-- 6: Dose — take your dose only -->
+<section class="scene blue" data-start="L6-0.15" data-end="L6e+0.35">
+  <div class="burst" data-in="L6" data-a="ring"></div>
+  <div class="logo" data-in="L6" data-a="pop"><span class="latin">D<span>o</span>se</span><span class="ar">دروس</span></div>
+  <div class="capsule" data-in="L6+0.4" data-a="spin"><i></i><i></i></div>
+  <div class="h1" data-in="L6+0.8" data-a="up">جرعتك <span class="y">وبس</span></div>
+</section>
+
+<!-- 7-9: how -->
+<section class="scene light" data-start="L7-0.15" data-end="L9e+0.4">
+  <div class="steps">
+    <div class="step card" data-in="L7" data-a="slide"><div class="n">1</div><div class="t">اختار الدرس اللي واقف معاك 📘</div></div>
+    <div class="step card" data-in="L8" data-a="slide"><div class="n">2</div><div class="t">احجز جرعة شرح 💊</div></div>
+    <div class="step card" data-in="L9" data-a="slide"><div class="n">3</div><div class="t">فهمته؟ خلاص ✅</div></div>
+  </div>
+  <div class="stamp" data-in="L9+0.8" data-a="stamp">مفيش اشتراك</div>
+</section>
+
+<!-- 10: interactive — comment the lesson you're stuck on -->
+<section class="scene light" data-start="L10-0.15" data-end="L10e+0.6" style="background:linear-gradient(180deg,#fff6d6,#ffffff)">
+  <div class="h2" data-in="L10" data-a="up">إيه الدرس اللي <span class="b">واقف معاك</span>؟</div>
+  <div class="bubbles">
+    <div class="bubble" data-in="L10+0.5" data-a="pop">القسمة المطوّلة 😩</div>
+    <div class="bubble" data-in="L10+0.9" data-a="pop" style="justify-self:end">قانون أوم ⚡</div>
+    <div class="bubble" data-in="L10+1.3" data-a="pop">الـ Present Perfect 🤯</div>
+    <div class="bubble" data-in="L10+1.7" data-a="pop" style="justify-self:end">المول 🧪</div>
+  </div>
+  <div class="post card" data-in="L10+0.2" data-a="up">
+    <div class="who"><span class="av">🙋</span>اكتب تعليق…</div>
+    <div class="cmt"><span id="typed"></span><span class="caret" data-blink="L10"></span></div>
+  </div>
+  <div class="arrow" data-bob="L10">👇</div>
+</section>
+
+<!-- 11: end -->
+<section class="scene yellow" data-start="L11-0.15" data-end="END">
+  <div class="logo" data-in="L11" data-a="pop"><span class="latin">D<span>o</span>se</span><span class="ar">دروس</span></div>
+  <div class="h1" data-in="L11+0.5" data-a="up">جرعة فهم<br><span style="color:#0061FA">مش اشتراك شهر</span></div>
+  <div class="url" data-in="L11e" data-a="pop">drwsdose.com</div>
+</section>
+
+<div class="cap"><span class="box" id="cap"></span></div>
+<script>
+const SEG = /*SEGS*/; // [[start,end], ...] per voice line
+const END = /*END*/;
+const LINES = /*LINES*/;
+// Resolve "L3", "L3e", "L4-0.15", "END" into seconds.
+const resolve = (v) => {
+  if (v === undefined) return v;
+  return String(v).split(',').map((x) => {
+    const m = /^(L(\d+)(e?)|END)([+-][\d.]+)?$/.exec(x.trim());
+    if (!m) return +x;
+    const base = m[1] === 'END' ? END : SEG[+m[2] - 1][m[3] ? 1 : 0];
+    return +(base + (m[4] ? +m[4] : 0)).toFixed(3);
+  }).join(',');
+};
+for (const el of document.querySelectorAll('*')) for (const k of Object.keys(el.dataset || {})) if (k !== 'a') el.dataset[k] = resolve(el.dataset[k]);
+const grid = document.getElementById('grid');
+for (let i = 1; i <= 30; i++) grid.insertAdjacentHTML('beforeend', `<div class="day ${i === 17 ? 'one' : ''}" data-in="${(+SEG[3][0] + 0.25 + i * 0.03).toFixed(2)}" data-a="pop">${i === 17 ? '📘' : i}</div>`);
+
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const TOPICS = ['القسمة المطوّلة', 'الكثافة', 'قانون أوم', 'الإعراب'];
+window.seek = (t) => {
+  for (const s of document.querySelectorAll('.scene')) {
+    const a = +s.dataset.start, b = +s.dataset.end, f = 0.25;
+    s.style.opacity = t < a || t > b ? 0 : (a <= 0.01 ? clamp((b - t) / f) : Math.min(clamp((t - a) / f), clamp((b - t) / f)));
+  }
+  for (const el of document.querySelectorAll('[data-in]')) {
+    const p = clamp((t - el.dataset.in) / 0.45);
+    let tr = '', op = ease(p);
+    switch (el.dataset.a) {
+      case 'up': tr = `translateY(${(1 - ease(p)) * 70}px)`; break;
+      case 'pop': tr = `scale(${0.4 + 0.6 * back(p)})`; break;
+      case 'slide': tr = `translateX(${(1 - ease(p)) * -160}px)`; break;
+      case 'stamp': tr = `scale(${2.2 - 1.2 * ease(p)}) rotate(-10deg)`; op = clamp(p * 2); break;
+      case 'spin': tr = `rotate(${(1 - ease(p)) * -200 - 20}deg) scale(${0.3 + 0.7 * back(p)})`; break;
+      case 'ring': tr = `scale(${0.2 + 1.2 * ease(clamp((t - el.dataset.in) / 1.6))})`; op = 1 - clamp((t - el.dataset.in) / 2.2); break;
+    }
+    el.style.opacity = op; el.style.transform = tr;
+  }
+  for (const el of document.querySelectorAll('[data-shake]')) {
+    const u = t - el.dataset.shake; const dx = u > 0 && u < 1.2 ? Math.sin(u * 40) * 16 * (1 - u / 1.2) : 0;
+    el.style.transform += ` rotate(${dx / 2}deg) translateX(${dx}px)`;
+  }
+  for (const el of document.querySelectorAll('[data-tap]')) {
+    const u = t - el.dataset.tap;
+    el.style.opacity = u < 0 ? 0 : u < 1.4 ? 1 : clamp(1 - (u - 1.4) / 0.3);
+    const y = u < 0.35 ? (1 - ease(clamp(u / 0.35))) * 160 : (u < 0.5 ? -20 * Math.sin((u - 0.35) / 0.15 * Math.PI) : 0);
+    el.style.transform = `translateY(${y}px)`;
+  }
+  for (const el of document.querySelectorAll('[data-fill]')) el.style.width = `${ease(clamp((t - el.dataset.fill) / 0.6)) * 100}%`;
+  for (const el of document.querySelectorAll('[data-win]')) el.classList.toggle('win', t >= +el.dataset.win);
+  for (const el of document.querySelectorAll('[data-lose]')) el.classList.toggle('lose', t >= +el.dataset.lose);
+  for (const el of document.querySelectorAll('[data-blink]')) el.style.opacity = Math.sin((t - el.dataset.blink) * 9) > 0 ? 1 : 0;
+  for (const el of document.querySelectorAll('[data-bob]')) el.style.transform = `translateY(${Math.abs(Math.sin((t - el.dataset.bob) * 4)) * 30}px)`;
+  // Typing in the comment box, cycling through lessons.
+  const typed = document.getElementById('typed'); const s10 = SEG[9][0] + 0.4;
+  if (t > s10) {
+    const per = 1.1, k = Math.floor((t - s10) / per) % TOPICS.length, u = ((t - s10) % per) / per;
+    const w = TOPICS[k]; typed.textContent = w.slice(0, Math.ceil(w.length * Math.min(1, u * 1.6)));
+  } else typed.textContent = '';
+};
+const capEl = document.getElementById('cap');
+const _seek = window.seek;
+window.seek = (t) => {
+  _seek(t);
+  const i = SEG.findIndex(([a, b]) => t >= a - 0.08 && t <= b + 0.2);
+  if (i < 0) { capEl.parentElement.style.opacity = 0; return; }
+  capEl.parentElement.style.opacity = 1;
+  const [a, b] = SEG[i]; const words = LINES[i].replaceAll('دوز', 'Dose').split(' ');
+  const k = Math.min(words.length - 1, Math.floor(((t - a) / Math.max(0.3, b - a)) * words.length));
+  capEl.innerHTML = words.map((w, j) => `<span class="w ${j < k ? 'done' : j === k ? 'on' : ''}">${w}</span>`).join(' ');
+};
+window.seek(0);
+</script></body></html>
