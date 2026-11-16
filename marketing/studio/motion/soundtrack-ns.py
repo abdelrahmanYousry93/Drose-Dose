@@ -34,7 +34,8 @@ def ding(): return tone(1318, .5, .002, .25)*0.5 + tone(1760, .5, .002, .2)*0.35
 
 
 def click(): n = int(.03*SR); return np.random.randn(n)*np.exp(-np.arange(n)/SR*200)*0.5
-def thud(): return kick()*1.2 + snap()*0.6
+def thud():
+    k = kick()*1.2; s = snap()*0.6; k[:len(s)] += s; return k
 L = lambda i, e=0: seg[i-1][e]
 BPM = 104; beat = 60/BPM
 TURN = L(6) - 0.05
