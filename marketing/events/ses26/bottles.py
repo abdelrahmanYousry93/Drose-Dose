@@ -43,7 +43,7 @@ def card(slug, name, subj, color, fact):
  <div class="neck"></div>
  <div class="body">
   <div class="label">
-   <div class="band"><span class="mark">{logo}</span><b dir="ltr">Dose®</b><span class="chip">{subj}</span></div>
+   <div class="band"><span class="mark">{logo}</span><b>دروس <bdi>Dose</bdi></b><span class="chip">{subj}</span></div>
    <div class="in">
     <div class="name"><bdi>{name}</bdi></div>
     <div class="fact"><span class="k">💡 معلومة في 10 ثواني</span>{fact}</div>
