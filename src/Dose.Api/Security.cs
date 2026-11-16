@@ -15,11 +15,12 @@ public static class Security
     /// <summary>
     /// Content Security Policy for the Angular app served from the same origin. Styles allow 'unsafe-inline' because
     /// Angular component styles are injected at runtime; scripts are same-origin only (no inline scripts are built).
-    /// Images allow https: for teacher photo URLs entered by admins.
+    /// Images allow https: for teacher photo URLs entered by admins. The Meta and TikTok pixels (ad measurement) load
+    /// their scripts from their own CDNs and report to their endpoints.
     /// </summary>
     public const string ContentSecurityPolicy =
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; " +
-        "font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-src 'none'; " +
+        "default-src 'self'; script-src 'self' https://connect.facebook.net https://analytics.tiktok.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; " +
+        "font-src 'self'; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.tiktokw.us https://*.tiktok.com; manifest-src 'self'; worker-src 'self'; frame-src 'none'; " +
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'";
 
     public static void AddDoseSecurity(this WebApplicationBuilder builder)

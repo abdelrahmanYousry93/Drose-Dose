@@ -153,7 +153,8 @@ public sealed record RejectPaymentRequest(string Reason);
 public sealed record SettingDto(string Key, string Value, string? DescriptionAr);
 public sealed record UpdateSettingsRequest(IReadOnlyList<SettingDto> Settings);
 
-public sealed record PublicSettingsDto(string WhatsAppBusinessNumber, string BusinessTimeZone, int FullRefundCancellationHours);
+public sealed record PublicSettingsDto(string WhatsAppBusinessNumber, string BusinessTimeZone, int FullRefundCancellationHours,
+    string MetaPixelId = "", string TikTokPixelId = "");
 
 // ---------- Session requests (public) ----------
 public sealed record GroupOptionDto(Guid Id, string Name, int MinParticipants, int MaxParticipants, decimal PricePerStudent);

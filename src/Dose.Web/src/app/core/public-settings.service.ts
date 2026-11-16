@@ -9,6 +9,8 @@ export interface PublicSettings {
   whatsAppBusinessNumber: string;
   businessTimeZone: string;
   fullRefundCancellationHours: number;
+  metaPixelId?: string;
+  tikTokPixelId?: string;
 }
 
 /** Loads non-sensitive settings from the API. Nothing here is hard-coded in the client. */

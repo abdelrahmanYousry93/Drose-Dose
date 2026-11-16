@@ -16,4 +16,10 @@ public sealed class PublicSettings
 
     /// <summary>IANA business time zone used for display, e.g. Africa/Cairo.</summary>
     public string BusinessTimeZone { get; init; } = "Africa/Cairo";
+
+    /// <summary>Meta pixel (dataset) id for ad measurement. Public by design; empty disables the pixel.</summary>
+    public string MetaPixelId { get; init; } = string.Empty;
+
+    /// <summary>TikTok pixel id for ad measurement. Public by design; empty disables the pixel.</summary>
+    public string TikTokPixelId { get; init; } = string.Empty;
 }

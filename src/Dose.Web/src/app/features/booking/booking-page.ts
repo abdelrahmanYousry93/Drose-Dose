@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Api, BookingView, PaymentMethod, PromoPreview } from '../../core/api';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
+import { MarketingTracker } from '../../core/marketing-tracker';
 import { PublicSettingsService } from '../../core/public-settings.service';
 import { StudentContext } from '../../core/student-context';
 import { looksLikePhone } from '../../shared/validation';
@@ -36,6 +37,7 @@ export class BookingPage {
   protected readonly copied = signal(false);
   protected readonly inviteCopied = signal(false);
   private readonly context = inject(StudentContext);
+  private readonly tracker = inject(MarketingTracker);
 
   // Promo code (details step)
   protected promoCode = '';
@@ -199,7 +201,9 @@ export class BookingPage {
       this.actionError.set(translate('booking.needFile'));
       return;
     }
+    const amount = this.b()?.price;
     await this.act(() => this.api.uploadProof(this.token(), this.methodId, this.file!, this.senderReference));
+    if (!this.actionError()) this.tracker.track('paid', undefined, amount);
     this.file = null;
   }
 

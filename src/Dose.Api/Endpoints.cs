@@ -77,7 +77,7 @@ public static class Endpoints
             .DisableRateLimiting();
         api.MapGet("/public-settings", async (IOptions<PublicSettings> s, SettingsService settings, CancellationToken ct) =>
             Results.Ok(new PublicSettingsDto(s.Value.WhatsAppBusinessNumber, s.Value.BusinessTimeZone,
-                (await settings.GetBookingSettingsAsync(ct)).FullRefundCancellationHours)));
+                (await settings.GetBookingSettingsAsync(ct)).FullRefundCancellationHours, s.Value.MetaPixelId, s.Value.TikTokPixelId)));
 
         // ---------- Public catalog ----------
         var catalog = api.MapGroup("/catalog");
