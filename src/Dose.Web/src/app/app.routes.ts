@@ -32,6 +32,12 @@ export const routes: Routes = [
     title: 'titles.myBookings',
   },
   {
+    // Private "my bookings" link the team sends on WhatsApp: restores every booking/request of that number here.
+    path: 'me/:token',
+    loadComponent: () => import('./features/my-bookings/restore').then((m) => m.Restore),
+    title: 'titles.restore',
+  },
+  {
     path: 'request-session',
     loadComponent: () => import('./features/request/request-session').then((m) => m.RequestSession),
     title: 'titles.request',

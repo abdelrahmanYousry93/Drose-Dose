@@ -66,6 +66,7 @@ export class AdminLogin {
     <nav class="admin-nav">
       <a routerLink="/admin/dashboard" routerLinkActive="on">{{ 'adminNav.dashboard' | t }}</a>
       <a routerLink="/admin/funnel" routerLinkActive="on">{{ 'adminNav.funnel' | t }}</a>
+      <a routerLink="/admin/students" routerLinkActive="on">{{ 'adminNav.students' | t }}</a>
       <a routerLink="/admin/partners" routerLinkActive="on">{{ 'adminNav.partners' | t }}</a>
       <a routerLink="/admin/payments" routerLinkActive="on">{{ 'adminNav.payments' | t }}</a>
       <a routerLink="/admin/follow-ups" routerLinkActive="on">{{ 'adminNav.followUps' | t }}</a>

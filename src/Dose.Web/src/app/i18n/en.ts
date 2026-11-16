@@ -35,6 +35,7 @@ export const en: typeof ar = {
     "requests": "Requests",
     "sessions": "Sessions",
     "settings": "Settings",
+    "students": "Returning students",
     "teachers": "Teachers",
     "users": "Users"
   },
@@ -50,6 +51,22 @@ export const en: typeof ar = {
     "wallLink": "Open the counter",
     "when": "When",
     "yes": "With name"
+  },
+  "adminStudents": {
+    "bookings": "Bookings",
+    "copied": "Copied ✓",
+    "copy": "Copy the message",
+    "expires": "The link works until {date}.",
+    "find": "Look up",
+    "issue": "Create their bookings link",
+    "lead": "A student asked on WhatsApp for their bookings? Copy their number from the chat and enter it here. Send the link back to that same chat only — the number that wrote to you is the proof they own the bookings.",
+    "links": "Links sent before",
+    "none": "No bookings or requests with this number. Ask whether they booked with another number (theirs or a guardian's).",
+    "openChat": "Open their WhatsApp chat",
+    "phone": "The WhatsApp number that messaged you",
+    "requests": "Requests",
+    "steps": "Copy the message → open their chat → paste and send.",
+    "used": "Opened {n} times"
   },
   "availability": {
     "approve": "Approve",
@@ -113,7 +130,7 @@ export const en: typeof ar = {
     "private": "Private",
     "privateGroup": "Private group ({n} students)",
     "privateGroupNote": "You pay for {n} students at once. After your payment is confirmed you'll get an invite code to send your friends — they join for free.",
-    "privateLink": "This link is private to you and is how you'll join the session. Keep it safe and don't share it.",
+    "privateLink": "This link is private to you and is how you'll join the session — don't share it. Once your booking is confirmed we'll send it to you on WhatsApp, so you can always get back from our chat.",
     "proofRejected": "Your previous receipt was rejected: {reason}. Please upload another one.",
     "reference": "Booking reference",
     "refreshStatus": "Refresh status",
@@ -506,12 +523,15 @@ export const en: typeof ar = {
     }
   },
   "my": {
+    "askLink": "Send me my bookings link on WhatsApp",
+    "askLinkHint": "Send it from the number you booked with so we know it's you.",
+    "askLinkMsg": "Hi Dose 👋\nPlease send me my bookings link (I'm writing from the number I booked with).",
     "bookings": "Bookings",
     "browse": "Browse available sessions",
     "empty": "No bookings on this phone yet.",
     "emptyBody": "As soon as you book a session or send a request, you'll find it here with its status.",
     "lead": "Every booking and request made on this phone, with its current status.",
-    "missingBody": "Open the booking link once on this phone and it will appear here. Lost the link? Message us on WhatsApp and we'll send it again.",
+    "missingBody": "Message us on WhatsApp from the number you booked with, and we'll send back one link that restores all your bookings and requests on any phone.",
     "missingTitle": "Booked on another phone, or can't find your booking?",
     "next": {
       "confirmed": "Confirmed. The session link opens in the booking shortly before the start.",
@@ -842,6 +862,14 @@ export const en: typeof ar = {
     },
     "times": "Preferred times"
   },
+  "restore": {
+    "badBody": "It may have expired or been copied incompletely. Message us on WhatsApp from your number and we'll send a new one.",
+    "badTitle": "This link isn't working",
+    "doneBody": "{b} bookings and {r} requests are now on this phone under “My bookings”.",
+    "doneTitle": "Your bookings are back ✓",
+    "loading": "Restoring your bookings…",
+    "open": "Open my bookings"
+  },
   "session": {
     "details": "Details",
     "openGroup": "Open group session",
@@ -1053,6 +1081,7 @@ export const en: typeof ar = {
     "adminRequests": "Session requests",
     "adminSessions": "Sessions",
     "adminSettings": "Settings",
+    "adminStudents": "Restore a student's bookings",
     "adminTeachers": "Teachers",
     "adminUsers": "Users",
     "booking": "My booking",
@@ -1065,6 +1094,7 @@ export const en: typeof ar = {
     "partnersWall": "Dose counter",
     "private": "Book a private session or group",
     "request": "Request a session",
+    "restore": "Restore my bookings",
     "sessions": "Available sessions",
     "teacherAvailability": "My availability",
     "teacherSession": "Session",

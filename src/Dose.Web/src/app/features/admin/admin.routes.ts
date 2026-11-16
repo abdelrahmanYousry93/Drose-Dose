@@ -18,6 +18,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-funnel').then((m) => m.AdminFunnel),
       },
       {
+        path: 'students', title: 'titles.adminStudents',
+        loadComponent: () => import('./admin-students').then((m) => m.AdminStudents),
+      },
+      {
         path: 'partners', title: 'titles.adminPartners',
         loadComponent: () => import('./admin-partners').then((m) => m.AdminPartners),
       },

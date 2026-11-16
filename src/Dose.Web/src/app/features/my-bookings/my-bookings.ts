@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Api, BookingStatus, BookingView } from '../../core/api';
 import { fmtDate, fmtDateTime, fmtMoney, myBookings, myRequests, SentRequest } from '../../core/format';
-import { TranslatePipe } from '../../core/i18n';
+import { TranslatePipe, translate } from '../../core/i18n';
 import { PublicSettingsService } from '../../core/public-settings.service';
 import { StudentContext } from '../../core/student-context';
 
@@ -100,8 +100,9 @@ const BADGE: Partial<Record<BookingStatus, string>> = {
       <div class="dose-card help">
         <p><strong>{{ 'my.missingTitle' | t }}</strong></p>
         <p class="muted small">{{ 'my.missingBody' | t }}</p>
-        @if (settings.whatsAppLink(); as link) {
-          <a class="dose-btn dose-btn--whatsapp" [href]="link" target="_blank" rel="noopener">{{ 'nav.whatsapp' | t }}</a>
+        @if (settings.whatsAppLink(askText); as link) {
+          <a class="dose-btn dose-btn--whatsapp" [href]="link" target="_blank" rel="noopener">{{ 'my.askLink' | t }}</a>
+          <p class="muted small">{{ 'my.askLinkHint' | t }}</p>
         }
       </div>
     </section>
@@ -127,6 +128,7 @@ export class MyBookings {
   protected readonly rows = signal<Row[]>([]);
   protected readonly requests = signal<SentRequest[]>(myRequests.list());
   protected readonly loading = signal(true);
+  protected readonly askText = translate('my.askLinkMsg');
 
   constructor() {
     const context = inject(StudentContext);

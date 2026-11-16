@@ -1,0 +1,31 @@
+{
+ "titles.restore": ["رجوع حجوزاتي", "Restore my bookings"],
+ "titles.adminStudents": ["رجّع حجوزات طالب", "Restore a student's bookings"],
+ "adminNav.students": ["رجوع الطلاب", "Returning students"],
+
+ "my.askLink": ["ابعتلي لينك حجوزاتي على واتساب", "Send me my bookings link on WhatsApp"],
+ "my.askLinkMsg": ["أهلاً دروس Dose 👋\nمحتاج لينك حجوزاتي (بعتّ من نفس الرقم اللي حجزت بيه).", "Hi Dose 👋\nPlease send me my bookings link (I'm writing from the number I booked with)."],
+ "my.askLinkHint": ["لازم تبعت من نفس الرقم اللي حجزت بيه علشان نتأكد إنه إنت.", "Send it from the number you booked with so we know it's you."],
+
+ "restore.loading": ["بنرجّع حجوزاتك…", "Restoring your bookings…"],
+ "restore.doneTitle": ["رجّعنا حجوزاتك ✓", "Your bookings are back ✓"],
+ "restore.doneBody": ["{b} حجز و{r} طلب بقوا موجودين على الموبايل ده في «حجوزاتي».", "{b} bookings and {r} requests are now on this phone under “My bookings”."],
+ "restore.open": ["افتح حجوزاتي", "Open my bookings"],
+ "restore.badTitle": ["اللينك ده مش شغال", "This link isn't working"],
+ "restore.badBody": ["ممكن يكون انتهى أو اتنسخ ناقص. ابعتلنا على واتساب من رقمك ونبعتلك لينك جديد.", "It may have expired or been copied incompletely. Message us on WhatsApp from your number and we'll send a new one."],
+
+ "adminStudents.lead": ["طالب بعتلك على واتساب إنه عاوز حجوزاته؟ انسخ رقمه من المحادثة واكتبه هنا. ابعت اللينك لنفس المحادثة بس — الرقم اللي بعت هو الإثبات إنه صاحب الحجوزات.", "A student asked on WhatsApp for their bookings? Copy their number from the chat and enter it here. Send the link back to that same chat only — the number that wrote to you is the proof they own the bookings."],
+ "adminStudents.phone": ["رقم الواتساب اللي بعتلك", "The WhatsApp number that messaged you"],
+ "adminStudents.find": ["دوّر", "Look up"],
+ "adminStudents.bookings": ["الحجوزات", "Bookings"],
+ "adminStudents.requests": ["الطلبات", "Requests"],
+ "adminStudents.none": ["مفيش حجوزات ولا طلبات بالرقم ده. اسأله يمكن حجز برقم تاني (رقمه أو رقم ولي أمره).", "No bookings or requests with this number. Ask whether they booked with another number (theirs or a guardian's)."],
+ "adminStudents.issue": ["اعمل لينك حجوزاته", "Create their bookings link"],
+ "adminStudents.copy": ["انسخ الرسالة", "Copy the message"],
+ "adminStudents.copied": ["اتنسخت ✓", "Copied ✓"],
+ "adminStudents.openChat": ["افتح محادثته على واتساب", "Open their WhatsApp chat"],
+ "adminStudents.steps": ["انسخ الرسالة ← افتح محادثته ← الصقها وابعت.", "Copy the message → open their chat → paste and send."],
+ "adminStudents.expires": ["اللينك شغال لحد {date}.", "The link works until {date}."],
+ "adminStudents.links": ["لينكات اتبعتت قبل كده", "Links sent before"],
+ "adminStudents.used": ["اتفتح {n} مرة", "Opened {n} times"]
+}

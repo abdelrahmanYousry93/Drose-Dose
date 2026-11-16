@@ -34,6 +34,7 @@ builder.Services.AddHttpClient("meta", c => c.Timeout = TimeSpan.FromSeconds(60)
 builder.Services.AddScoped<MarketingPublisher>();
 builder.Services.AddScoped<MarketingReport>();
 builder.Services.AddScoped<PartnerService>();
+builder.Services.AddScoped<StudentAccessService>();
 // Owner alerts on Telegram (inactive until Telegram__BotToken is set as an encrypted environment variable).
 builder.Services.AddOptions<TelegramSettings>().Bind(builder.Configuration.GetSection(TelegramSettings.SectionName));
 builder.Services.AddHttpClient("telegram", c => c.Timeout = TimeSpan.FromSeconds(20));
@@ -129,6 +130,7 @@ app.MapPhase4Endpoints();
 app.MapMessagingEndpoints();
 app.MapPhase6Endpoints();
 app.MapPartnerEndpoints();
+app.MapStudentAccessEndpoints();
 app.MapDoseSpa();
 
 app.Run();

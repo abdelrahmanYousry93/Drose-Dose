@@ -16,8 +16,8 @@
   "Copy booking link"
  ],
  "booking.privateLink": [
-  "اللينك ده خاص بيك ومنه هتدخل الجلسة. احفظه ومتبعتهوش لحد.",
-  "This link is private to you and is how you'll join the session. Keep it safe and don't share it."
+  "اللينك ده خاص بيك ومنه هتدخل الجلسة، متبعتهوش لحد. لما حجزك يتأكد هنبعتهولك على واتساب، فارجع لمحادثتنا وادخل منه في أي وقت.",
+  "This link is private to you and is how you'll join the session — don't share it. Once your booking is confirmed we'll send it to you on WhatsApp, so you can always get back from our chat."
  ],
  "booking.steps": [
   "خطوات الحجز",

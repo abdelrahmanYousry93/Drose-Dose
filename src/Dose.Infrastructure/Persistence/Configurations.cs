@@ -388,3 +388,15 @@ internal sealed class PartnerPledgeConfig : IEntityTypeConfiguration<Dose.Domain
         e.HasIndex(x => x.CreatedAtUtc);
     }
 }
+
+internal sealed class StudentAccessLinkConfig : IEntityTypeConfiguration<Dose.Domain.Administration.StudentAccessLink>
+{
+    public void Configure(EntityTypeBuilder<Dose.Domain.Administration.StudentAccessLink> e)
+    {
+        e.Property(x => x.TokenHash).HasMaxLength(32).IsFixedLength();
+        e.HasIndex(x => x.TokenHash).IsUnique();
+        e.Property(x => x.PhoneE164).HasMaxLength(20);
+        e.HasIndex(x => x.PhoneE164);
+        e.Property(x => x.CreatedBy).HasMaxLength(100);
+    }
+}
