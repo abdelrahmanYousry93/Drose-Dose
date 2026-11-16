@@ -7,47 +7,50 @@ here = os.path.dirname(os.path.abspath(__file__))
 fonts = os.path.abspath(os.path.join(here, '../../../src/Dose.Web/node_modules/@fontsource/cairo/files'))
 logo = open(os.path.join(here, '../../../src/Dose.Web/public/brand/dose-mark.svg'), encoding='utf-8').read()
 
-# slug, short name on the bottle, full condition, subject chip, cap colour
+# slug, name on the bottle, subject chip, colour, quick fact (one idea, tested wording)
 B = [
-  ('longdiv', 'القسمة المطوّلة', 'عدم فهم القسمة المطوّلة', 'رياضيات', '#0061fa'),
-  ('fractions', 'الكسور', 'عدم فهم جمع وطرح الكسور', 'رياضيات', '#0061fa'),
-  ('density', 'الكثافة', 'عدم فهم الكثافة', 'علوم', '#07b24c'),
-  ('speed', 'السرعة والعجلة', 'الخلط بين السرعة والعجلة', 'علوم', '#07b24c'),
-  ('irab', 'الإعراب', 'الخوف من سؤال الإعراب', 'عربي', '#d97706'),
-  ('perfect', 'Present Perfect', 'عدم فهم الـ Present Perfect', 'إنجليزي', '#d97706'),
-  ('ohm', 'قانون أوم', 'عدم فهم قانون أوم', 'فيزياء', '#7c3aed'),
-  ('mole', 'المول', 'عدم فهم المول', 'كيمياء', '#7c3aed'),
+  ('longdiv', 'القسمة المطوّلة', 'رياضيات', '#0061fa',
+   'هي 4 خطوات بتتكرر وبس:<br/><b>اقسم ← اضرب ← اطرح ← نزّل</b><br/>وكرّرها لحد ما الأرقام تخلص.'),
+  ('fractions', 'الكسور', 'رياضيات', '#0061fa',
+   'مينفعش تجمع كسرين غير لما المقامات تبقى واحدة:<br/><b class="ltr">1/2 + 1/3 = 3/6 + 2/6 = 5/6</b>'),
+  ('density', 'الكثافة', 'علوم', '#07b24c',
+   '<b>الكثافة = الكتلة ÷ الحجم</b><br/>علشان كده الخشب بيطفو على الميه، والحديد بيغرق.'),
+  ('speed', 'السرعة والعجلة', 'علوم', '#07b24c',
+   '<b>السرعة</b>: بتقطع قد إيه في الثانية.<br/><b>العجلة</b>: سرعتك بتتغير قد إيه كل ثانية.<br/>عربية ماشية ثابتة على 60 = عجلتها صفر.'),
+  ('irab', 'الإعراب', 'عربي', '#d97706',
+   '<b>الفاعل</b>: عمل الفعل ← مرفوع<br/><b>المفعول به</b>: وقع عليه الفعل ← منصوب<br/><b>كتبَ الطالبُ الدرسَ</b>'),
+  ('perfect', 'Present Perfect', 'إنجليزي', '#d97706',
+   '<b class="ltr">have / has + V3</b><br/>حاجة حصلت ولسه أثرها موجود.<br/><b class="ltr">I have lost my keys.</b>'),
+  ('ohm', 'قانون أوم', 'فيزياء', '#7c3aed',
+   '<b class="ltr">V = I × R</b><br/>الجهد = التيار × المقاومة<br/>المقاومة تزيد ← التيار يقل'),
+  ('mole', 'المول', 'كيمياء', '#7c3aed',
+   'المول عدد، زي الدستة بالظبط:<br/>الدستة = 12<br/><b>المول = <span class="ltr">6.02 × 10²³</span></b>'),
 ]
 
 def qr_svg(url):
-    q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, border=1, image_factory=qrcode.image.svg.SvgPathImage)
+    q = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, border=0, image_factory=qrcode.image.svg.SvgPathImage)
     q.add_data(url); q.make(fit=True)
     buf = io.BytesIO(); q.make_image().save(buf)
     s = buf.getvalue().decode()
     s = re.sub(r'<\?xml[^>]*\?>', '', s)
     return re.sub(r'width="[^"]*" height="[^"]*"', 'width="100%" height="100%"', s, count=1)
 
-def card(slug, name, cond, subj, color):
+def card(slug, name, subj, color, fact):
     url = f'https://drwsdose.com/partners?src=ses26-{slug}'
-    big = 'big' if len(name) <= 8 else ''
     return f'''
-<div class="card">
- <svg class="shape" viewBox="0 0 70 120" preserveAspectRatio="none">
-  <path d="M22 1 h26 a3 3 0 0 1 3 3 v11 a2 2 0 0 1 -2 2 h-1 v4 c10 2 18 8 18 18 v74 a6 6 0 0 1 -6 6 h-50 a6 6 0 0 1 -6 -6 v-74 c0 -10 8 -16 18 -18 v-4 h-1 a2 2 0 0 1 -2 -2 v-11 a3 3 0 0 1 3 -3 z" class="cut"/>
-  <rect x="20.5" y="1" width="29" height="14.5" rx="3" fill="{color}"/>
-  <g stroke="rgba(255,255,255,.28)" stroke-width=".8">{''.join(f'<line x1="{x}" y1="2" x2="{x}" y2="14.5"/>' for x in range(23, 49, 3))}</g>
-  <path d="M22 17 h26 v4 c10 2 18 8 18 18 v74 a6 6 0 0 1 -6 6 h-50 a6 6 0 0 1 -6 -6 v-74 c0 -10 8 -16 18 -18 z" fill="url(#amber)"/>
-  <path d="M9 40 c0 -6 3 -10 8 -12" stroke="rgba(255,255,255,.35)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-  <rect x="7" y="44" width="2" height="62" rx="1" fill="rgba(255,255,255,.18)"/>
- </svg>
- <div class="label" style="--c:{color}">
-  <div class="top"><span class="mark">{logo}</span><b dir="ltr">Dose®</b><span class="chip">{subj}</span></div>
-  <div class="name {big}"><bdi>{name}</bdi></div>
-  <div class="row"><i>دواعي الاستعمال</i> {cond}</div>
-  <div class="row"><i>الجرعة</i> جلسة شرح واحدة · 60 دقيقة · أونلاين</div>
-  <div class="row side"><i>آثار جانبية</i> ثقة زيادة في الامتحان</div>
-  <div class="qrbox"><div class="qr">{qr_svg(url)}</div><div class="cta">امسح<br/>واكتب جرعة<br/>لطالب</div></div>
-  <div class="foot">لا يحتاج اشتراك شهري · drwsdose.com</div>
+<div class="card" style="--c:{color}">
+ <div class="cap"></div>
+ <div class="body">
+  <div class="label">
+   <div class="top"><span class="mark">{logo}</span><b dir="ltr">Dose®</b><span class="chip">{subj}</span></div>
+   <div class="name"><bdi>{name}</bdi></div>
+   <div class="fact"><span class="k">💡 معلومة في 10 ثواني</span>{fact}</div>
+   <div class="scan">
+    <div class="tab">📱 امسح الكود</div>
+    <div class="qr">{qr_svg(url)}<span class="logo">{logo}</span></div>
+    <div class="why">واعرف إزاي جهتك تدّي<br/>طالب الجرعة دي</div>
+   </div>
+  </div>
  </div>
 </div>'''
 
@@ -61,26 +64,27 @@ html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 @page{{size:A4;margin:0}}
 *{{box-sizing:border-box;margin:0}}
 body{{font-family:Cairo,sans-serif;color:#0f1b3d;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}}
-.page{{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,80mm);grid-auto-rows:136mm;gap:6mm 14mm;justify-content:center;align-content:center;page-break-after:always}}
-.card{{position:relative;width:80mm;height:136mm}}
-.shape{{position:absolute;inset:0;width:100%;height:100%;overflow:visible}}
-.cut{{fill:none;stroke:#9aa3b5;stroke-width:.35;stroke-dasharray:1.4 1}}
-.label{{position:absolute;left:5.5mm;right:5.5mm;top:47mm;height:73mm;background:#fff;border-radius:2.5mm;border-top:2.2mm solid var(--c);border-bottom:1.6mm solid #ffc30a;padding:2mm 2.6mm 1.4mm;display:flex;flex-direction:column;gap:.7mm;box-shadow:0 .4mm 1.2mm rgba(0,0,0,.25)}}
-.top{{display:flex;align-items:center;gap:1.4mm;font-size:3.1mm;color:#0b1f6b}}
-.mark svg{{width:4.4mm;height:4.4mm;display:block}}
-.chip{{margin-inline-start:auto;background:var(--c);color:#fff;border-radius:9mm;padding:0 2mm;font-size:2.5mm;font-weight:800;line-height:1.7}}
-.name{{font-weight:900;font-size:5.2mm;line-height:1.25;color:#0b1f6b}}
-.name.big{{font-size:6.6mm}}
-.row{{font-size:2.35mm;line-height:1.45;font-weight:700}}
-.row i{{font-style:normal;display:block;font-size:1.95mm;font-weight:400;color:#5b6785}}
-.side{{color:#07803a}}
-.qrbox{{margin-top:auto;display:flex;align-items:center;gap:2mm}}
-.qr{{width:19mm;height:19mm;flex:none}}
+.page{{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,82mm);grid-auto-rows:140mm;gap:5mm 12mm;justify-content:center;align-content:center;page-break-after:always}}
+.card{{display:flex;flex-direction:column;align-items:center}}
+.cap{{width:38mm;height:11mm;background:var(--c);border-radius:2mm 2mm 0 0;background-image:repeating-linear-gradient(90deg,transparent 0 3mm,rgba(255,255,255,.3) 3mm 3.6mm)}}
+.body{{width:82mm;flex:1;background:linear-gradient(90deg,#7a3e0c,#b8621a 45%,#8a4b12);border-radius:5mm;padding:4mm 3.5mm;outline:.3mm dashed #9aa3b5;outline-offset:.8mm}}
+.label{{height:100%;background:#fff;border-radius:3mm;border-top:2.4mm solid var(--c);border-bottom:2mm solid #ffc30a;padding:2.4mm 3mm 3mm;display:flex;flex-direction:column;gap:1.6mm}}
+.top{{display:flex;align-items:center;gap:1.4mm;font-size:3.6mm;color:#0b1f6b}}
+.mark svg{{width:5mm;height:5mm;display:block}}
+.chip{{margin-inline-start:auto;background:var(--c);color:#fff;border-radius:9mm;padding:0 2.4mm;font-size:3.1mm;font-weight:800;line-height:1.7}}
+.name{{font-weight:900;font-size:7.4mm;line-height:1.2;color:#0b1f6b}}
+.fact{{flex:none;background:#f5f8ff;border-radius:2.2mm;padding:2mm 2.4mm;font-size:3.6mm;line-height:1.55;font-weight:700;color:#0f1b3d}}
+.fact .k{{display:block;font-size:2.8mm;font-weight:800;color:var(--c);margin-bottom:.4mm}}
+.fact b{{font-weight:900;color:#0b1f6b}}
+.ltr{{direction:ltr;unicode-bidi:isolate;display:inline-block}}
+.scan{{margin-top:auto;position:relative;border:.8mm solid var(--c);border-radius:3mm;padding:4.4mm 2mm 2mm;display:flex;flex-direction:column;align-items:center;gap:1.4mm}}
+.tab{{position:absolute;top:-3.6mm;background:var(--c);color:#fff;font-weight:900;font-size:3.6mm;padding:.2mm 3.4mm;border-radius:9mm;white-space:nowrap}}
+.qr{{position:relative;width:38mm;height:38mm}}
 .qr svg path{{fill:#0b1f6b}}
-.cta{{font-weight:900;font-size:3.1mm;line-height:1.3;color:var(--c)}}
-.foot{{font-size:1.85mm;color:#5b6785;text-align:center;border-top:.2mm dashed #dbe5f7;padding-top:.6mm}}
+.qr .logo{{position:absolute;inset:0;margin:auto;width:9mm;height:9mm;background:#fff;border-radius:1.6mm;padding:.8mm}}
+.qr .logo svg{{width:100%;height:100%;display:block}}
+.why{{font-size:3.2mm;font-weight:800;line-height:1.35;text-align:center;color:#0b1f6b}}
 </style></head><body>
-<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="amber" x1="0" x2="1"><stop offset="0" stop-color="#6b340a"/><stop offset=".38" stop-color="#b8621a"/><stop offset=".62" stop-color="#a65616"/><stop offset="1" stop-color="#5e2d08"/></linearGradient></defs></svg>
 {''.join('<div class="page">' + ''.join(card(*b) for b in p) + '</div>' for p in pages)}
 </body></html>'''
 open(os.path.join(here, 'bottles.html'), 'w', encoding='utf-8').write(html)
