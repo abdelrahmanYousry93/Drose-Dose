@@ -70,6 +70,12 @@ public static class Endpoints
             funnel = await report.FunnelAsync(DateTime.UtcNow.AddDays(-Math.Clamp(days ?? 30, 1, 365)), ct),
             engagement = await report.EngagementAsync(ct),
         }));
+        app.MapGet("/api/admin/funnel", async (int? days, MarketingReport report, CancellationToken ct) =>
+        {
+            var since = DateTime.UtcNow.AddDays(-Math.Clamp(days ?? 30, 1, 365));
+            var (overall, promos, byDay) = await report.SiteFunnelAsync(since, ct);
+            return Results.Ok(new { since, overall, promos, days = byDay, sources = await report.FunnelAsync(since, ct), engagement = await report.EngagementAsync(ct) });
+        }).RequireAuthorization(AdminPolicy);
         api.MapGet("/marketing/status", async (MarketingPublisher publisher, CancellationToken ct) =>
             Results.Ok(await publisher.StatusAsync(ct)));
         api.MapGet("/health/db", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>

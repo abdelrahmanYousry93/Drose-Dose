@@ -54,6 +54,40 @@ public sealed partial class MarketingReport(
             .OrderByDescending(r => r.Paid).ThenByDescending(r => r.Visits).ToList();
     }
 
+    public sealed record Overall(int Visitors, int BookingsStarted, int DetailsEntered, int ProofsSent, int Paid, int Requests, decimal Revenue);
+    public sealed record PromoRow(string Code, int Bookings, int Paid);
+    public sealed record DayRow(DateOnly Day, int Started, int Paid);
+
+    static readonly BookingStatus[] Started =
+        [BookingStatus.PendingHold, BookingStatus.PendingPayment, BookingStatus.PaymentUnderReview, BookingStatus.Confirmed,
+         BookingStatus.TopUpPending, BookingStatus.Cancelled, BookingStatus.Expired, BookingStatus.RefundPending,
+         BookingStatus.Refunded, BookingStatus.Transferred, BookingStatus.Completed, BookingStatus.NoShow];
+
+    /// <summary>The whole site's funnel (tracked or not): bookings started → details → payment proof → paid.</summary>
+    public async Task<(Overall Overall, List<PromoRow> Promos, List<DayRow> Days)> SiteFunnelAsync(DateTime sinceUtc, CancellationToken ct)
+    {
+        var bookings = await db.Set<Booking>().AsNoTracking()
+            .Where(b => b.CreatedAtUtc >= sinceUtc && b.SponsorBookingId == null)
+            .Select(b => new
+            {
+                b.Id, b.Status, b.CreatedAtUtc, b.QuotedPrice, HasDetails = b.StudentId != null,
+                Proof = db.Set<PaymentProof>().Any(p => p.BookingId == b.Id), b.PromoCodeId,
+            }).ToListAsync(ct);
+        var requests = await db.SessionRequests.CountAsync(r => r.CreatedAtUtc >= sinceUtc, ct);
+        var visitors = await db.Set<MarketingTouch>().CountAsync(t => t.Step == "visit" && t.CreatedAtUtc >= sinceUtc, ct);
+        var paid = bookings.Where(b => Paid.Contains(b.Status) || b.Status == BookingStatus.Completed).ToList();
+        var overall = new Overall(visitors, bookings.Count, bookings.Count(b => b.HasDetails), bookings.Count(b => b.Proof),
+            paid.Count, requests, paid.Sum(b => b.QuotedPrice));
+        var promoIds = bookings.Where(b => b.PromoCodeId != null).Select(b => b.PromoCodeId!.Value).Distinct().ToList();
+        var codes = await db.Set<PromoCode>().AsNoTracking().Where(p => promoIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.Code, ct);
+        var promos = bookings.Where(b => b.PromoCodeId != null).GroupBy(b => b.PromoCodeId!.Value)
+            .Select(g => new PromoRow(codes.GetValueOrDefault(g.Key, "?"), g.Count(), g.Count(b => paid.Any(p => p.Id == b.Id))))
+            .OrderByDescending(r => r.Paid).ThenByDescending(r => r.Bookings).ToList();
+        var days = bookings.GroupBy(b => DateOnly.FromDateTime(b.CreatedAtUtc.AddHours(2)))
+            .Select(g => new DayRow(g.Key, g.Count(), g.Count(b => paid.Any(p => p.Id == b.Id)))).OrderBy(d => d.Day).ToList();
+        return (overall, promos, days);
+    }
+
     static (DateTime At, Dictionary<string, object> Data)? engagementCache;
 
     /// <summary>Likes, comments, shares (and reach where the key allows it) for each published post; cached 30 minutes.</summary>

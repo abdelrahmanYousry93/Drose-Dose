@@ -14,6 +14,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-dashboard').then((m) => m.AdminDashboard),
       },
       {
+        path: 'funnel', title: 'titles.adminFunnel',
+        loadComponent: () => import('./admin-funnel').then((m) => m.AdminFunnel),
+      },
+      {
         path: 'users', title: 'titles.adminUsers',
         loadComponent: () => import('./admin-users').then((m) => m.AdminUsers),
       },
