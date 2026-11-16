@@ -39,6 +39,7 @@ builder.Services.AddHttpClient("telegram", c => c.Timeout = TimeSpan.FromSeconds
 builder.Services.AddSingleton<OwnerAlertQueue>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<OwnerAlertQueue>());
 builder.Services.AddScoped<OwnerAlerts>();
+builder.Services.AddScoped<OwnerFollowUps>();
 
 builder.Services.AddDoseApplication();
 builder.Services.AddHttpContextAccessor();

@@ -104,4 +104,38 @@ public sealed class OwnerAlertsTests(DatabaseFixture fx)
         await Task.Delay(300);
         Assert.Empty(telegram.Urls);
     }
+
+    [Fact]
+    public async Task Unpaid_bookings_get_one_follow_up_with_a_ready_whatsapp_message()
+    {
+        Assert.SkipWhen(DatabaseFixture.ServerConnection is null, "Set DOSE_TEST_SQL to run SQL Server integration tests.");
+        var session = await FutureSessionAsync();
+        var telegram = new FakeTelegram();
+        using var app = Api(telegram, "test-token");
+        var http = app.CreateClient();
+        var hold = await (await http.PostAsJsonAsync("/api/bookings/holds", new { sessionId = session.Id })).Content.ReadFromJsonAsync<JsonElement>();
+        await http.PostAsJsonAsync($"/api/b/{hold.GetProperty("accessToken").GetString()}/details", new
+        {
+            studentName = "سارة أحمد", contactPhone = "01009990088", acceptTerms = true, acceptTopUpTerms = true,
+            expectedPrice = hold.GetProperty("price").GetDecimal(),
+        });
+        await WaitForAsync(telegram, 2);
+        var reference = hold.GetProperty("reference").GetString()!;
+        await using (var db = fx.NewDb())
+        {
+            var b = await db.Bookings.SingleAsync(x => x.Reference == reference);
+            b.GetType().GetProperty("CreatedAtUtc")!.SetValue(b, DateTime.UtcNow.AddMinutes(-45));
+            await db.SaveChangesAsync();
+        }
+
+        using (var scope = app.Services.CreateScope()) await scope.ServiceProvider.GetRequiredService<Dose.Api.OwnerFollowUps>().RunAsync(default);
+        using (var scope = app.Services.CreateScope()) await scope.ServiceProvider.GetRequiredService<Dose.Api.OwnerFollowUps>().RunAsync(default);
+
+        var followUp = await WaitForAsync(telegram, 3);
+        Assert.Contains("متابعة: كتب بياناته ومدفعش لسه", followUp);
+        Assert.Contains(reference, followUp);
+        Assert.Contains("https://wa.me/201009990088?text=", followUp);
+        await Task.Delay(300);
+        Assert.Equal(3, telegram.Sent.Count(m => m.Contains(reference))); // started, details, one follow-up only
+    }
 }

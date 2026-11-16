@@ -202,3 +202,60 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
     public Task SessionProposedAsync(Guid sessionId) => Try(async () =>
         $"👨‍🏫 مدرس اقترح جلسة جديدة — محتاجة موافقتك\n\n{await SessionLinesAsync(sessionId)}\n\n{Admin}");
 }
+
+/// <summary>
+/// The funnel's follow-ups, sent to the owner's Telegram with a ready-to-send WhatsApp link (the owner sends it):
+/// 1. a student entered their details 30+ minutes ago and hasn't paid — a nudge before the booking expires;
+/// 2. a paid session ended — ask how it went, suggest the next lesson and pass the friend code.
+/// Each booking is followed up once per kind (marker in the audit log). Runs every 10 minutes.
+/// </summary>
+public sealed class OwnerFollowUps(DoseDbContext db, OwnerAlertQueue queue, IOptions<PublicSettings> siteOptions)
+{
+    static readonly Dose.Domain.Bookings.BookingStatus[] Attended =
+        [Dose.Domain.Bookings.BookingStatus.Confirmed, Dose.Domain.Bookings.BookingStatus.Completed];
+
+    static string WhatsApp(string phone, string text) =>
+        $"https://wa.me/{new string(phone.Where(char.IsDigit).ToArray())}?text={Uri.EscapeDataString(text)}";
+    static string First(string name) => name.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? name;
+
+    public async Task RunAsync(CancellationToken ct)
+    {
+        if (!queue.Enabled) return;
+        var now = DateTime.UtcNow;
+        var site = siteOptions.Value.AppBaseUrl.TrimEnd('/');
+        var done = (await db.AuditLogs.AsNoTracking().Where(a => a.Entity == "FollowUp" && a.AtUtc > now.AddDays(-3))
+            .Select(a => a.EntityId).ToListAsync(ct)).ToHashSet();
+
+        // 1. Details entered, not paid yet.
+        var unpaid = await db.Bookings.AsNoTracking()
+            .Where(b => b.Status == Dose.Domain.Bookings.BookingStatus.PendingPayment && b.StudentId != null
+                        && b.CreatedAtUtc < now.AddMinutes(-30) && b.CreatedAtUtc > now.AddHours(-24))
+            .Select(b => new { b.Id, b.Reference, b.QuotedPrice, b.Student!.Name, Phone = b.Student.ContactPhoneE164, b.Session!.ScopeTitleAr, b.PaymentDueAtUtc })
+            .Take(20).ToListAsync(ct);
+        foreach (var b in unpaid.Where(b => !done.Contains($"pay:{b.Id}")))
+        {
+            var msg = $"أهلاً {First(b.Name)} 👋 معاك فريق Dose. شفنا إنك بدأت تحجز «{b.ScopeTitleAr}» ولسه الدفع ماكملش. " +
+                      $"لو محتاج مساعدة في التحويل أو عندك أي سؤال قولّي، ومكانك محجوز لحد ما الوقت يخلص. رقم الحجز: {b.Reference}";
+            queue.Enqueue($"🔔 متابعة: كتب بياناته ومدفعش لسه\n\n📘 {b.ScopeTitleAr}\n💵 {b.QuotedPrice:0.##} ج.م\n🔖 {b.Reference}\n👤 {b.Name}" +
+                          (b.PaymentDueAtUtc is { } due ? $"\n⏳ الحجز بيخلص بعد {Math.Max(0, (int)(due - now).TotalMinutes)} دقيقة" : "") +
+                          $"\n\n💬 ابعتله الرسالة دي بضغطة:\n{WhatsApp(b.Phone, msg)}");
+            db.AuditLogs.Add(new AuditLog { Actor = "followup", Entity = "FollowUp", EntityId = $"pay:{b.Id}", Action = "alerted", AtUtc = now });
+        }
+
+        // 2. Session ended (1–24 h ago) for a paid booking.
+        var ended = await db.Bookings.AsNoTracking()
+            .Where(b => Attended.Contains(b.Status) && b.StudentId != null && b.SponsorBookingId == null
+                        && b.Session!.EndUtc < now.AddHours(-1) && b.Session.EndUtc > now.AddHours(-24))
+            .Select(b => new { b.Id, b.Reference, b.Student!.Name, Phone = b.Student.ContactPhoneE164, b.Session!.ScopeTitleAr, Subject = b.Session.Subject!.NameAr })
+            .Take(20).ToListAsync(ct);
+        foreach (var b in ended.Where(b => !done.Contains($"after:{b.Id}")))
+        {
+            var msg = $"أهلاً {First(b.Name)} 👋 إيه رأيك في جلسة «{b.ScopeTitleAr}»؟ رأيك بيفرق معانا جدًا. " +
+                      $"لو في درس تاني واقف معاك في {b.Subject} أو أي مادة، احجزه من هنا: {site}/?src=wa-after\n" +
+                      "ولو عندك صاحب محتاج شرح، ابعتله كود WA15 — خصم 15% على أول حجز ليه 🎁";
+            queue.Enqueue($"✅ جلسة خلصت — ابعت متابعة\n\n📘 {b.ScopeTitleAr}\n🔖 {b.Reference}\n👤 {b.Name}\n\n💬 رسالة المتابعة بضغطة:\n{WhatsApp(b.Phone, msg)}");
+            db.AuditLogs.Add(new AuditLog { Actor = "followup", Entity = "FollowUp", EntityId = $"after:{b.Id}", Action = "alerted", AtUtc = now });
+        }
+        await db.SaveChangesAsync(ct);
+    }
+}
