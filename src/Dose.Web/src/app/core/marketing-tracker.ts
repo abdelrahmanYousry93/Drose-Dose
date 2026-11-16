@@ -117,24 +117,27 @@ export class MarketingTracker {
     this.meta = true;
   }
 
-  /** TikTok's standard loader (same approach). */
+  /** TikTok's official base code, as functions instead of an inline script (the CSP allows analytics.tiktok.com). */
   private loadTikTok(id: string) {
-    if (!window.ttq) {
-      const methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie'];
-      const ttq = [] as unknown as Fn & unknown[];
-      for (const m of methods) (ttq as unknown as Record<string, unknown>)[m] = (...args: unknown[]) => { (ttq as unknown[]).push([m, ...args]); };
-      Object.assign(ttq, { methods, _i: {}, _t: {}, _o: {} });
-      (ttq as unknown as Record<string, unknown>)['load'] = (pid: string) => {
-        const s = document.createElement('script');
-        s.async = true;
-        s.src = `https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${encodeURIComponent(pid)}&lib=ttq`;
-        document.head.appendChild(s);
-      };
-      window.TiktokAnalyticsObject = 'ttq';
-      window.ttq = ttq as unknown as Fn;
-    }
-    (window.ttq['load'] as (id: string) => void)(id);
-    (window.ttq['page'] as Fn)();
+    const w = window as unknown as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    w['TiktokAnalyticsObject'] = 'ttq';
+    const ttq = (w['ttq'] = w['ttq'] || []);
+    ttq.methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group',
+      'enableCookie', 'disableCookie', 'holdConsent', 'revokeConsent', 'grantConsent'];
+    ttq.setAndDefer = (t: any, e: string) => { t[e] = (...args: unknown[]) => { t.push([e, ...args]); }; }; // eslint-disable-line @typescript-eslint/no-explicit-any
+    for (const m of ttq.methods) ttq.setAndDefer(ttq, m);
+    ttq.instance = (t: string) => { const e = ttq._i[t] || []; for (const m of ttq.methods) ttq.setAndDefer(e, m); return e; };
+    ttq.load = (e: string, n?: Record<string, unknown>) => {
+      const r = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+      ttq._i = ttq._i || {}; ttq._i[e] = []; ttq._i[e]._u = r;
+      ttq._t = ttq._t || {}; ttq._t[e] = +new Date();
+      ttq._o = ttq._o || {}; ttq._o[e] = n || {};
+      const s = document.createElement('script');
+      s.type = 'text/javascript'; s.async = true; s.src = `${r}?sdkid=${encodeURIComponent(e)}&lib=ttq`;
+      document.head.appendChild(s);
+    };
+    ttq.load(id);
+    ttq.page();
     this.tiktok = true;
   }
 }
