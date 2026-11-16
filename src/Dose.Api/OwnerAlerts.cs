@@ -32,15 +32,32 @@ public sealed class OwnerAlertQueue(
     string? chatId;
 
     public bool Enabled => options.Value.Enabled;
+
+    /// <summary>Last outcome, shown (without secrets) in /api/health so a missing alert can be diagnosed.</summary>
+    public string Status { get; private set; } = "not started";
+    public bool ChatLinked => chatId is not null || !string.IsNullOrWhiteSpace(options.Value.ChatId);
+    void Mark(string status) => Status = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm}Z {status}";
     public void Enqueue(string text) { if (Enabled) queue.Writer.TryWrite(text); }
+    public void Note(string status) => Mark(status);
 
     protected override async Task ExecuteAsync(CancellationToken stop)
     {
-        if (!Enabled) return;
+        if (!Enabled) { Status = "off: Telegram__BotToken not set"; return; }
+        try
+        {
+            using var me = await http.CreateClient("telegram").GetAsync(Api("getMe"), stop);
+            Mark(me.IsSuccessStatusCode ? "ready: bot token accepted" : $"bot token rejected by Telegram ({(int)me.StatusCode})");
+            if (me.IsSuccessStatusCode) await ChatAsync(http.CreateClient("telegram"), stop);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException) { Mark("cannot reach Telegram: " + ex.GetType().Name); }
         await foreach (var text in queue.Reader.ReadAllAsync(stop))
         {
             try { await SendAsync(text, stop); }
-            catch (Exception ex) when (ex is not OperationCanceledException) { log.LogWarning("Owner alert not sent: {Error}", ex.Message); }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Mark("send failed: " + ex.GetType().Name);
+                log.LogWarning("Owner alert not sent: {Error}", ex.Message);
+            }
         }
     }
 
@@ -50,10 +67,21 @@ public sealed class OwnerAlertQueue(
     {
         var client = http.CreateClient("telegram");
         var chat = await ChatAsync(client, ct);
-        if (chat is null) { log.LogWarning("Owner alert skipped: nobody has sent /start to the Telegram bot yet"); return; }
+        if (chat is null)
+        {
+            Mark("skipped: nobody has pressed Start in the bot chat yet");
+            log.LogWarning("Owner alert skipped: nobody has sent /start to the Telegram bot yet");
+            return;
+        }
         using var res = await client.PostAsJsonAsync(Api("sendMessage"),
             new { chat_id = chat, text, disable_web_page_preview = true }, ct);
-        if (!res.IsSuccessStatusCode) log.LogWarning("Telegram answered {Status}", (int)res.StatusCode);
+        if (res.IsSuccessStatusCode) Mark("sent");
+        else
+        {
+            var body = await res.Content.ReadAsStringAsync(ct);
+            Mark($"Telegram refused the message ({(int)res.StatusCode}): {body[..Math.Min(body.Length, 160)]}");
+            log.LogWarning("Telegram answered {Status}", (int)res.StatusCode);
+        }
     }
 
     /// <summary>Configured chat, else the remembered one, else the first private chat that messaged the bot.</summary>
@@ -67,7 +95,11 @@ public sealed class OwnerAlertQueue(
         if (chatId is not null) return chatId;
 
         using var res = await client.GetAsync(Api("getUpdates"), ct);
-        if (!res.IsSuccessStatusCode) return null;
+        if (!res.IsSuccessStatusCode)
+        {
+            Mark($"getUpdates failed ({(int)res.StatusCode})");
+            return null;
+        }
         using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct));
         foreach (var update in doc.RootElement.GetProperty("result").EnumerateArray())
             if (update.TryGetProperty("message", out var m) && m.TryGetProperty("chat", out var c)
@@ -100,7 +132,7 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
     {
         if (!queue.Enabled) return;
         try { if (await build() is { } text) queue.Enqueue(text); }
-        catch (Exception ex) { log.LogWarning("Owner alert not built: {Error}", ex.Message); }
+        catch (Exception ex) { log.LogWarning(ex, "Owner alert not built"); queue.Note("alert not built: " + ex.GetType().Name + " " + ex.Message[..Math.Min(ex.Message.Length, 120)]); }
     }
 
     async Task<string> SessionLinesAsync(Guid sessionId)

@@ -49,8 +49,12 @@ public static class Endpoints
         // Platform health check: the web app itself is up (200) even while the database is unreachable, so the host
         // keeps serving the site and a clear "temporarily unavailable" message instead of its own error page.
         // /api/health/db answers 503 when the database is unreachable (for monitoring).
-        api.MapGet("/health", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
-            Results.Ok(new { status = "ok", database = await DatabaseUpAsync(db, ct) ? "ok" : "unavailable" }))
+        api.MapGet("/health", async (Dose.Infrastructure.Persistence.DoseDbContext db, OwnerAlertQueue alerts, CancellationToken ct) =>
+            Results.Ok(new
+            {
+                status = "ok", database = await DatabaseUpAsync(db, ct) ? "ok" : "unavailable",
+                telegram = new { enabled = alerts.Enabled, chatLinked = alerts.ChatLinked, last = alerts.Status },
+            }))
             .DisableRateLimiting();
         // What the marketing publisher has queued and published (no secrets) — read by the marketing agency.
         // Marketing funnel: the site reports steps of visitors who came from a post link (no personal data).
