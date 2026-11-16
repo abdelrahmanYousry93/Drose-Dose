@@ -40,16 +40,20 @@ def card(slug, name, subj, color, fact):
     return f'''
 <div class="card" style="--c:{color}">
  <div class="cap"></div>
+ <div class="neck"></div>
  <div class="body">
   <div class="label">
-   <div class="top"><span class="mark">{logo}</span><b dir="ltr">Dose®</b><span class="chip">{subj}</span></div>
-   <div class="name"><bdi>{name}</bdi></div>
-   <div class="fact"><span class="k">💡 معلومة في 10 ثواني</span>{fact}</div>
-   <div class="scan">
-    <div class="tab">📱 امسح الكود</div>
-    <div class="qr">{qr_svg(url)}<span class="logo">{logo}</span></div>
-    <div class="why">واعرف إزاي جهتك تدّي<br/>طالب الجرعة دي</div>
+   <div class="band"><span class="mark">{logo}</span><b dir="ltr">Dose®</b><span class="chip">{subj}</span></div>
+   <div class="in">
+    <div class="name"><bdi>{name}</bdi></div>
+    <div class="fact"><span class="k">💡 معلومة في 10 ثواني</span>{fact}</div>
+    <div class="scan">
+     <div class="tab">📱 امسح الكود</div>
+     <div class="qr">{qr_svg(url)}<span class="logo">{logo}</span></div>
+     <div class="why">واعرف إزاي جهتك تدّي طالب الجرعة دي</div>
+    </div>
    </div>
+   <div class="band2">جرعة فهم · مش اشتراك شهر</div>
   </div>
  </div>
 </div>'''
@@ -66,24 +70,28 @@ html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 body{{font-family:Cairo,sans-serif;color:#0f1b3d;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}}
 .page{{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,82mm);grid-auto-rows:140mm;gap:5mm 12mm;justify-content:center;align-content:center;page-break-after:always}}
 .card{{display:flex;flex-direction:column;align-items:center}}
-.cap{{width:38mm;height:11mm;background:var(--c);border-radius:2mm 2mm 0 0;background-image:repeating-linear-gradient(90deg,transparent 0 3mm,rgba(255,255,255,.3) 3mm 3.6mm)}}
-.body{{width:82mm;flex:1;background:linear-gradient(90deg,#7a3e0c,#b8621a 45%,#8a4b12);border-radius:5mm;padding:4mm 3.5mm;outline:.3mm dashed #9aa3b5;outline-offset:.8mm}}
-.label{{height:100%;background:#fff;border-radius:3mm;border-top:2.4mm solid var(--c);border-bottom:2mm solid #ffc30a;padding:2.4mm 3mm 3mm;display:flex;flex-direction:column;gap:1.6mm}}
-.top{{display:flex;align-items:center;gap:1.4mm;font-size:3.6mm;color:#0b1f6b}}
-.mark svg{{width:5mm;height:5mm;display:block}}
-.chip{{margin-inline-start:auto;background:var(--c);color:#fff;border-radius:9mm;padding:0 2.4mm;font-size:3.1mm;font-weight:800;line-height:1.7}}
+.cap{{width:66mm;height:15mm;border:.35mm solid #b9c0cc;border-radius:2.5mm 2.5mm 1.2mm 1.2mm;background:repeating-linear-gradient(90deg,#f4f6f9 0 2.2mm,#d9dee6 2.2mm 2.8mm),#fff;box-shadow:inset 0 -2.2mm 0 #e3e7ee}}
+.neck{{width:60mm;height:3mm;border-inline:.35mm solid #b9c0cc;background:linear-gradient(90deg,#dfe3ea,#fff 35%,#fff 65%,#dfe3ea)}}
+.body{{width:82mm;flex:1;border:.35mm solid #b9c0cc;border-radius:9mm 9mm 5mm 5mm;background:linear-gradient(90deg,#dde2ea,#fbfcfd 22%,#fff 50%,#f4f6f9 78%,#d5dbe4);padding:8mm 2.6mm 6mm}}
+.label{{height:100%;background:#fff;border-radius:1.5mm;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 .3mm #e3e7ee}}
+.band{{background:var(--c);color:#fff;display:flex;align-items:center;gap:1.6mm;padding:1.6mm 3mm;font-size:3.8mm}}
+.band .mark{{background:#fff;border-radius:1.4mm;padding:.5mm}}
+.mark svg{{width:4.4mm;height:4.4mm;display:block}}
+.chip{{margin-inline-start:auto;background:#fff;color:var(--c);border-radius:9mm;padding:0 2.4mm;font-size:3.1mm;font-weight:900;line-height:1.7}}
+.in{{flex:1;display:flex;flex-direction:column;gap:1.6mm;padding:2.2mm 3mm 3mm}}
+.band2{{background:var(--c);color:#fff;font-weight:800;font-size:2.9mm;text-align:center;padding:.8mm}}
 .name{{font-weight:900;font-size:7.4mm;line-height:1.2;color:#0b1f6b}}
-.fact{{flex:none;background:#f5f8ff;border-radius:2.2mm;padding:2mm 2.4mm;font-size:3.6mm;line-height:1.55;font-weight:700;color:#0f1b3d}}
+.fact{{flex:none;background:#f5f8ff;border-radius:2.2mm;padding:2mm 2.4mm;font-size:3.5mm;line-height:1.55;font-weight:700;color:#0f1b3d}}
 .fact .k{{display:block;font-size:2.8mm;font-weight:800;color:var(--c);margin-bottom:.4mm}}
 .fact b{{font-weight:900;color:#0b1f6b}}
 .ltr{{direction:ltr;unicode-bidi:isolate;display:inline-block}}
-.scan{{margin-top:auto;position:relative;border:.8mm solid var(--c);border-radius:3mm;padding:4.4mm 2mm 2mm;display:flex;flex-direction:column;align-items:center;gap:1.4mm}}
+.scan{{margin-top:auto;position:relative;border:.8mm solid var(--c);border-radius:3mm;padding:4.4mm 2mm 1.8mm;display:flex;flex-direction:column;align-items:center;gap:1.2mm}}
 .tab{{position:absolute;top:-3.6mm;background:var(--c);color:#fff;font-weight:900;font-size:3.6mm;padding:.2mm 3.4mm;border-radius:9mm;white-space:nowrap}}
-.qr{{position:relative;width:38mm;height:38mm}}
+.qr{{position:relative;width:34mm;height:34mm}}
 .qr svg path{{fill:#0b1f6b}}
-.qr .logo{{position:absolute;inset:0;margin:auto;width:9mm;height:9mm;background:#fff;border-radius:1.6mm;padding:.8mm}}
+.qr .logo{{position:absolute;inset:0;margin:auto;width:8.5mm;height:8.5mm;background:#fff;border-radius:1.6mm;padding:.8mm}}
 .qr .logo svg{{width:100%;height:100%;display:block}}
-.why{{font-size:3.2mm;font-weight:800;line-height:1.35;text-align:center;color:#0b1f6b}}
+.why{{font-size:3.1mm;font-weight:800;line-height:1.35;text-align:center;color:#0b1f6b}}
 </style></head><body>
 {''.join('<div class="page">' + ''.join(card(*b) for b in p) + '</div>' for p in pages)}
 </body></html>'''
