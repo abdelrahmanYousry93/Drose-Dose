@@ -77,6 +77,31 @@ type Way = 'fund' | 'students';
         }
       }
 
+      @if (step() !== 'form') {
+        <aside class="founder" [attr.aria-label]="'ev.founderTitle' | t">
+          <div class="who">
+            <span class="avatar" aria-hidden="true">ع</span>
+            <div>
+              <div class="fname">{{ 'ev.founderName' | t }}</div>
+              <div class="frole">{{ 'ev.founderRole' | t }}</div>
+            </div>
+          </div>
+          <p class="fline">{{ 'ev.founderLine' | t }}</p>
+          <div class="fbtns">
+            <a class="fbtn call" [href]="'tel:' + founderPhone" (click)="tracker.trackEvent('ev-call')">
+              <span class="ic" aria-hidden="true">📞</span>
+              <span><b>{{ 'ev.callMe' | t }}</b><small dir="ltr">{{ founderPhoneShown }}</small></span>
+            </a>
+            @if (settings.whatsAppLink(founderWa()); as link) {
+              <a class="fbtn wa" [href]="link" target="_blank" rel="noopener" (click)="tracker.trackEvent('ev-chat')">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+                <span><b>{{ 'ev.waMe' | t }}</b><small dir="ltr">{{ waShown() }}</small></span>
+              </a>
+            }
+          </div>
+        </aside>
+      }
+
       <button type="button" class="more" (click)="full.emit()">{{ 'ev.more' | t }}</button>
     </div>
   `,
@@ -108,6 +133,22 @@ type Way = 'fund' | 'students';
     .back::before, .back::after { content: none !important; }
     .back, .more { background: none; border: 0; font: inherit; color: var(--dose-text-muted); cursor: pointer; text-decoration: underline; }
     .more { margin-top: 8px; font-size: .85rem; }
+    .founder { width: 100%; max-width: 420px; margin-top: 10px; padding: 16px; border-radius: 22px; text-align: start; color: #fff;
+      background: linear-gradient(135deg, var(--dose-navy, #0B1F6B), #1d3fa8); box-shadow: 0 14px 34px rgb(11 31 107 / .28); display: grid; gap: 12px; }
+    .who { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none; font-weight: 900; font-size: 1.5rem;
+      background: var(--dose-accent, #FFC30A); color: var(--dose-navy, #0B1F6B); box-shadow: 0 0 0 4px rgb(255 255 255 / .18); }
+    .fname { font-weight: 900; font-size: 1.15rem; }
+    .frole { font-size: .85rem; font-weight: 700; color: #c9d6ff; }
+    .fline { margin: 0; font-weight: 700; font-size: .98rem; line-height: 1.6; }
+    .fbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 360px) { .fbtns { grid-template-columns: 1fr; } }
+    .fbtn { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; text-decoration: none; font-weight: 800; min-height: 56px; }
+    .fbtn span { display: grid; line-height: 1.25; } .fbtn small { font-size: .78rem; font-weight: 700; opacity: .85; }
+    .fbtn .ic { width: 26px; height: 26px; font-size: 1.3rem; flex: none; display: grid; place-items: center; }
+    .fbtn.call { background: #fff; color: var(--dose-navy, #0B1F6B); }
+    .fbtn.wa { background: #25d366; color: #fff; }
+    .fbtn:active { transform: scale(.97); }
     .rain { position: relative; height: 90px; width: 100%; max-width: 320px; overflow: hidden; }
     .rain span { position: absolute; top: -30px; left: calc(var(--i) * 9%); font-size: 1.4rem; animation: fall 1.6s ease-in calc(var(--i) * .12s) infinite; }
     @keyframes fall { to { transform: translateY(130px) rotate(200deg); opacity: 0; } }
@@ -138,6 +179,14 @@ export class PartnersEvent {
   protected answer(dose: boolean) { this.right.set(dose); this.step.set('reveal'); this.tracker.trackEvent(dose ? 'ev-dose' : 'ev-month'); }
   protected toChoices() { this.step.set('how'); this.tracker.trackEvent('ev-how'); }
   protected pick(w: Way) { this.way.set(w); this.step.set('form'); this.tracker.trackEvent(w === 'fund' ? 'ev-fund' : 'ev-students'); }
+  /** The founder's direct line, shown publicly on the summit page at his request. WhatsApp goes to Dose's business number. */
+  protected readonly founderPhone = '+201010372614';
+  protected readonly founderPhoneShown = '0101 037 2614';
+  protected waShown() {
+    const n = this.settings.settings()?.whatsAppBusinessNumber?.replace(/\D/g, '') ?? '';
+    return n.startsWith('20') ? `0${n.slice(2, 5)} ${n.slice(5, 8)} ${n.slice(8)}` : n;
+  }
+  protected founderWa() { return translate('ev.founderWa', { lesson: this.lesson() ?? '' }).replace(/\s+\(\)/, ''); }
   protected waText() { return translate('event.waText', { lesson: this.lesson() ?? '' }).replace(/\s+\(\)/, ''); }
 
   protected async send() {
