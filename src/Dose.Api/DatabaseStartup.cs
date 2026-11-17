@@ -96,6 +96,7 @@ public sealed class DatabaseStartup(
             await ChemReviewNov2026.NarrowToChapterOneAsync(db, ct);
             await LaunchSessionsFixedPrice.EnsureAsync(db, DateTime.UtcNow, ct);
             await LaunchSessionsFixedPrice.WidenAsync(db, ct);
+            await ProgReviewNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
         }
     }
 

@@ -7,6 +7,31 @@ namespace Dose.IntegrationTests;
 public sealed class CampaignSeedTests(DatabaseFixture fx)
 {
     [Fact]
+    public async Task Programming_session_seed_creates_subject_teacher_session_and_free_code_once()
+    {
+        Assert.SkipWhen(DatabaseFixture.ServerConnection is null, "Set DOSE_TEST_SQL to run SQL Server integration tests.");
+        await using (var db = fx.NewDb())
+        {
+            await ProgReviewNov2026.EnsureAsync(db, fx.SeedTime);
+            await ProgReviewNov2026.EnsureAsync(db, fx.SeedTime); // second run is a no-op
+        }
+        await using (var db = fx.NewDb())
+        {
+            var s = await db.Sessions.Include(x => x.PricingPlanVersion!).ThenInclude(v => v.Tiers).SingleAsync(x => x.Id == ProgReviewNov2026.SessionId);
+            Assert.Equal(new DateTime(2026, 11, 21, 14, 0, 0, DateTimeKind.Utc), s.StartUtc); // 4 pm Cairo
+            Assert.All(s.PricingPlanVersion!.Tiers, t => Assert.Equal(50m, t.PricePerStudent));
+            var subject = await db.Subjects.SingleAsync(x => x.NameAr == ProgReviewNov2026.SubjectAr);
+            Assert.Equal(subject.Id, s.SubjectId);
+            Assert.True(await db.GradeSubjects.AnyAsync(l => l.SubjectId == subject.Id && l.GradeId == s.GradeId));
+            var teacher = await db.Teachers.SingleAsync(x => x.DisplayNameAr == ProgReviewNov2026.TeacherAr);
+            Assert.Equal((teacher.Id, true), (s.TeacherId, teacher.IsPublished));
+            var code = await db.PromoCodes.SingleAsync(p => p.Code == ProgReviewNov2026.Code);
+            Assert.Equal((100m, 15, (Guid?)s.Id), (code.Value, code.MaxTotalUses!.Value, code.SessionId));
+            Assert.Equal(1, await db.Sessions.CountAsync(x => x.Id == ProgReviewNov2026.SessionId));
+        }
+    }
+
+    [Fact]
     public async Task Chemistry_review_seed_creates_the_session_at_its_fixed_id_with_a_flat_price_and_the_free_code_once()
     {
         Assert.SkipWhen(DatabaseFixture.ServerConnection is null, "Set DOSE_TEST_SQL to run SQL Server integration tests.");
