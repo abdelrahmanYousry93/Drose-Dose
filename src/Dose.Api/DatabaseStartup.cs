@@ -97,6 +97,7 @@ public sealed class DatabaseStartup(
             await LaunchSessionsFixedPrice.EnsureAsync(db, DateTime.UtcNow, ct);
             await LaunchSessionsFixedPrice.WidenAsync(db, ct);
             await ProgReviewNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
+            await ProgReviewNov2026.RenameTeacherAsync(db, ct);
         }
     }
 

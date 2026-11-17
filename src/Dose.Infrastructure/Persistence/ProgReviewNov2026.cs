@@ -21,9 +21,19 @@ public static class ProgReviewNov2026
     public static readonly Guid SessionId = Guid.Parse("01a1f3c0-c4e3-7a20-8000-000000002021");
     public const string Code = "CODE15";
     public const string SubjectAr = "البرمجة والذكاء الاصطناعي";
-    public const string TeacherAr = "عبدالرحمن يسري";
+    public const string TeacherAr = "عبدالرحمن كامل";
     const string ScopeAr = "تطبيقات الويب: الموقع بيشتغل إزاي؟ (Client / Server / HTTP)";
     const string ScopeEn = "Web applications: how a website works (Client / Server / HTTP)";
+
+    /// <summary>Owner's correction (18 Nov): show him as «عبدالرحمن كامل» (no title). Renames the first deploy's teacher once.</summary>
+    public static async Task RenameTeacherAsync(DoseDbContext db, CancellationToken ct = default)
+    {
+        var t = await db.Teachers.FirstOrDefaultAsync(x => x.DisplayNameAr == "عبدالرحمن يسري" && x.PhotoUrl == "/m/teachers/prog-avatar.svg", ct);
+        if (t is null) return;
+        t.DisplayNameAr = TeacherAr;
+        t.DisplayNameEn = "Abdelrahman Kamel";
+        await db.SaveChangesAsync(ct);
+    }
 
     public static async Task EnsureAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
     {
@@ -46,7 +56,7 @@ public static class ProgReviewNov2026
         if (teacher is null)
             db.Teachers.Add(teacher = new Teacher
             {
-                DisplayNameAr = TeacherAr, DisplayNameEn = "Abdelrahman Yousry", PhotoUrl = "/m/teachers/prog-avatar.svg",
+                DisplayNameAr = TeacherAr, DisplayNameEn = "Abdelrahman Kamel", PhotoUrl = "/m/teachers/prog-avatar.svg",
                 BioAr = "مطوّر برمجيات بيشتغل في بناء المواقع والتطبيقات، وبيشرح البرمجة بأمثلة من الشغل الحقيقي.",
                 BioEn = "Software developer who builds websites and apps, and teaches programming with real-world examples.",
                 IsPublished = true,
