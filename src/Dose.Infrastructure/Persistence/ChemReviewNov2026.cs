@@ -19,6 +19,17 @@ public static class ChemReviewNov2026
     public static readonly Guid SessionId = Guid.Parse("01a1f3c0-c4e3-7a20-8000-000000002011");
     public const string Code = "CHEM20";
 
+    /// <summary>Owner's request (17 Nov): the chemistry teacher shows as «محمد علاء» with a generic avatar (no real photo).</summary>
+    public static async Task NameChemistryTeacherAsync(DoseDbContext db, CancellationToken ct = default)
+    {
+        var t = await db.Teachers.FirstOrDefaultAsync(x => x.DisplayNameAr == "مدرس Dose — كيمياء", ct);
+        if (t is null) return; // already renamed (or edited in the admin panel): never overwrite
+        t.DisplayNameAr = "محمد علاء";
+        t.DisplayNameEn = "Mohamed Alaa";
+        if (t.PhotoFileKey is null && t.PhotoUrl is null) t.PhotoUrl = "/m/teachers/chem-avatar.svg";
+        await db.SaveChangesAsync(ct);
+    }
+
     public static async Task EnsureAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
     {
         if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == Marker, ct)) return;

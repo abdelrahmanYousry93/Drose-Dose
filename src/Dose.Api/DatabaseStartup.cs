@@ -92,6 +92,7 @@ public sealed class DatabaseStartup(
         {
             await LaunchCatalog.EnsureAsync(db, DateTime.UtcNow, ct);
             await ChemReviewNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
+            await ChemReviewNov2026.NameChemistryTeacherAsync(db, ct);
         }
     }
 
