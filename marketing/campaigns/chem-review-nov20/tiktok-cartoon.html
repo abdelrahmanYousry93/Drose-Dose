@@ -1,0 +1,182 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/*FONTS*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: clip; }
+body { font-family: Cairo, sans-serif; color: #0B1F6B; background: #eaf2ff; }
+.bg { position: absolute; inset: 0; opacity: 0; }
+.b1 { background: linear-gradient(180deg, #2a1650, #11163a); }
+.b2 { background: linear-gradient(180deg, #fff6d6, #ffe08a); }
+.b3 { background: linear-gradient(180deg, #eaf2ff, #cfe0ff); }
+.b4 { background: #0061FA; }
+.scene { contain: paint; position: absolute; left: 50px; right: 160px; top: 180px; bottom: 430px; opacity: 0; }
+.cap { position: absolute; left: 0; right: 0; text-align: center; font-weight: 900; line-height: 1.25; }
+.w { color: #fff; } .y { color: #FFC30A; } .bl { color: #0061FA; }
+.bubble { position: absolute; background: #fff; color: #0B1F6B; border-radius: 34px; padding: 18px 30px; font-weight: 900; font-size: 50px; box-shadow: 0 12px 30px rgba(0,0,0,.18); white-space: nowrap; }
+.bubble:after { content: ""; position: absolute; bottom: -22px; width: 0; height: 0; border: 16px solid transparent; border-top: 24px solid #fff; }
+.bubble.l:after { left: 50px; } .bubble.r:after { right: 50px; }
+svg.char { position: absolute; overflow: visible; }
+.phone { position: absolute; width: 470px; height: 900px; left: 175px; top: 230px; background: #0B1F6B; border-radius: 64px; padding: 22px; box-shadow: 0 30px 60px rgba(11,31,107,.35); }
+.screen { position: relative; width: 100%; height: 100%; background: #f4f7ff; border-radius: 46px; overflow: hidden; }
+.pg { position: absolute; inset: 0; padding: 46px 26px; display: flex; flex-direction: column; gap: 18px; opacity: 0; }
+.pg .top { font-weight: 900; font-size: 30px; color: #0061FA; text-align: center; }
+.card { background: #fff; border-radius: 22px; padding: 18px; box-shadow: 0 6px 16px rgba(11,31,107,.1); font-weight: 800; font-size: 26px; }
+.yel { background: #FFC30A; border-radius: 22px; padding: 18px; text-align: center; font-weight: 900; font-size: 32px; }
+.btn { background: #0061FA; color: #fff; border-radius: 18px; padding: 16px; text-align: center; font-weight: 900; font-size: 30px; }
+.field { background: #fff; border: 3px solid #dbe5f7; border-radius: 16px; padding: 14px 16px; font-size: 26px; font-weight: 700; color: #9aa3b5; }
+.field.f { color: #0B1F6B; border-color: #0061FA; }
+.ok { margin: auto; text-align: center; font-weight: 900; font-size: 40px; color: #07803a; }
+.ok b { display: block; font-size: 130px; }
+.tap { position: absolute; width: 90px; height: 90px; border-radius: 50%; background: rgba(255,195,10,.55); border: 6px solid #FFC30A; opacity: 0; }
+.step { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-weight: 900; font-size: 64px; }
+.step i { font-style: normal; display: inline-block; width: 86px; height: 86px; line-height: 86px; border-radius: 50%; background: #0061FA; color: #fff; margin-inline-end: 14px; }
+.ribbon { position: absolute; left: 0; right: 0; background: #FFC30A; color: #0B1F6B; font-weight: 900; font-size: 84px; text-align: center; border-radius: 34px; padding: 18px 0; transform: rotate(-2deg); box-shadow: 0 0 60px rgba(255,195,10,.6); }
+.code { direction: ltr; display: inline-block; background: #FFC30A; color: #0B1F6B; border-radius: 18px; padding: 0 24px; letter-spacing: 3px; }
+.door { position: absolute; width: 300px; height: 470px; left: 40px; bottom: 60px; background: #0061FA; border-radius: 30px 30px 0 0; border: 10px solid #0B1F6B; display: grid; place-items: center; text-align: center; color: #fff; font-weight: 900; font-size: 44px; line-height: 1.3; }
+.door b { color: #FFC30A; font-size: 60px; display: block; }
+</style></head><body>
+<div class="bg b1" data-s="0" data-e="4.3"></div>
+<div class="bg b2" data-s="4.1" data-e="9.3"></div>
+<div class="bg b3" data-s="9.1" data-e="18.3"></div>
+<div class="bg b4" data-s="18.1" data-e="23"></div>
+
+<!-- 1. Hook: stressed student at night + parent -->
+<section class="scene" data-s="0" data-e="4.3">
+  <div class="cap w" style="top:0;font-size:78px" data-in="0" data-a="up">الباب الأول كيمياء<br><span class="y">مش راكب؟</span> 😵</div>
+  <svg class="char" id="student" style="left:330px;top:500px" width="430" height="680" data-in="0.2" data-a="pop" data-shake="0.6"></svg>
+  <div class="bubble r" style="right:20px;top:400px;font-size:44px" data-in="0.9" data-a="pop" data-hide="2.2">العناصر الانتقالية 😭</div>
+  <svg class="char" id="parent" style="left:-10px;top:540px" width="400" height="640" data-in="1.8" data-a="slide"></svg>
+  <div class="bubble l" style="left:0;top:400px;font-size:44px" data-in="2.3" data-a="pop">ولا الدروس كل شهر 💸</div>
+</section>
+
+<!-- 2. The offer: everyone runs to the free review door -->
+<section class="scene" data-s="4.1" data-e="9.3">
+  <div class="cap" style="top:0;font-size:64px" data-in="4.2" data-a="up">🔔 مراجعة <span class="bl">الباب الأول كله</span></div>
+  <div class="ribbon" style="top:140px;font-size:66px" data-in="4.6" data-a="stamp">🎁 ببلاش لأول 20 طالب</div>
+  <div class="door" style="bottom:150px" data-in="5" data-a="pop"><span><b>20</b>مكان مجاني<br>بس</span></div>
+  <svg class="char run" style="top:620px" width="260" height="480" data-run="5.4" data-from="610" data-to="300"></svg>
+  <svg class="char run" style="top:660px" width="260" height="480" data-run="5.9" data-from="610" data-to="420"></svg>
+  <svg class="char run" style="top:640px" width="260" height="480" data-run="6.4" data-from="610" data-to="540"></svg>
+  <div class="cap" style="bottom:10px;font-size:56px" data-in="7" data-a="pop" data-bob="7.2">اللي يسبق ياخد مكانه 🏃</div>
+</section>
+
+<!-- 3. How to book, on a phone -->
+<section class="scene" data-s="9.1" data-e="18.3">
+  <div class="step" data-in="9.2" data-a="up" data-hide="11.9"><i>1</i>افتح اللينك في البايو</div>
+  <div class="step" data-in="12" data-a="up" data-hide="14.7"><i>2</i>دوس «احجز ببلاش»</div>
+  <div class="step" data-in="14.8" data-a="up"><i>3</i>اسمك ورقمك… وخلاص ✅</div>
+  <div class="phone" data-in="9.3" data-a="pop"><div class="screen">
+    <div class="pg" data-show="9.3" data-until="12">
+      <div class="top">@drwsdose</div>
+      <div class="card" style="text-align:center">دروس Dose 💊</div>
+      <div class="card" style="color:#0061FA;text-align:center" id="biolink">🔗 drwsdose.com</div>
+      <div class="card" style="height:160px;background:#dbe5f7"></div>
+      <div class="card" style="height:160px;background:#dbe5f7"></div>
+    </div>
+    <div class="pg" data-show="12" data-until="14.8">
+      <div class="top">مراجعة كيمياء · الباب الأول</div>
+      <div class="yel">🎁 ببلاش لأول 20 طالب<div style="font-size:24px;margin-top:6px">الكود CHEM20 بيتطبق لوحده</div></div>
+      <div class="btn">احجز مكانك ببلاش 🎁</div>
+      <div class="card">📅 الجمعة 20 نوفمبر · 6 م</div>
+      <div class="card">⏱️ ساعتين · أونلاين</div>
+    </div>
+    <div class="pg" data-show="14.8" data-until="16.6">
+      <div class="top">بياناتك</div>
+      <div class="field" id="f1">اسم الطالب</div>
+      <div class="field" id="f2">رقم الواتساب</div>
+      <div class="card" style="color:#07803a;text-align:center">المطلوب: 0 ج.م 🎁</div>
+      <div class="btn">أكّد الحجز</div>
+    </div>
+    <div class="pg" data-show="16.6" data-until="99">
+      <div class="ok"><b>✅</b>مكانك اتحجز!<br><span style="font-size:28px;color:#0B1F6B">لينك الجلسة هيوصلك</span></div>
+    </div>
+    <div class="tap" data-tap="10.8" style="left:150px;top:270px"></div>
+    <div class="tap" data-tap="13.4" style="left:150px;top:330px"></div>
+    <div class="tap" data-tap="16.1" style="left:150px;top:500px"></div>
+  </div></div>
+</section>
+
+<!-- 4. CTA -->
+<section class="scene" data-s="18.1" data-e="23">
+  <div class="cap w" style="top:20px;font-size:80px" data-in="18.2" data-a="up">الجمعة <span class="y">6 مساءً</span></div>
+  <div class="cap w" style="top:150px;font-size:54px" data-in="18.4" data-a="up">مراجعة كيمياء · الباب الأول كله</div>
+  <svg class="char" id="happy" style="left:255px;top:270px" width="330" height="580" data-in="18.6" data-a="pop" data-bob="19"></svg>
+  <div class="cap w" style="top:870px;font-size:58px" data-in="19.2" data-a="pop">ببلاش لأول 20 طالب 🎁<br>الكود <span class="code">CHEM20</span></div>
+  <div class="cap y" style="top:1060px;font-size:50px" data-in="19.8" data-a="up">📲 ابعته لأي حد في تالتة ثانوي</div>
+  <div class="cap w" style="top:1150px;font-size:50px" data-in="20.3" data-a="pop" data-bob="20.5">اللينك في البايو 👆</div>
+</section>
+
+<script>
+// Simple original cartoon people (flat shapes): skin, hair, shirt colour, mood.
+function person(svg, { skin = '#f3c9a5', hair = '#2a1b12', shirt = '#0061FA', pants = '#0B1F6B', mood = 'happy', scarf = false, glasses = false } = {}) {
+  const w = +svg.getAttribute('width'), h = +svg.getAttribute('height');
+  svg.setAttribute('viewBox', '0 0 200 360');
+  const mouth = mood === 'sad' ? '<path d="M84 98 q16 -12 32 0" stroke="#5a2d1a" stroke-width="5" fill="none" stroke-linecap="round"/>'
+    : mood === 'wow' ? '<ellipse cx="100" cy="98" rx="10" ry="13" fill="#5a2d1a"/>'
+    : '<path d="M80 92 q20 22 40 0" stroke="#5a2d1a" stroke-width="5" fill="#fff" stroke-linecap="round"/>';
+  const brows = mood === 'sad' ? '<path d="M70 58 l18 6 M130 58 l-18 6" stroke="#2a1b12" stroke-width="5" stroke-linecap="round"/>' : '';
+  const tear = mood === 'sad' ? '<path d="M70 82 q-6 14 0 18 q6 -4 0 -18z" fill="#6ec6ff"/>' : '';
+  const hairTop = scarf ? `<path d="M44 78 q0 -72 56 -72 q56 0 56 72 q-18 -34 -56 -34 q-38 0 -56 34z" fill="${hair}"/>`
+    : `<path d="M52 66 q-4 -56 48 -58 q54 2 50 58 q-14 -26 -48 -24 q-36 -2 -50 24z" fill="${hair}"/>`;
+  svg.innerHTML = `
+    <rect x="62" y="232" width="30" height="110" rx="14" fill="${pants}"/><rect x="108" y="232" width="30" height="110" rx="14" fill="${pants}"/>
+    <ellipse cx="77" cy="346" rx="24" ry="12" fill="#222"/><ellipse cx="123" cy="346" rx="24" ry="12" fill="#222"/>
+    <path d="M44 250 q0 -100 56 -100 q56 0 56 100z" fill="${shirt}"/>
+    <rect x="22" y="160" width="26" height="92" rx="13" fill="${shirt}" transform="rotate(${mood === 'sad' ? -150 : 18} 35 165)"/>
+    <rect x="152" y="160" width="26" height="92" rx="13" fill="${shirt}" transform="rotate(${mood === 'sad' ? 150 : -18} 165 165)"/>
+    <rect x="88" y="128" width="24" height="26" fill="${skin}"/>
+    ${scarf ? `<path d="M36 82 q0 -80 64 -80 q64 0 64 80 l8 70 q-72 28 -144 0z" fill="${hair}"/>` : ''}
+    <circle cx="100" cy="76" r="54" fill="${skin}"/>
+    ${hairTop}
+    ${brows}
+    <circle cx="80" cy="74" r="7" fill="#2a1b12"/><circle cx="120" cy="74" r="7" fill="#2a1b12"/>
+    ${glasses ? '<circle cx="80" cy="74" r="15" fill="none" stroke="#0B1F6B" stroke-width="4"/><circle cx="120" cy="74" r="15" fill="none" stroke="#0B1F6B" stroke-width="4"/><path d="M95 74 h10" stroke="#0B1F6B" stroke-width="4"/>' : ''}
+    ${tear}${mouth}`;
+}
+person(document.getElementById('student'), { mood: 'sad', shirt: '#7c3aed', glasses: true });
+person(document.getElementById('parent'), { mood: 'sad', shirt: '#07b24c', hair: '#5a3a22', scarf: true, skin: '#e8b48c' });
+person(document.getElementById('happy'), { mood: 'happy', shirt: '#FFC30A', pants: '#0B1F6B', glasses: true });
+const looks = [{ shirt: '#e5484d', hair: '#1a1a1a' }, { shirt: '#7c3aed', scarf: true, hair: '#3b2414', skin: '#d9a07a' }, { shirt: '#07b24c', glasses: true }];
+document.querySelectorAll('svg.run').forEach((s, i) => person(s, { mood: 'wow', ...looks[i] }));
+
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const cl = (x) => Math.max(0, Math.min(1, x));
+window.seek = (t) => {
+  for (const s of document.querySelectorAll('[data-s]')) {
+    const a = +s.dataset.s, b = +s.dataset.e, f = 0.2;
+    s.style.opacity = t < a || t > b ? 0 : (a === 0 ? cl((b - t) / f) : Math.min(cl((t - a) / f), cl((b - t) / f)));
+  }
+  for (const el of document.querySelectorAll('[data-in]')) {
+    const p = cl((t - el.dataset.in) / 0.35); let tr = '', op = ease(p);
+    switch (el.dataset.a) {
+      case 'up': tr = `translateY(${(1 - ease(p)) * 60}px)`; break;
+      case 'pop': tr = `scale(${0.4 + 0.6 * back(p)})`; break;
+      case 'slide': tr = `translateX(${(1 - ease(p)) * -260}px)`; break;
+      case 'stamp': tr = `scale(${p <= 0 ? 1 : 2 - ease(p)}) rotate(-2deg)`; op = cl(p * 2); break;
+    }
+    if (el.dataset.hide && t > +el.dataset.hide) op = 0;
+    el.style.opacity = op; el.style.transform = tr;
+  }
+  for (const el of document.querySelectorAll('[data-shake]')) {
+    const u = t - el.dataset.shake; const dx = u > 0 && u < 3 ? Math.sin(u * 30) * 6 : 0;
+    el.style.transform += ` translateX(${dx}px)`;
+  }
+  for (const el of document.querySelectorAll('[data-bob]')) {
+    const u = t - el.dataset.bob; if (u > 0) el.style.transform += ` translateY(${Math.abs(Math.sin(u * 5)) * -18}px)`;
+  }
+  for (const el of document.querySelectorAll('[data-run]')) {
+    const u = cl((t - el.dataset.run) / 1.3), x = +el.dataset.from + (+el.dataset.to - +el.dataset.from) * ease(u);
+    el.style.left = x + 'px'; el.style.opacity = t < +el.dataset.run ? 0 : 1;
+    el.style.transform = `translateY(${u < 1 ? Math.abs(Math.sin(t * 16)) * -24 : 0}px) rotate(${u < 1 ? -6 : 0}deg)`;
+  }
+  for (const el of document.querySelectorAll('[data-show]')) el.style.opacity = t >= +el.dataset.show && t < +el.dataset.until ? 1 : 0;
+  for (const el of document.querySelectorAll('[data-tap]')) {
+    const u = t - el.dataset.tap; el.style.opacity = u > 0 && u < 0.6 ? 1 - u / 0.6 : 0; el.style.transform = `scale(${0.6 + cl(u / 0.6)})`;
+  }
+  const f1 = document.getElementById('f1'), f2 = document.getElementById('f2');
+  const typed = (s, a, b) => s.slice(0, Math.floor(s.length * cl((t - a) / (b - a))));
+  if (t > 15.1) { f1.textContent = typed('أحمد محمد', 15.1, 15.5) || 'اسم الطالب'; f1.classList.add('f'); } else { f1.textContent = 'اسم الطالب'; f1.classList.remove('f'); }
+  if (t > 15.6) { f2.textContent = typed('01xxxxxxxxx', 15.6, 16) || 'رقم الواتساب'; f2.classList.add('f'); } else { f2.textContent = 'رقم الواتساب'; f2.classList.remove('f'); }
+};
+window.seek(0);
+</script></body></html>
