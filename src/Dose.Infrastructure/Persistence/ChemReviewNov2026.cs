@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Dose.Infrastructure.Persistence;
 
 /// <summary>
-/// Owner's request (17 Nov 2026): a chemistry review for 3rd secondary — chapters 1 and 2 — on Friday 20 Nov at 6 pm
+/// Owner's request (17 Nov 2026): a chemistry review for 3rd secondary — chapter 1 (transition elements) — on Friday 20 Nov at 6 pm
 /// Cairo, 100 EGP per student, free for the first 20 who use code CHEM20 (100%, one use per number, this session only).
 /// The session has a fixed id so its direct booking link (/sessions/{id}) could go on the poster before deploy.
 /// Runs once (audit marker); afterwards the session and the code are edited from the admin panel.
@@ -18,6 +18,20 @@ public static class ChemReviewNov2026
     const string Marker = "ChemReview/2026-11-20";
     public static readonly Guid SessionId = Guid.Parse("01a1f3c0-c4e3-7a20-8000-000000002011");
     public const string Code = "CHEM20";
+    // Owner narrowed the review to chapter 1 only (17 Nov, 12:41).
+    const string ScopeAr = "مراجعة الباب الأول: العناصر الانتقالية (السلسلة الانتقالية الأولى + الحديد)";
+    const string ScopeEn = "Review of chapter 1: transition elements (first transition series + iron)";
+    const string OldScopeAr = "مراجعة الباب الأول والتاني: العناصر الانتقالية والتحليل الكيميائي (الكشف عن الشقوق + المعايرة)";
+
+    /// <summary>If an earlier deploy already created the session with chapters 1+2, narrow it to chapter 1.</summary>
+    public static async Task NarrowToChapterOneAsync(DoseDbContext db, CancellationToken ct = default)
+    {
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == SessionId && x.ScopeTitleAr == OldScopeAr, ct);
+        if (s is null) return;
+        s.ScopeTitleAr = ScopeAr;
+        s.ScopeTitleEn = ScopeEn;
+        await db.SaveChangesAsync(ct);
+    }
 
     /// <summary>Owner's request (17 Nov): the chemistry teacher shows as «محمد علاء» with a generic avatar (no real photo).</summary>
     public static async Task NameChemistryTeacherAsync(DoseDbContext db, CancellationToken ct = default)
@@ -63,8 +77,8 @@ public static class ChemReviewNov2026
         var start = CairoToUtc(new DateTime(2026, 11, 20, 18, 0, 0));
         var session = new Session
         {
-            ScopeTitleAr = "مراجعة الباب الأول والتاني: العناصر الانتقالية والتحليل الكيميائي (الكشف عن الشقوق + المعايرة)",
-            ScopeTitleEn = "Review of chapters 1 and 2: transition elements and chemical analysis (ion tests + titration)",
+            ScopeTitleAr = ScopeAr,
+            ScopeTitleEn = ScopeEn,
             GradeId = sec3.Id, StudyTrackId = track.Id, SubjectId = chemistry.Id, ServiceTypeId = service.Id, TeacherId = teacher.Id,
             StartUtc = start, EndUtc = start.AddMinutes(120), Mode = SessionMode.Group,
             Capacity = 60, MinParticipants = 1,
@@ -78,7 +92,7 @@ public static class ChemReviewNov2026
         if (!await db.PromoCodes.AnyAsync(p => p.Code == Code, ct))
             db.PromoCodes.Add(new PromoCode
             {
-                Code = Code, Description = "مراجعة الكيمياء 20 نوفمبر — مجانًا لأول 20", Kind = PromoKind.Percent, Value = 100,
+                Code = Code, Description = "مراجعة كيمياء الباب الأول 20 نوفمبر — مجانًا لأول 20", Kind = PromoKind.Percent, Value = 100,
                 SessionId = SessionId, MaxTotalUses = 20, MaxUsesPerPhone = 1, ValidToUtc = start,
                 CreatedBy = "campaign", CreatedAtUtc = nowUtc,
             });
