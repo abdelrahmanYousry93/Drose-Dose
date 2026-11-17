@@ -6,8 +6,9 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0061FA">
-  <!-- Always light: stops phone browsers (Chrome auto-dark, Samsung Internet) from repainting the site dark. -->
-  <meta name="color-scheme" content="only light">
+  <!-- Samsung Internet only skips its forced dark mode for sites that declare their own dark theme, so we declare one
+       (styles.scss) that keeps the same light colours. -->
+  <meta name="color-scheme" content="light dark">
   <meta name="supported-color-schemes" content="light">
   <meta name="description" content="Dose دروس — شرح مركّز للجزء اللي واقف معاك، من غير ما تدفع دروس شهرية.">
   <link rel="icon" type="image/svg+xml" href="brand/dose-mark.svg">

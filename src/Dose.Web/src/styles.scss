@@ -167,3 +167,9 @@ html[dir='ltr'] .back::before { content: '← '; }
 
 /* Always light, whatever the phone setting (forced dark modes respect this). */
 :root { color-scheme: only light; }
+/* Our "dark theme" is the light theme: browsers that force dark (Samsung Internet) leave sites alone when they
+   declare one, and every colour here stays light. */
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: light; }
+  html, body { background: var(--dose-bg); color: var(--dose-text); }
+}
