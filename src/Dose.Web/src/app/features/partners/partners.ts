@@ -7,6 +7,7 @@ import { TranslatePipe, translate } from '../../core/i18n';
 import { MarketingTracker } from '../../core/marketing-tracker';
 import { looksLikePhone } from '../../shared/validation';
 import { PublicSettingsService } from '../../core/public-settings.service';
+import { PartnersEvent } from './partners-event';
 
 /** Lessons on the event's medicine-bottle cards (QR src = ses26-<slug>). */
 const BOTTLES: Record<string, string> = {
@@ -23,33 +24,12 @@ const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const
  */
 @Component({
   selector: 'dose-partners',
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, PartnersEvent],
   template: `
     <section class="page">
-      @if (event()) {
-        <div class="event dose-card">
-          <span class="hello">{{ 'event.hello' | t }}</span>
-          @if (bottle(); as b) {
-            <h1>{{ 'event.scanned' | t: { lesson: b } }}</h1>
-            <p>{{ 'event.lessonLine' | t: { lesson: b } }}</p>
-          } @else {
-            <h1>{{ 'event.title' | t }}</h1>
-          }
-          <ul class="what">
-            <li>💊 {{ 'event.what1' | t }}</li>
-            <li>👥 {{ 'event.what2' | t }}</li>
-            <li>💰 {{ 'event.what3' | t }}</li>
-          </ul>
-          <p class="strong">{{ 'event.ask' | t }}</p>
-          <div class="acts">
-            <button type="button" class="act" (click)="choose('fund')"><b>🤝 {{ 'event.fund' | t }}</b><span>{{ 'event.fundHint' | t }}</span></button>
-            <button type="button" class="act" (click)="choose('students')"><b>🏫 {{ 'event.students' | t }}</b><span>{{ 'event.studentsHint' | t }}</span></button>
-            @if (settings.whatsAppLink(waText()); as link) {
-              <a class="act wa" [href]="link" target="_blank" rel="noopener"><b>💬 {{ 'event.chat' | t }}</b><span>{{ 'event.chatHint' | t }}</span></a>
-            }
-          </div>
-        </div>
-      }
+      @if (event() && !showFull()) {
+        <dose-partners-event [lesson]="bottle()" (full)="showFull.set(true)" />
+      } @else {
       <div class="hero">
         <div class="bottle" aria-hidden="true">
           <div class="cap"></div><div class="neck"></div>
@@ -143,6 +123,7 @@ const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const
           </form>
         }
       </div>
+      }
     </section>
   `,
   styles: `
@@ -204,6 +185,7 @@ export class Partners {
   /** Visitors who scanned an event card (src ses26 / ses26-<lesson>) get a short "who we are + what next" block. */
   private readonly src = this.tracker.current() ?? '';
   protected readonly event = signal(this.src.startsWith('ses26'));
+  protected readonly showFull = signal(false);
   protected readonly bottle = signal<string | null>(BOTTLES[this.src.replace(/^ses26-?/, '')] ?? null);
   protected waText() {
     return translate('event.waText', { lesson: this.bottle() ?? '' }).replace(/\s+\(\)/, '');
