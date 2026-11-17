@@ -157,7 +157,19 @@ export class PwaBanners {
     destroy.onDestroy(() => sub.unsubscribe());
 
     if (this.sw.isEnabled) {
-      const up = this.sw.versionUpdates.subscribe((evt) => { if (evt.type === 'VERSION_READY') this.updateReady.set(true); });
+      // A returning visitor first gets the cached (older) build. If the new one is ready within the first seconds,
+      // before they typed anything, switch to it right away instead of leaving them on an outdated page.
+      const openedAt = Date.now();
+      let typed = false;
+      const markTyped = () => { typed = true; };
+      document.addEventListener('input', markTyped, { once: true, capture: true });
+      destroy.onDestroy(() => document.removeEventListener('input', markTyped, { capture: true }));
+      const up = this.sw.versionUpdates.subscribe((evt) => {
+        if (evt.type !== 'VERSION_READY') return;
+        if (!typed && Date.now() - openedAt < 20_000) { void this.sw.activateUpdate().then(() => location.reload()); return; }
+        this.updateReady.set(true);
+      });
+      this.sw.checkForUpdate().catch(() => undefined);
       // A broken cached version cannot recover by itself: load the fresh one from the network.
       const broken = this.sw.unrecoverable.subscribe(() => location.reload());
       destroy.onDestroy(() => { up.unsubscribe(); broken.unsubscribe(); });
