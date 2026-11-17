@@ -39,14 +39,14 @@ type Way = 'fund' | 'students';
           <p class="react">{{ (right() ? 'ev.right' : 'ev.wrong') | t }}</p>
           <h1 class="brand">{{ 'ev.is' | t }}</h1>
           <p class="one">{{ 'ev.oneLine' | t }}</p>
-          <button type="button" class="go" (click)="step.set('how')">{{ 'ev.next' | t }} ←</button>
+          <button type="button" class="go" (click)="toChoices()">{{ 'ev.next' | t }} ←</button>
         }
         @case ('how') {
           <h1>{{ 'ev.howTitle' | t }}</h1>
           <button type="button" class="tile" (click)="pick('fund')"><b>🤝</b><span>{{ 'ev.fund' | t }}</span></button>
           <button type="button" class="tile" (click)="pick('students')"><b>🏫</b><span>{{ 'ev.students' | t }}</span></button>
           @if (settings.whatsAppLink(waText()); as link) {
-            <a class="tile wa" [href]="link" target="_blank" rel="noopener"><b>💬</b><span>{{ 'ev.chat' | t }}</span></a>
+            <a class="tile wa" [href]="link" target="_blank" rel="noopener" (click)="tracker.trackEvent('ev-chat')"><b>💬</b><span>{{ 'ev.chat' | t }}</span></a>
           }
         }
         @case ('form') {
@@ -115,7 +115,7 @@ type Way = 'fund' | 'students';
 })
 export class PartnersEvent {
   private readonly api = inject(Api);
-  private readonly tracker = inject(MarketingTracker);
+  protected readonly tracker = inject(MarketingTracker);
   protected readonly settings = inject(PublicSettingsService);
   readonly lesson = input<string | null>(null);
   readonly full = output<void>();
@@ -135,8 +135,9 @@ export class PartnersEvent {
   protected phone = '';
 
   protected n() { return { hook: 1, reveal: 2, how: 3, form: 4, done: 4 }[this.step()]; }
-  protected answer(dose: boolean) { this.right.set(dose); this.step.set('reveal'); }
-  protected pick(w: Way) { this.way.set(w); this.step.set('form'); }
+  protected answer(dose: boolean) { this.right.set(dose); this.step.set('reveal'); this.tracker.trackEvent(dose ? 'ev-dose' : 'ev-month'); }
+  protected toChoices() { this.step.set('how'); this.tracker.trackEvent('ev-how'); }
+  protected pick(w: Way) { this.way.set(w); this.step.set('form'); this.tracker.trackEvent(w === 'fund' ? 'ev-fund' : 'ev-students'); }
   protected waText() { return translate('event.waText', { lesson: this.lesson() ?? '' }).replace(/\s+\(\)/, ''); }
 
   protected async send() {

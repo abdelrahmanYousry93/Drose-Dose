@@ -5,6 +5,8 @@ import { filter } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 type Step = 'visit' | 'whatsapp' | 'hold' | 'request' | 'paid';
+/** Summit scan-flow steps: counted in our own report only, never sent to ad pixels. */
+export type EventStep = 'ev-dose' | 'ev-month' | 'ev-how' | 'ev-fund' | 'ev-students' | 'ev-chat';
 const KEY = 'dose.src';
 const KEEP_DAYS = 30;
 
@@ -92,7 +94,13 @@ export class MarketingTracker {
     } catch { /* never break the page */ }
   }
 
-  private send(source: string, step: Step, reference?: string) {
+  /** A step in the summit scan flow (only when the visitor came from an event card). */
+  trackEvent(step: EventStep) {
+    const src = this.current();
+    if (src) this.send(src, step);
+  }
+
+  private send(source: string, step: Step | EventStep, reference?: string) {
     this.http.post('/api/track', { source, step, reference: reference ?? null }).subscribe({ error: () => { /* best effort */ } });
   }
 

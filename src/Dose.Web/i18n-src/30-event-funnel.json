@@ -1,0 +1,10 @@
+{
+ "funnel.event": ["قمة التعليم المجتمعي: سكانات الزجاجات", "Summit: bottle-card scans"],
+ "funnel.eventLead": ["كل زجاجة في سطر. 💊 = جاوب «جرعة» · 📅 = جاوب «شهر» · الاختيارات = وصل لشاشة «اختار» · 🤝 تمويل · 🏫 طلاب · 💬 واتساب · بعتوا = الفورم اتبعت.", "One row per card. 💊 = answered “dose” · 📅 = answered “month” · Choices = reached the choices screen · 🤝 fund · 🏫 students · 💬 WhatsApp · Sent = form sent."],
+ "funnel.card": ["الزجاجة", "Card"],
+ "funnel.scans": ["سكانات", "Scans"],
+ "funnel.choices": ["الاختيارات", "Choices"],
+ "funnel.sent": ["بعتوا", "Sent"],
+ "funnel.doses": ["جرعات", "Doses"],
+ "funnel.total": ["الإجمالي", "Total"]
+}

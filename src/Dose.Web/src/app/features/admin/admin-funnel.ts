@@ -9,6 +9,7 @@ interface Overall { visitors: number; bookingsStarted: number; detailsEntered: n
 interface SourceRow { source: string; visits: number; whatsApp: number; holds: number; requests: number; paid: number }
 interface PromoRow { code: string; bookings: number; paid: number }
 interface DayRow { day: string; started: number; paid: number }
+interface EventRow { source: string; scans: number; answeredDose: number; answeredMonth: number; reachedChoices: number; pickedFund: number; pickedStudents: number; openedWhatsApp: number; sent: number; dosesPledged: number }
 interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRow[]; days: DayRow[]; engagement: Record<string, Record<string, number | null>> }
 
 /** The sales funnel at a glance: steps with conversion between them, sources, promo codes, post engagement, days. */
@@ -87,9 +88,29 @@ interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRo
           </table></div>
         }
       }
+      @if (event().length) {
+        <div class="dose-card box">
+          <h2>{{ 'funnel.event' | t }}</h2>
+          <p class="muted small">{{ 'funnel.eventLead' | t }}</p>
+          <div class="table-wrap"><table class="ev">
+            <thead><tr><th>{{ 'funnel.card' | t }}</th><th>{{ 'funnel.scans' | t }}</th><th>💊</th><th>📅</th><th>{{ 'funnel.choices' | t }}</th><th>🤝</th><th>🏫</th><th>💬</th><th>{{ 'funnel.sent' | t }}</th><th>{{ 'funnel.doses' | t }}</th></tr></thead>
+            <tbody>
+              @for (r of event(); track r.source) {
+                <tr><td dir="ltr">{{ r.source }}</td><td><b>{{ r.scans }}</b></td><td>{{ r.answeredDose }}</td><td>{{ r.answeredMonth }}</td><td>{{ r.reachedChoices }}</td><td>{{ r.pickedFund }}</td><td>{{ r.pickedStudents }}</td><td>{{ r.openedWhatsApp }}</td><td><b>{{ r.sent }}</b></td><td>{{ r.dosesPledged }}</td></tr>
+              }
+              <tr class="tot"><td>{{ 'funnel.total' | t }}</td><td>{{ sum('scans') }}</td><td>{{ sum('answeredDose') }}</td><td>{{ sum('answeredMonth') }}</td><td>{{ sum('reachedChoices') }}</td><td>{{ sum('pickedFund') }}</td><td>{{ sum('pickedStudents') }}</td><td>{{ sum('openedWhatsApp') }}</td><td>{{ sum('sent') }}</td><td>{{ sum('dosesPledged') }}</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      }
     </section>
   `,
   styles: `
+    .table-wrap { overflow-x: auto; }
+    table.ev { border-collapse: collapse; width: 100%; font-size: .85rem; white-space: nowrap; }
+    table.ev th, table.ev td { padding: 6px 8px; border-bottom: 1px solid var(--dose-border); text-align: center; }
+    table.ev tr.tot td { font-weight: 800; border-top: 2px solid var(--dose-navy); }
+
     .periods { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; }
     .periods button { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--dose-border, #d0d5dd); background: #fff; font: 600 0.92rem var(--dose-font); cursor: pointer; }
     .periods button.on { background: var(--dose-navy); color: #fff; border-color: var(--dose-navy); }
@@ -142,7 +163,13 @@ export class AdminFunnel {
     shares: v['shares'] as number | null, reach: v['reach'] as number | null,
   })));
 
-  constructor() { void this.load(30); }
+  protected readonly event = signal<EventRow[]>([]);
+  protected sum(k: keyof EventRow) { return this.event().reduce((a, r) => a + (r[k] as number), 0); }
+
+  constructor() {
+    void this.load(30);
+    firstValueFrom(this.http.get<EventRow[]>(`${environment.apiBaseUrl}/admin/funnel/event?prefix=ses26`)).then((r) => this.event.set(r)).catch(() => undefined);
+  }
 
   protected money = (n: number) => fmtMoney(n);
 

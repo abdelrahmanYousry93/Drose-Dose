@@ -35,6 +35,26 @@ public sealed partial class MarketingReport(
         return true;
     }
 
+    public sealed record EventRow(string Source, int Scans, int AnsweredDose, int AnsweredMonth, int ReachedChoices,
+        int PickedFund, int PickedStudents, int OpenedWhatsApp, int Sent, int DosesPledged);
+
+    /// <summary>Summit scan flow, per card (source = prefix or prefix-&lt;lesson&gt;): how far people got. Counts only.</summary>
+    public async Task<List<EventRow>> EventFunnelAsync(string prefix, CancellationToken ct)
+    {
+        var touches = await db.Set<MarketingTouch>().AsNoTracking().Where(t => t.Source.StartsWith(prefix))
+            .Select(t => new { t.Source, t.Step }).ToListAsync(ct);
+        var pledges = await db.Set<PartnerPledge>().AsNoTracking().Where(p => p.Source != null && p.Source.StartsWith(prefix))
+            .Select(p => new { Source = p.Source!, p.Doses }).ToListAsync(ct);
+        var sources = touches.Select(t => t.Source).Concat(pledges.Select(p => p.Source)).Distinct();
+        return sources.Select(src =>
+        {
+            int C(string step) => touches.Count(t => t.Source == src && t.Step == step);
+            var mine = pledges.Where(p => p.Source == src).ToList();
+            return new EventRow(src, C("visit"), C("ev-dose"), C("ev-month"), C("ev-how"), C("ev-fund"), C("ev-students"), C("ev-chat"),
+                mine.Count, mine.Sum(p => p.Doses));
+        }).OrderByDescending(r => r.Scans).ThenBy(r => r.Source).ToList();
+    }
+
     public sealed record SourceRow(string Source, int Visits, int WhatsApp, int Holds, int Requests, int Paid);
 
     public async Task<List<SourceRow>> FunnelAsync(DateTime sinceUtc, CancellationToken ct)

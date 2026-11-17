@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dose.IntegrationTests;
 
@@ -61,6 +62,16 @@ public sealed class PartnerTests(DatabaseFixture fx)
         Assert.Equal(2, wall.GetProperty("organizations").GetInt32());
         var names = wall.GetProperty("names").EnumerateArray().Select(n => n.GetProperty("organization").GetString()).ToList();
         Assert.Equal(["مؤسسة اختبار " + tag], names);
+
+        // Scan-flow steps are counted per card, with the pledges sent from it.
+        foreach (var step in new[] { "visit", "ev-dose", "ev-how", "ev-fund" })
+            Assert.Equal(HttpStatusCode.NoContent, (await http.PostAsJsonAsync("/api/track", new { source = $"{tag}-density", step, reference = (string?)null })).StatusCode);
+        using (var scope = app.Services.CreateScope())
+        {
+            var rows = await scope.ServiceProvider.GetRequiredService<Dose.Api.MarketingReport>().EventFunnelAsync(tag, default);
+            var d = rows.Single(r => r.Source == $"{tag}-density");
+            Assert.Equal((1, 1, 0, 1, 1, 1, 80), (d.Scans, d.AnsweredDose, d.AnsweredMonth, d.ReachedChoices, d.PickedFund, d.Sent, d.DosesPledged));
+        }
 
         // The admin list is not public.
         Assert.Equal(HttpStatusCode.Unauthorized, (await http.GetAsync("/api/admin/partners")).StatusCode);

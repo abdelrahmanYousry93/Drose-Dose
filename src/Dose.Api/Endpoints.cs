@@ -76,6 +76,9 @@ public static class Endpoints
             var (overall, promos, byDay) = await report.SiteFunnelAsync(since, ct);
             return Results.Ok(new { since, overall, promos, days = byDay, sources = await report.FunnelAsync(since, ct), engagement = await report.EngagementAsync(ct) });
         }).RequireAuthorization(AdminPolicy);
+        app.MapGet("/api/admin/funnel/event", (string? prefix, MarketingReport report, CancellationToken ct) =>
+            report.EventFunnelAsync(string.IsNullOrWhiteSpace(prefix) ? "ses26" : prefix.Trim().ToLowerInvariant(), ct))
+            .RequireAuthorization(AdminPolicy);
         api.MapGet("/marketing/status", async (MarketingPublisher publisher, CancellationToken ct) =>
             Results.Ok(await publisher.StatusAsync(ct)));
         api.MapGet("/health/db", async (Dose.Infrastructure.Persistence.DoseDbContext db, CancellationToken ct) =>
