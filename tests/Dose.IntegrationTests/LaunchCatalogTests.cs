@@ -71,6 +71,7 @@ public sealed class LaunchCatalogTests(DatabaseFixture fx)
         // 17 Nov: open groups become a fixed 120 per student; the Saturday chapter-1 session is withdrawn.
         await LaunchSessionsFixedPrice.EnsureAsync(db, now);
         await LaunchSessionsFixedPrice.EnsureAsync(db, now); // once
+        await LaunchSessionsFixedPrice.WidenAsync(db);
         db.ChangeTracker.Clear();
         var after = await db.Sessions.Include(x => x.PricingPlanVersion!).ThenInclude(v => v.Tiers).Include(x => x.TargetTier)
             .Where(x => ids.Contains(x.TeacherId)).ToListAsync();
@@ -81,6 +82,7 @@ public sealed class LaunchCatalogTests(DatabaseFixture fx)
         {
             Assert.Equal(120m, Dose.Application.Sessions.SessionPricing.CurrentPrice(x));
             Assert.Null(Dose.Application.Sessions.SessionPricing.GroupTerms(x));
+            Assert.Equal(50, x.Capacity);
         });
     }
 }

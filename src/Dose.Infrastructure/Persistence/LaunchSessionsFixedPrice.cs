@@ -62,6 +62,17 @@ public static class LaunchSessionsFixedPrice
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>Owner (17 Nov): the fixed-price launch groups take up to 50 students. Only raises seats, never lowers.</summary>
+    public static async Task WidenAsync(DoseDbContext db, CancellationToken ct = default)
+    {
+        var sessions = await db.Sessions
+            .Where(s => s.Mode == SessionMode.Group && s.Status == SessionStatus.Published && s.Capacity < 50
+                        && s.TargetTier != null && s.TargetTier.NameAr == "سعر ثابت" && s.TargetTier.PricePerStudent == Price)
+            .ToListAsync(ct);
+        foreach (var s in sessions) s.Capacity = 50;
+        if (sessions.Count > 0) await db.SaveChangesAsync(ct);
+    }
+
     static void Mark(DoseDbContext db, DateTime nowUtc, int moved, int withdrawn) =>
         db.AuditLogs.Add(new AuditLog { Actor = "campaign", Entity = "Campaign", EntityId = Marker, Action = $"fixed-price:{moved} withdrawn:{withdrawn}", AtUtc = nowUtc });
 }
