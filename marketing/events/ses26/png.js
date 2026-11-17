@@ -5,7 +5,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
   for (const f of ['bottles.html', 'bottles-2.html']) {
     const p = await b.newPage({ viewport: { width: 900, height: 1300 }, deviceScaleFactor: 3.125 });
     let html = fs.readFileSync(path.join(__dirname, f), 'utf8').replace('</style>',
-      '.card{background:none!important;outline:none!important;padding:0!important}body{background:transparent!important}.page{gap:10mm!important}</style>');
+      '.card{background:none!important;outline:none!important;padding:0!important;filter:none!important}.cap,.neck,.body{box-shadow:none!important;filter:none!important}body{background:transparent!important}.page{gap:10mm!important}</style>');
     const tmp = path.join(__dirname, '_tmp.html'); fs.writeFileSync(tmp, html);
     await p.goto('file://' + tmp); await p.evaluate(() => document.fonts.ready);
     const cards = await p.$$('.card');
