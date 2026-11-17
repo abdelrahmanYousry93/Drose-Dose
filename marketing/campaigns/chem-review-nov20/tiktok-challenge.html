@@ -1,0 +1,114 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/*FONTS*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: clip; background: #05061a; }
+body { font-family: Cairo, sans-serif; color: #fff; }
+.stage { position: absolute; inset: 0; background:
+  radial-gradient(circle at 20% 15%, rgba(124,58,237,.45), transparent 40%),
+  radial-gradient(circle at 85% 80%, rgba(0,97,250,.45), transparent 45%), #05061a; }
+.grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,.05) 2px, transparent 2px); background-size: 90px 90px; }
+.flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.scene { contain: paint; position: absolute; left: 60px; right: 170px; top: 220px; bottom: 460px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 34px; opacity: 0; }
+.tag { font-weight: 900; font-size: 54px; background: #e5484d; border-radius: 999px; padding: 6px 40px; box-shadow: 0 0 40px rgba(229,72,77,.6); }
+.h1 { font-weight: 900; font-size: 100px; line-height: 1.15; }
+.h2 { font-weight: 800; font-size: 56px; line-height: 1.35; }
+.y { color: #FFC30A; } .g { color: #2fe08a; }
+.qn { font-weight: 900; font-size: 44px; color: #9ec2ff; }
+.q { font-weight: 900; font-size: 64px; line-height: 1.3; }
+.ring { position: relative; width: 190px; height: 190px; }
+.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 96px; font-weight: 900; }
+.opts { width: 100%; display: grid; gap: 18px; }
+.opt { border: 5px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); border-radius: 28px; padding: 16px 28px; font-weight: 900; font-size: 56px; display: flex; justify-content: space-between; align-items: center; }
+.opt.ok { border-color: #2fe08a; background: rgba(47,224,138,.18); }
+.opt.no { opacity: .35; }
+.opt .mk { font-size: 56px; }
+.chips { display: flex; gap: 18px; direction: ltr; }
+.chip { font-weight: 900; font-size: 64px; border-radius: 26px; padding: 10px 26px; background: rgba(255,255,255,.1); border: 4px solid rgba(255,255,255,.3); }
+.ribbon { width: 100%; background: #FFC30A; color: #0B1F6B; font-weight: 900; font-size: 74px; line-height: 1.2; border-radius: 34px; padding: 20px 10px; transform: rotate(-2deg); box-shadow: 0 0 70px rgba(255,195,10,.55); }
+.code { direction: ltr; display: inline-block; background: #0061FA; border-radius: 20px; padding: 2px 28px; letter-spacing: 4px; }
+.small { font-size: 44px; font-weight: 800; color: #c9d6ff; }
+</style></head><body>
+<div class="stage"></div><div class="grid"></div><div class="flash" id="flash"></div>
+
+<section class="scene" data-s="0" data-e="2.4">
+  <div class="tag" data-in="0" data-a="pop">⏱️ تحدي</div>
+  <div class="h1" data-in="0.1" data-a="up">3 أسئلة<br><span class="y">3 ثواني</span> لكل سؤال</div>
+  <div class="h2" data-in="0.9" data-a="up">لو جاوبتهم كلهم صح…<br>متحضرش المراجعة 😏</div>
+</section>
+
+<div id="qs"></div>
+
+<section class="scene" data-s="14.2" data-e="16.7">
+  <div class="h1" data-in="14.25" data-a="up">جبت كام<br>من <span class="y">3</span>؟</div>
+  <div class="chips" data-in="14.6" data-a="pop"><span class="chip">0/3</span><span class="chip">1/3</span><span class="chip">2/3</span><span class="chip">3/3</span></div>
+  <div class="h2 y" data-in="15.1" data-a="pop" data-bob="15.3">اكتب نتيجتك في الكومنت 👇</div>
+</section>
+
+<section class="scene" data-s="16.7" data-e="21">
+  <div class="h2" data-in="16.75" data-a="up">مش 3/3؟ المراجعة دي ليك 😉</div>
+  <div class="h1" data-in="17" data-a="up" style="font-size:84px">مراجعة <span class="y">الباب الأول</span> كله</div>
+  <div class="small" data-in="17.3" data-a="up">الجمعة 6 مساءً · أونلاين · تالتة ثانوي</div>
+  <div class="ribbon" data-in="17.7" data-a="stamp">🎁 ببلاش لأول 20 بس</div>
+  <div class="h2" data-in="18.4" data-a="up">بالكود <span class="code">CHEM20</span></div>
+  <div class="h2 y" data-in="18.9" data-a="pop" data-bob="19.1">الحق مكانك · اللينك في البايو 👆</div>
+</section>
+
+<script>
+const Q = [
+  { n: 'سؤال 1', q: 'أول عنصر في السلسلة الانتقالية الأولى؟', o: ['Sc', 'Ti', 'Zn'], ok: 0 },
+  { n: 'سؤال 2', q: 'التوزيع الإلكتروني لأيون <span dir="ltr">Fe³⁺</span>؟', o: ['[Ar] 3d⁶', '[Ar] 3d⁵', '[Ar] 4s² 3d³'], ok: 1 },
+  { n: 'سؤال 3', q: 'سبيكة الحديد مع الكربون اسمها؟', o: ['البرونز', 'النحاس الأصفر', 'الصلب'], ok: 2 },
+];
+const qs = document.getElementById('qs');
+Q.forEach((x, i) => {
+  const s = 2.4 + i * 3.93, t0 = s + 0.45, reveal = t0 + 3;
+  qs.insertAdjacentHTML('beforeend', `<section class="scene" data-s="${s}" data-e="${(s + 3.93).toFixed(2)}">
+    <div class="qn" data-in="${s}" data-a="up">${x.n} من 3</div>
+    <div class="q" data-in="${s + 0.05}" data-a="up">${x.q}</div>
+    <div class="ring" data-in="${s + 0.2}" data-a="pop" data-timer="${t0}">
+      <svg viewBox="0 0 190 190"><circle cx="95" cy="95" r="80" stroke="rgba(255,255,255,.15)" stroke-width="16" fill="none"/>
+      <circle class="arc" cx="95" cy="95" r="80" stroke="#FFC30A" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="503" stroke-dashoffset="0"/></svg>
+      <b>3</b></div>
+    <div class="opts">${x.o.map((o, j) => `<div class="opt" data-in="${(s + 0.3 + j * 0.08).toFixed(2)}" data-a="slide" data-res="${reveal}" data-ok="${j === x.ok}"><span dir="ltr">${o}</span><span class="mk"></span></div>`).join('')}</div>
+  </section>`);
+});
+window.FLASH = Q.map((_, i) => 2.4 + i * 3.93 + 0.45 + 3);
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const cl = (x) => Math.max(0, Math.min(1, x));
+window.seek = (t) => {
+  for (const s of document.querySelectorAll('[data-s]')) {
+    const a = +s.dataset.s, b = +s.dataset.e, f = 0.15;
+    s.style.opacity = t < a || t > b ? 0 : (a === 0 ? cl((b - t) / f) : Math.min(cl((t - a) / f), cl((b - t) / f)));
+  }
+  for (const el of document.querySelectorAll('[data-in]')) {
+    const p = cl((t - el.dataset.in) / 0.3); let tr = '', op = ease(p);
+    switch (el.dataset.a) {
+      case 'up': tr = `translateY(${(1 - ease(p)) * 60}px)`; break;
+      case 'pop': tr = `scale(${0.4 + 0.6 * back(p)})`; break;
+      case 'slide': tr = `translateX(${(1 - ease(p)) * 100}px)`; break;
+      case 'stamp': tr = `scale(${p <= 0 ? 1 : 2 - ease(p)}) rotate(-2deg)`; op = cl(p * 2); break;
+    }
+    el.style.opacity = op; el.style.transform = tr;
+  }
+  for (const r of document.querySelectorAll('[data-timer]')) {
+    const u = cl((t - r.dataset.timer) / 3);
+    r.querySelector('.arc').setAttribute('stroke-dashoffset', String(503 * u));
+    r.querySelector('.arc').setAttribute('stroke', u > 0.66 ? '#e5484d' : '#FFC30A');
+    r.querySelector('b').textContent = u >= 1 ? '✓' : String(Math.max(1, 3 - Math.floor(u * 3)));
+    if (u > 0.66 && u < 1) r.style.transform += ` scale(${1 + Math.abs(Math.sin(t * 18)) * 0.06})`;
+  }
+  for (const o of document.querySelectorAll('[data-res]')) {
+    const done = t >= +o.dataset.res, ok = o.dataset.ok === 'true';
+    o.classList.toggle('ok', done && ok); o.classList.toggle('no', done && !ok);
+    o.querySelector('.mk').textContent = done ? (ok ? '✅' : '') : '';
+  }
+  for (const el of document.querySelectorAll('[data-bob]')) {
+    const u = t - el.dataset.bob; if (u > 0) el.style.transform += ` translateY(${Math.abs(Math.sin(u * 5)) * -16}px)`;
+  }
+  const fl = Math.max(0, ...window.FLASH.map((x) => (t >= x && t < x + 0.25 ? 0.35 * (1 - (t - x) / 0.25) : 0)));
+  document.getElementById('flash').style.opacity = fl;
+};
+window.seek(0);
+</script></body></html>
