@@ -28,5 +28,5 @@ public sealed class MarketingTouch : Entity
     public static readonly string[] Steps = ["visit", "whatsapp", "hold", "request",
         // Summit scan flow (no personal data): answered "one dose" / "a whole month", reached the choices,
         // picked fund / students, opened WhatsApp.
-        "ev-dose", "ev-month", "ev-how", "ev-fund", "ev-students", "ev-chat", "ev-call"];
+        "ev-dose", "ev-month", "ev-how", "ev-fund", "ev-students", "ev-chat", "ev-call", "ev-try"];
 }

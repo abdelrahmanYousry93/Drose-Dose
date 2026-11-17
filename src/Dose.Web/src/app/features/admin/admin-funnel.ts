@@ -9,7 +9,7 @@ interface Overall { visitors: number; bookingsStarted: number; detailsEntered: n
 interface SourceRow { source: string; visits: number; whatsApp: number; holds: number; requests: number; paid: number }
 interface PromoRow { code: string; bookings: number; paid: number }
 interface DayRow { day: string; started: number; paid: number }
-interface EventRow { source: string; scans: number; answeredDose: number; answeredMonth: number; reachedChoices: number; pickedFund: number; pickedStudents: number; openedWhatsApp: number; called: number; sent: number; dosesPledged: number }
+interface EventRow { source: string; scans: number; answeredDose: number; answeredMonth: number; reachedChoices: number; pickedFund: number; pickedStudents: number; openedWhatsApp: number; called: number; tried: number; sent: number; dosesPledged: number }
 interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRow[]; days: DayRow[] }
 type Engagement = Record<string, Record<string, number | null>>;
 
@@ -110,12 +110,12 @@ type Engagement = Record<string, Record<string, number | null>>;
           <h2>{{ 'funnel.event' | t }}</h2>
           <p class="muted small">{{ 'funnel.eventLead' | t }}</p>
           <div class="table-wrap"><table class="ev">
-            <thead><tr><th>{{ 'funnel.card' | t }}</th><th>{{ 'funnel.scans' | t }}</th><th>💊</th><th>📅</th><th>{{ 'funnel.choices' | t }}</th><th>🤝</th><th>🏫</th><th>💬</th><th>📞</th><th>{{ 'funnel.sent' | t }}</th><th>{{ 'funnel.doses' | t }}</th></tr></thead>
+            <thead><tr><th>{{ 'funnel.card' | t }}</th><th>{{ 'funnel.scans' | t }}</th><th>💊</th><th>📅</th><th>{{ 'funnel.choices' | t }}</th><th>🤝</th><th>🏫</th><th>💬</th><th>📞</th><th>💊</th><th>{{ 'funnel.sent' | t }}</th><th>{{ 'funnel.doses' | t }}</th></tr></thead>
             <tbody>
               @for (r of event(); track r.source) {
-                <tr><td dir="ltr">{{ r.source }}</td><td><b>{{ r.scans }}</b></td><td>{{ r.answeredDose }}</td><td>{{ r.answeredMonth }}</td><td>{{ r.reachedChoices }}</td><td>{{ r.pickedFund }}</td><td>{{ r.pickedStudents }}</td><td>{{ r.openedWhatsApp }}</td><td>{{ r.called }}</td><td><b>{{ r.sent }}</b></td><td>{{ r.dosesPledged }}</td></tr>
+                <tr><td dir="ltr">{{ r.source }}</td><td><b>{{ r.scans }}</b></td><td>{{ r.answeredDose }}</td><td>{{ r.answeredMonth }}</td><td>{{ r.reachedChoices }}</td><td>{{ r.pickedFund }}</td><td>{{ r.pickedStudents }}</td><td>{{ r.openedWhatsApp }}</td><td>{{ r.called }}</td><td>{{ r.tried }}</td><td><b>{{ r.sent }}</b></td><td>{{ r.dosesPledged }}</td></tr>
               }
-              <tr class="tot"><td>{{ 'funnel.total' | t }}</td><td>{{ sum('scans') }}</td><td>{{ sum('answeredDose') }}</td><td>{{ sum('answeredMonth') }}</td><td>{{ sum('reachedChoices') }}</td><td>{{ sum('pickedFund') }}</td><td>{{ sum('pickedStudents') }}</td><td>{{ sum('openedWhatsApp') }}</td><td>{{ sum('called') }}</td><td>{{ sum('sent') }}</td><td>{{ sum('dosesPledged') }}</td></tr>
+              <tr class="tot"><td>{{ 'funnel.total' | t }}</td><td>{{ sum('scans') }}</td><td>{{ sum('answeredDose') }}</td><td>{{ sum('answeredMonth') }}</td><td>{{ sum('reachedChoices') }}</td><td>{{ sum('pickedFund') }}</td><td>{{ sum('pickedStudents') }}</td><td>{{ sum('openedWhatsApp') }}</td><td>{{ sum('called') }}</td><td>{{ sum('tried') }}</td><td>{{ sum('sent') }}</td><td>{{ sum('dosesPledged') }}</td></tr>
             </tbody>
           </table></div>
         </div>

@@ -36,7 +36,7 @@ public sealed partial class MarketingReport(
     }
 
     public sealed record EventRow(string Source, int Scans, int AnsweredDose, int AnsweredMonth, int ReachedChoices,
-        int PickedFund, int PickedStudents, int OpenedWhatsApp, int Called, int Sent, int DosesPledged);
+        int PickedFund, int PickedStudents, int OpenedWhatsApp, int Called, int Tried, int Sent, int DosesPledged);
 
     /// <summary>Summit scan flow, per card (source = prefix or prefix-&lt;lesson&gt;): how far people got. Counts only.</summary>
     public async Task<List<EventRow>> EventFunnelAsync(string prefix, CancellationToken ct)
@@ -50,7 +50,7 @@ public sealed partial class MarketingReport(
         {
             int C(string step) => touches.Count(t => t.Source == src && t.Step == step);
             var mine = pledges.Where(p => p.Source == src).ToList();
-            return new EventRow(src, C("visit"), C("ev-dose"), C("ev-month"), C("ev-how"), C("ev-fund"), C("ev-students"), C("ev-chat"), C("ev-call"),
+            return new EventRow(src, C("visit"), C("ev-dose"), C("ev-month"), C("ev-how"), C("ev-fund"), C("ev-students"), C("ev-chat"), C("ev-call"), C("ev-try"),
                 mine.Count, mine.Sum(p => p.Doses));
         }).OrderByDescending(r => r.Scans).ThenBy(r => r.Source).ToList();
     }

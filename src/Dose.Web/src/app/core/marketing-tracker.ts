@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 
 type Step = 'visit' | 'whatsapp' | 'hold' | 'request' | 'paid';
 /** Summit scan-flow steps: counted in our own report only, never sent to ad pixels. */
-export type EventStep = 'ev-dose' | 'ev-month' | 'ev-how' | 'ev-fund' | 'ev-students' | 'ev-chat' | 'ev-call';
+export type EventStep = 'ev-dose' | 'ev-month' | 'ev-how' | 'ev-fund' | 'ev-students' | 'ev-chat' | 'ev-call' | 'ev-try';
 const KEY = 'dose.src';
 const KEEP_DAYS = 30;
 

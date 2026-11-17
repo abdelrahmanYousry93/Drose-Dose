@@ -332,6 +332,8 @@ export const en: typeof ar = {
     "students": "We have students who need support",
     "thanks": "Got it! 🙌",
     "thanksDoses": "{n} students will understand the lesson they were stuck on, thanks to you.",
+    "tryLine": "Not a partner? Try it: pick the subject and the lesson you're stuck on",
+    "tryTitle": "Book your first dose",
     "waMe": "WhatsApp",
     "wall": "See the dose counter",
     "wrong": "That's what happens today…"

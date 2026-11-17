@@ -78,6 +78,13 @@ type Way = 'fund' | 'students';
       }
 
       @if (step() !== 'form') {
+        <a class="try" routerLink="/sessions" (click)="tracker.trackEvent('ev-try')">
+          <span class="try-ic" aria-hidden="true">💊</span>
+          <span class="try-t"><b>{{ 'ev.tryTitle' | t }}</b><small>{{ 'ev.tryLine' | t }}</small></span>
+          <span class="try-go" aria-hidden="true">←</span>
+        </a>
+      }
+      @if (step() !== 'form') {
         <aside class="founder" [attr.aria-label]="'ev.founderTitle' | t">
           <div class="who">
             <span class="avatar" aria-hidden="true">ع</span>
@@ -133,6 +140,14 @@ type Way = 'fund' | 'students';
     .back::before, .back::after { content: none !important; }
     .back, .more { background: none; border: 0; font: inherit; color: var(--dose-text-muted); cursor: pointer; text-decoration: underline; }
     .more { margin-top: 8px; font-size: .85rem; }
+    .try { width: 100%; max-width: 420px; margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px;
+      background: #FFC30A; color: #0B1F6B; text-decoration: none; text-align: start; box-shadow: 0 6px 0 #0B1F6B; border: 3px solid #0B1F6B; animation: tryPulse 2.4s ease-in-out infinite; }
+    .try:active { transform: translateY(3px); box-shadow: 0 3px 0 #0B1F6B; }
+    .try-ic { font-size: 1.9rem; flex: none; }
+    .try-t { flex: 1; display: grid; line-height: 1.3; } .try-t b { font-size: 1.12rem; font-weight: 900; } .try-t small { font-size: .85rem; font-weight: 700; color: #3c4a6e; }
+    .try-go { font-size: 1.5rem; font-weight: 900; }
+    @keyframes tryPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+    @media (prefers-reduced-motion: reduce) { .try { animation: none; } }
     .founder { width: 100%; max-width: 420px; margin-top: 10px; padding: 16px; border-radius: 22px; text-align: start; color: #fff;
       background: linear-gradient(135deg, var(--dose-navy, #0B1F6B), #1d3fa8); box-shadow: 0 14px 34px rgb(11 31 107 / .28); display: grid; gap: 12px; }
     .who { display: flex; align-items: center; gap: 12px; }

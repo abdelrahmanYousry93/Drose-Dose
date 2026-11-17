@@ -134,5 +134,13 @@
  "ev.founderName": [
   "تواصل مع المؤسسين",
   "Talk to the founders"
+ ],
+ "ev.tryTitle": [
+  "يلا احجز أول جرعة ليك",
+  "Book your first dose"
+ ],
+ "ev.tryLine": [
+  "مش شريك؟ جرّب بنفسك: اختار المادة والدرس اللي واقف معاك",
+  "Not a partner? Try it: pick the subject and the lesson you're stuck on"
  ]
 }
