@@ -125,13 +125,16 @@ public sealed partial class MarketingReport(
 
         async Task<JsonElement?> Get(string path)
         {
+            // A slow read gives up after 10 s (shown as "—") rather than holding the whole page.
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
             try
             {
-                using var res = await client.GetAsync($"https://graph.facebook.com/{m.GraphVersion}/{path}&access_token={Uri.EscapeDataString(token)}", ct);
+                using var res = await client.GetAsync($"https://graph.facebook.com/{m.GraphVersion}/{path}&access_token={Uri.EscapeDataString(token)}", cts.Token);
                 if (!res.IsSuccessStatusCode) return null;
-                return JsonDocument.Parse(await res.Content.ReadAsStringAsync(ct)).RootElement.Clone();
+                return JsonDocument.Parse(await res.Content.ReadAsStringAsync(cts.Token)).RootElement.Clone();
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex) when (!ct.IsCancellationRequested)
             {
                 log.LogDebug(ex, "Engagement read failed for {Path}", path);
                 return null;
@@ -152,30 +155,40 @@ public sealed partial class MarketingReport(
             return null;
         }
 
-        foreach (var p in posts)
+        // Two Graph reads per post: run them in parallel (bounded) instead of one after another.
+        using var gate = new SemaphoreSlim(8);
+        async Task<(string Key, object Value)> Read(MarketingPost p)
         {
-            if (p.Channel == "facebook")
+            await gate.WaitAsync(ct);
+            try
             {
-                var j = await Get($"{p.ExternalId}?fields=reactions.summary(true).limit(0),comments.summary(true).limit(0),shares");
-                var ins = await Get($"{p.ExternalId}/insights?metric=post_impressions_unique,post_clicks");
-                data[$"{p.Key}|facebook"] = new
+                if (p.Channel == "facebook")
                 {
-                    reactions = Count(j, "reactions", "total_count"), comments = Count(j, "comments", "total_count"),
-                    shares = j is { } e && e.TryGetProperty("shares", out var sh) && sh.TryGetProperty("count", out var sc) ? sc.GetInt32() : 0,
-                    reach = InsightValue(ins, "post_impressions_unique"), clicks = InsightValue(ins, "post_clicks"),
-                };
-            }
-            else
-            {
-                var j = await Get($"{p.ExternalId}?fields=like_count,comments_count");
-                var ins = await Get($"{p.ExternalId}/insights?metric=reach,saved,shares");
-                data[$"{p.Key}|instagram"] = new
+                    var jt = Get($"{p.ExternalId}?fields=reactions.summary(true).limit(0),comments.summary(true).limit(0),shares");
+                    var it = Get($"{p.ExternalId}/insights?metric=post_impressions_unique,post_clicks");
+                    var (j, ins) = (await jt, await it);
+                    return ($"{p.Key}|facebook", new
+                    {
+                        reactions = Count(j, "reactions", "total_count"), comments = Count(j, "comments", "total_count"),
+                        shares = j is { } e && e.TryGetProperty("shares", out var sh) && sh.TryGetProperty("count", out var sc) ? sc.GetInt32() : 0,
+                        reach = InsightValue(ins, "post_impressions_unique"), clicks = InsightValue(ins, "post_clicks"),
+                    });
+                }
+                else
                 {
-                    likes = Count(j, "like_count"), comments = Count(j, "comments_count"),
-                    reach = InsightValue(ins, "reach"), saves = InsightValue(ins, "saved"), shares = InsightValue(ins, "shares"),
-                };
+                    var jt = Get($"{p.ExternalId}?fields=like_count,comments_count");
+                    var it = Get($"{p.ExternalId}/insights?metric=reach,saved,shares");
+                    var (j, ins) = (await jt, await it);
+                    return ($"{p.Key}|instagram", new
+                    {
+                        likes = Count(j, "like_count"), comments = Count(j, "comments_count"),
+                        reach = InsightValue(ins, "reach"), saves = InsightValue(ins, "saved"), shares = InsightValue(ins, "shares"),
+                    });
+                }
             }
+            finally { gate.Release(); }
         }
+        foreach (var (key, value) in await Task.WhenAll(posts.Select(Read))) data[key] = value;
         engagementCache = (DateTime.UtcNow, data);
         return data;
     }

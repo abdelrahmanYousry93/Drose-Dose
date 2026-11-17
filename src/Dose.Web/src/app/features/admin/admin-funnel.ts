@@ -10,7 +10,8 @@ interface SourceRow { source: string; visits: number; whatsApp: number; holds: n
 interface PromoRow { code: string; bookings: number; paid: number }
 interface DayRow { day: string; started: number; paid: number }
 interface EventRow { source: string; scans: number; answeredDose: number; answeredMonth: number; reachedChoices: number; pickedFund: number; pickedStudents: number; openedWhatsApp: number; sent: number; dosesPledged: number }
-interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRow[]; days: DayRow[]; engagement: Record<string, Record<string, number | null>> }
+interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRow[]; days: DayRow[] }
+type Engagement = Record<string, Record<string, number | null>>;
 
 /** The sales funnel at a glance: steps with conversion between them, sources, promo codes, post engagement, days. */
 @Component({
@@ -22,12 +23,21 @@ interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRo
       <p class="muted small">{{ 'funnel.lead' | t }}</p>
       <div class="periods" role="group" [attr.aria-label]="'funnel.period' | t">
         @for (d of periods; track d) {
-          <button type="button" [class.on]="days() === d" (click)="load(d)">{{ ('funnel.d' + d) | t }}</button>
+          <button type="button" [class.on]="days() === d" [attr.aria-pressed]="days() === d" (click)="load(d)">
+            @if (loading() && days() === d) { <span class="spin" aria-hidden="true"></span> }
+            {{ ('funnel.d' + d) | t }}
+          </button>
         }
       </div>
       @if (error()) { <p class="alert alert--error" role="alert">{{ error() }}</p> }
 
+      @if (loading() && !data()) {
+        <div class="loading-note" role="status"><span class="spin"></span> {{ 'common.loading' | t }}</div>
+        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+      }
       @if (data(); as r) {
+        <div class="report" [class.stale]="loading()" [attr.aria-busy]="loading()">
+        @if (loading()) { <div class="loading-note sticky" role="status"><span class="spin"></span> {{ 'common.loading' | t }}</div> }
         <h2>{{ 'funnel.steps' | t }}</h2>
         <div class="steps">
           @for (s of steps(); track s.key; let i = $index) {
@@ -68,7 +78,11 @@ interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRo
           </table></div>
         } @else { <p class="muted">{{ 'funnel.noPromos' | t }}</p> }
 
-        @if (posts().length) {
+        @if (engLoading()) {
+          <h2>{{ 'funnel.posts' | t }}</h2>
+          <div class="loading-note" role="status"><span class="spin"></span> {{ 'common.loading' | t }}</div>
+          <div class="skeleton short"></div>
+        } @else if (posts().length) {
           <h2>{{ 'funnel.posts' | t }}</h2>
           <div class="table-wrap"><table>
             <thead><tr><th>{{ 'funnel.post' | t }}</th><th>{{ 'funnel.likes' | t }}</th><th>{{ 'funnel.comments' | t }}</th><th>{{ 'funnel.shares' | t }}</th><th>{{ 'funnel.reach' | t }}</th></tr></thead>
@@ -87,8 +101,11 @@ interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRo
             <tbody>@for (d of r.days; track d.day) { <tr><td dir="ltr">{{ d.day }}</td><td>{{ d.started }}</td><td><b>{{ d.paid }}</b></td></tr> }</tbody>
           </table></div>
         }
+        </div>
       }
-      @if (event().length) {
+      @if (eventLoading()) {
+        <div class="dose-card box"><h2>{{ 'funnel.event' | t }}</h2><div class="skeleton short"></div></div>
+      } @else if (event().length) {
         <div class="dose-card box">
           <h2>{{ 'funnel.event' | t }}</h2>
           <p class="muted small">{{ 'funnel.eventLead' | t }}</p>
@@ -106,6 +123,14 @@ interface FunnelReport { overall: Overall; sources: SourceRow[]; promos: PromoRo
     </section>
   `,
   styles: `
+    .report { position: relative; transition: opacity .15s; }
+    .report.stale > :not(.loading-note) { opacity: .3; pointer-events: none; }
+    .loading-note { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--dose-navy); margin: 12px 0; }
+    .loading-note.sticky { position: sticky; top: 8px; z-index: 2; background: #fff; border-radius: 999px; padding: 8px 16px; width: fit-content; box-shadow: 0 4px 16px rgb(11 31 107 / .15); }
+    .spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid currentColor; border-inline-end-color: transparent; display: inline-block; animation: spin .7s linear infinite; vertical-align: -3px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2s; } }
+    .skeleton { margin-bottom: 8px; } .skeleton.short { height: 60px; }
     .table-wrap { overflow-x: auto; }
     table.ev { border-collapse: collapse; width: 100%; font-size: .85rem; white-space: nowrap; }
     table.ev th, table.ev td { padding: 6px 8px; border-bottom: 1px solid var(--dose-border); text-align: center; }
@@ -139,6 +164,11 @@ export class AdminFunnel {
   protected readonly days = signal(30);
   protected readonly data = signal<FunnelReport | null>(null);
   protected readonly error = signal('');
+  protected readonly loading = signal(false);
+  protected readonly engagement = signal<Engagement>({});
+  protected readonly engLoading = signal(true);
+  protected readonly eventLoading = signal(true);
+  private seq = 0;
 
   protected readonly steps = computed(() => {
     const o = this.data()?.overall;
@@ -157,7 +187,7 @@ export class AdminFunnel {
     return s.length ? s.reduce((a, b) => ((b.rate ?? 100) < (a.rate ?? 100) ? b : a)).key : '';
   });
 
-  protected readonly posts = computed(() => Object.entries(this.data()?.engagement ?? {}).map(([key, v]) => ({
+  protected readonly posts = computed(() => Object.entries(this.engagement()).map(([key, v]) => ({
     key: key.replace('|', ' · '),
     likes: (v['likes'] ?? v['reactions']) as number | null, comments: v['comments'] as number | null,
     shares: v['shares'] as number | null, reach: v['reach'] as number | null,
@@ -168,18 +198,28 @@ export class AdminFunnel {
 
   constructor() {
     void this.load(30);
-    firstValueFrom(this.http.get<EventRow[]>(`${environment.apiBaseUrl}/admin/funnel/event?prefix=ses26`)).then((r) => this.event.set(r)).catch(() => undefined);
+    firstValueFrom(this.http.get<EventRow[]>(`${environment.apiBaseUrl}/admin/funnel/event?prefix=ses26`))
+      .then((r) => this.event.set(r)).catch(() => undefined).finally(() => this.eventLoading.set(false));
+    // Engagement is read live from Facebook/Instagram (slow on a cold cache): it fills in on its own.
+    firstValueFrom(this.http.get<Engagement>(`${environment.apiBaseUrl}/admin/funnel/engagement`))
+      .then((r) => this.engagement.set(r ?? {})).catch(() => undefined).finally(() => this.engLoading.set(false));
   }
 
   protected money = (n: number) => fmtMoney(n);
 
   protected async load(days: number) {
+    // Only the latest click wins: a slower answer for an older period never replaces the current one.
+    const mine = ++this.seq;
     this.days.set(days);
     this.error.set('');
+    this.loading.set(true);
     try {
-      this.data.set(await firstValueFrom(this.http.get<FunnelReport>(`${environment.apiBaseUrl}/admin/funnel?days=${days}`)));
+      const r = await firstValueFrom(this.http.get<FunnelReport>(`${environment.apiBaseUrl}/admin/funnel?days=${days}`));
+      if (mine === this.seq) this.data.set(r);
     } catch (e) {
-      this.error.set(errorMessage(e));
+      if (mine === this.seq) { this.data.set(null); this.error.set(errorMessage(e)); }
+    } finally {
+      if (mine === this.seq) this.loading.set(false);
     }
   }
 }

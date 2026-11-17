@@ -74,8 +74,11 @@ public static class Endpoints
         {
             var since = DateTime.UtcNow.AddDays(-Math.Clamp(days ?? 30, 1, 365));
             var (overall, promos, byDay) = await report.SiteFunnelAsync(since, ct);
-            return Results.Ok(new { since, overall, promos, days = byDay, sources = await report.FunnelAsync(since, ct), engagement = await report.EngagementAsync(ct) });
+            return Results.Ok(new { since, overall, promos, days = byDay, sources = await report.FunnelAsync(since, ct) });
         }).RequireAuthorization(AdminPolicy);
+        // Post engagement is read live from Meta (slow on a cold cache), so the page loads it on its own.
+        app.MapGet("/api/admin/funnel/engagement", async (MarketingReport report, CancellationToken ct) =>
+            Results.Ok(await report.EngagementAsync(ct))).RequireAuthorization(AdminPolicy);
         app.MapGet("/api/admin/funnel/event", (string? prefix, MarketingReport report, CancellationToken ct) =>
             report.EventFunnelAsync(string.IsNullOrWhiteSpace(prefix) ? "ses26" : prefix.Trim().ToLowerInvariant(), ct))
             .RequireAuthorization(AdminPolicy);
