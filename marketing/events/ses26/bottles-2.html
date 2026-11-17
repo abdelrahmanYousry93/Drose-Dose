@@ -7,11 +7,11 @@
 @page{size:A4;margin:0}
 *{box-sizing:border-box;margin:0}
 body{font-family:Cairo,sans-serif;color:#0f1b3d;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
-.page{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,82mm);grid-auto-rows:140mm;gap:5mm 12mm;justify-content:center;align-content:center;page-break-after:always}
-.card{display:flex;flex-direction:column;align-items:center}
-.cap{width:66mm;height:15mm;border:.35mm solid #b9c0cc;border-radius:2.5mm 2.5mm 1.2mm 1.2mm;background:repeating-linear-gradient(90deg,#f4f6f9 0 2.2mm,#d9dee6 2.2mm 2.8mm),#fff;box-shadow:inset 0 -2.2mm 0 #e3e7ee}
-.neck{width:60mm;height:3mm;border-inline:.35mm solid #b9c0cc;background:linear-gradient(90deg,#dfe3ea,#fff 35%,#fff 65%,#dfe3ea)}
-.body{width:82mm;flex:1;border:.35mm solid #b9c0cc;border-radius:9mm 9mm 5mm 5mm;background:linear-gradient(90deg,#dde2ea,#fbfcfd 22%,#fff 50%,#f4f6f9 78%,#d5dbe4);padding:8mm 2.6mm 6mm}
+.page{width:210mm;height:297mm;display:grid;grid-template-columns:repeat(2,94mm);grid-auto-rows:143mm;gap:0;justify-content:center;align-content:center;page-break-after:always}
+.card{display:flex;flex-direction:column;align-items:center;padding:3mm 0 3.5mm;outline:.25mm dashed #9aa3b5;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--c) 70%,#fff) 0%,var(--c) 45%,color-mix(in srgb,var(--c) 55%,#0B1F6B) 100%);-webkit-print-color-adjust:exact}
+.cap{box-shadow:0 1.5mm 3mm rgba(0,0,0,.3);width:58mm;height:13mm;border:.35mm solid #b9c0cc;border-radius:2.5mm 2.5mm 1.2mm 1.2mm;background:repeating-linear-gradient(90deg,#f4f6f9 0 2.2mm,#d9dee6 2.2mm 2.8mm),#fff;box-shadow:inset 0 -2.2mm 0 #e3e7ee}
+.neck{width:52mm;height:3mm;border-inline:.35mm solid #b9c0cc;background:linear-gradient(90deg,#dfe3ea,#fff 35%,#fff 65%,#dfe3ea)}
+.body{width:78mm;flex:1;box-shadow:0 2mm 4mm rgba(0,0,0,.35);border:.35mm solid #b9c0cc;border-radius:9mm 9mm 5mm 5mm;background:linear-gradient(90deg,#dde2ea,#fbfcfd 22%,#fff 50%,#f4f6f9 78%,#d5dbe4);padding:8mm 2.6mm 6mm}
 .label{height:100%;background:#fff;border-radius:1.5mm;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 .3mm #e3e7ee}
 .band{background:var(--c);color:#fff;display:flex;align-items:center;gap:1.6mm;padding:1.6mm 3mm;font-size:3.8mm}
 .band .mark{background:#fff;border-radius:1.4mm;padding:.5mm}

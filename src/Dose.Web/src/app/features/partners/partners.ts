@@ -6,6 +6,14 @@ import { errorMessage } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 import { MarketingTracker } from '../../core/marketing-tracker';
 import { looksLikePhone } from '../../shared/validation';
+import { PublicSettingsService } from '../../core/public-settings.service';
+
+/** Lessons on the event's medicine-bottle cards (QR src = ses26-<slug>). */
+const BOTTLES: Record<string, string> = {
+  longdiv: 'القسمة المطوّلة', fractions: 'الكسور', density: 'الكثافة', speed: 'السرعة والعجلة', irab: 'الإعراب',
+  perfect: 'Present Perfect', ohm: 'قانون أوم', mole: 'المول', percent: 'النسبة المئوية', pythagoras: 'فيثاغورس',
+  photosynthesis: 'البناء الضوئي', cell: 'الخلية', kana: 'كان وإنّ', passive: 'Passive Voice', newton: 'قانون نيوتن التاني', ph: 'الأحماض والقواعد',
+};
 
 const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const;
 
@@ -18,6 +26,30 @@ const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const
   imports: [FormsModule, RouterLink, TranslatePipe],
   template: `
     <section class="page">
+      @if (event()) {
+        <div class="event dose-card">
+          <span class="hello">{{ 'event.hello' | t }}</span>
+          @if (bottle(); as b) {
+            <h1>{{ 'event.scanned' | t: { lesson: b } }}</h1>
+            <p>{{ 'event.lessonLine' | t: { lesson: b } }}</p>
+          } @else {
+            <h1>{{ 'event.title' | t }}</h1>
+          }
+          <ul class="what">
+            <li>💊 {{ 'event.what1' | t }}</li>
+            <li>👥 {{ 'event.what2' | t }}</li>
+            <li>💰 {{ 'event.what3' | t }}</li>
+          </ul>
+          <p class="strong">{{ 'event.ask' | t }}</p>
+          <div class="acts">
+            <button type="button" class="act" (click)="choose('fund')"><b>🤝 {{ 'event.fund' | t }}</b><span>{{ 'event.fundHint' | t }}</span></button>
+            <button type="button" class="act" (click)="choose('students')"><b>🏫 {{ 'event.students' | t }}</b><span>{{ 'event.studentsHint' | t }}</span></button>
+            @if (settings.whatsAppLink(waText()); as link) {
+              <a class="act wa" [href]="link" target="_blank" rel="noopener"><b>💬 {{ 'event.chat' | t }}</b><span>{{ 'event.chatHint' | t }}</span></a>
+            }
+          </div>
+        </div>
+      }
       <div class="hero">
         <div class="bottle" aria-hidden="true">
           <div class="cap"></div><div class="neck"></div>
@@ -114,6 +146,15 @@ const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const
     </section>
   `,
   styles: `
+    .event { padding: 22px 18px; display: grid; gap: 12px; border: 2px solid var(--dose-accent); }
+    .event .hello { justify-self: start; background: var(--dose-accent); color: var(--dose-navy); font-weight: 800; border-radius: 999px; padding: 2px 12px; font-size: .85rem; }
+    .event h1 { margin: 0; font-size: 1.5rem; line-height: 1.35; color: var(--dose-navy); }
+    .what { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-weight: 600; }
+    .acts { display: grid; gap: 10px; }
+    .act { display: grid; gap: 2px; text-align: start; padding: 14px 16px; border-radius: var(--dose-radius-sm); border: 2px solid var(--dose-primary); background: var(--dose-primary-50); color: var(--dose-navy); font: inherit; cursor: pointer; text-decoration: none; }
+    .act b { font-size: 1.05rem; } .act span { font-size: .85rem; color: var(--dose-text-muted); }
+    .act.wa { border-color: #25d366; background: #e9fbef; }
+
     .hero { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
     @media (max-width: 640px) { .hero { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
     .hero-text { display: grid; gap: 10px; }
@@ -159,6 +200,18 @@ const INTERESTS = ['fund', 'students', 'employees', 'content', 'other'] as const
 export class Partners {
   private readonly api = inject(Api);
   private readonly tracker = inject(MarketingTracker);
+  protected readonly settings = inject(PublicSettingsService);
+  /** Visitors who scanned an event card (src ses26 / ses26-<lesson>) get a short "who we are + what next" block. */
+  private readonly src = this.tracker.current() ?? '';
+  protected readonly event = signal(this.src.startsWith('ses26'));
+  protected readonly bottle = signal<string | null>(BOTTLES[this.src.replace(/^ses26-?/, '')] ?? null);
+  protected waText() {
+    return translate('event.waText', { lesson: this.bottle() ?? '' }).replace(/\s+\(\)/, '');
+  }
+  protected choose(i: 'fund' | 'students') {
+    this.interest.set(i);
+    document.getElementById('pledge')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   protected readonly interests = INTERESTS;
 
   protected readonly budget = signal(10000);

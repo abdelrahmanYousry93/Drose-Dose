@@ -1,0 +1,17 @@
+{
+ "event.hello": ["أهلًا من قمة التعليم المجتمعي 👋", "Hello from the Social Education Summit 👋"],
+ "event.scanned": ["مسحت زجاجة «{lesson}» 💊", "You scanned the “{lesson}” bottle 💊"],
+ "event.lessonLine": ["«{lesson}» درس واحد من الدروس اللي طلاب كتير بيقفوا فيها، وبيضطروا يشتركوا دروس شهر كامل علشانها. في Dose الطالب بياخد جرعة شرح للدرس ده بس.", "“{lesson}” is one of the lessons many students get stuck on — and they end up paying for a whole month of tutoring because of it. On Dose a student takes one explanation session for just that lesson."],
+ "event.title": ["Dose: جرعة فهم، مش اشتراك شهر 💊", "Dose: a dose of understanding, not a monthly subscription 💊"],
+ "event.what1": ["الطالب يختار الدرس اللي واقف فيه ويحجز جلسة شرح ليه بس، أونلاين.", "A student picks the lesson they're stuck on and books one online session for just that."],
+ "event.what2": ["لوحده أو مع صحابه بسعر أقل.", "Alone, or with friends for less."],
+ "event.what3": ["أوفر بكتير من الدروس الشهرية، فالميزانية بتوصل لطلاب أكتر.", "Far cheaper than monthly tutoring, so a budget reaches many more students."],
+ "event.ask": ["إزاي نشتغل مع بعض؟", "How could we work together?"],
+ "event.fund": ["جهتنا عاوزة تموّل جرعات لطلاب", "We'd like to fund lessons for students"],
+ "event.fundHint": ["مسؤولية مجتمعية بأثر واضح وتقرير بالنتايج", "CSR with clear impact and a results report"],
+ "event.students": ["عندنا طلاب محتاجين دعم", "We have students who need support"],
+ "event.studentsHint": ["جمعية أو مدرسة مجتمعية: طلابكم ياخدوا الجرعات بسعر خاص", "An NGO or community school: special prices for your students"],
+ "event.chat": ["كلمني على واتساب", "Chat on WhatsApp"],
+ "event.chatHint": ["نتكلم 5 دقايق بعد القمة", "A 5-minute chat after the summit"],
+ "event.waText": ["أهلًا Dose 👋 كنت في قمة التعليم المجتمعي ومسحت زجاجة ({lesson}). حابب نتكلم عن شراكة.", "Hi Dose 👋 I was at the Social Education Summit and scanned the ({lesson}) bottle. I'd like to talk about a partnership."]
+}

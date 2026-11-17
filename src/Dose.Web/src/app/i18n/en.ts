@@ -300,6 +300,23 @@ export const en: typeof ar = {
     "http_invalid_input": "Some required information is missing or not in the right format. Check the fields and try again.",
     "http_too_large": "The file or data you sent is too large."
   },
+  "event": {
+    "ask": "How could we work together?",
+    "chat": "Chat on WhatsApp",
+    "chatHint": "A 5-minute chat after the summit",
+    "fund": "We'd like to fund lessons for students",
+    "fundHint": "CSR with clear impact and a results report",
+    "hello": "Hello from the Social Education Summit 👋",
+    "lessonLine": "“{lesson}” is one of the lessons many students get stuck on — and they end up paying for a whole month of tutoring because of it. On Dose a student takes one explanation session for just that lesson.",
+    "scanned": "You scanned the “{lesson}” bottle 💊",
+    "students": "We have students who need support",
+    "studentsHint": "An NGO or community school: special prices for your students",
+    "title": "Dose: a dose of understanding, not a monthly subscription 💊",
+    "waText": "Hi Dose 👋 I was at the Social Education Summit and scanned the ({lesson}) bottle. I'd like to talk about a partnership.",
+    "what1": "A student picks the lesson they're stuck on and books one online session for just that.",
+    "what2": "Alone, or with friends for less.",
+    "what3": "Far cheaper than monthly tutoring, so a budget reaches many more students."
+  },
   "f": {
     "active": "Active",
     "activeF": "Active",
