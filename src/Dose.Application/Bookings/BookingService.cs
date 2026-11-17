@@ -89,7 +89,8 @@ public sealed class BookingService(
 
         if (!req.AcceptTerms)
             throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الحجز.", "You must accept the booking terms.");
-        if (session.Mode == SessionMode.Group && !session.IsClosed && !req.AcceptTopUpTerms)
+        var hasGroupTerms = session.Mode == SessionMode.Group && !session.IsClosed && SessionPricing.GroupTerms(session) is not null;
+        if (hasGroupTerms && !req.AcceptTopUpTerms)
             throw new DomainException(BookingErrors.TermsRequired, "لازم توافق على شروط الجروب (احتمال فرق لو الجروب مكملش).", "You must accept the group terms (possible difference if the group does not fill).");
 
         var name = (req.StudentName ?? "").Trim();
@@ -141,7 +142,7 @@ public sealed class BookingService(
         booking.StudentId = student.Id;
         booking.ContactPhoneE164 = phone;
         booking.TermsAcceptedAtUtc = now;
-        booking.TopUpTermsAcceptedAtUtc = session.Mode == SessionMode.Group && !session.IsClosed ? now : null;
+        booking.TopUpTermsAcceptedAtUtc = hasGroupTerms ? now : null;
         booking.Status = BookingStatus.PendingPayment;
         booking.HoldExpiresAtUtc = null;
         booking.PaymentDueAtUtc = now.AddMinutes(cfg.PaymentProofDeadlineMinutes);

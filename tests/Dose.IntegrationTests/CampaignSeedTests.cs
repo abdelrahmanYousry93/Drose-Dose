@@ -32,5 +32,16 @@ public sealed class CampaignSeedTests(DatabaseFixture fx)
             var code = await db.PromoCodes.SingleAsync(p => p.Code == ChemReviewNov2026.Code);
             Assert.Equal((100m, 20, (Guid?)s.Id), (code.Value, code.MaxTotalUses!.Value, code.SessionId));
         }
+        // Fixed price: no "how the group price works" terms, and no group-difference box to tick.
+        var clock = new FakeClock(fx.SeedTime);
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, clock);
+            var hold = await svc.CreateHoldAsync(ChemReviewNov2026.SessionId, default);
+            Assert.Null((await svc.GetViewAsync(hold.AccessToken, default)).GroupTerms);
+            await svc.SubmitDetailsAsync(hold.AccessToken, new Dose.Contracts.SubmitDetailsRequest("طالب كيمياء", "01222000111", "ولي أمر", "01222000112",
+                AcceptTerms: true, AcceptTopUpTerms: false, ExpectedPrice: 100m), default);
+            Assert.Equal("PendingPayment", (await svc.GetViewAsync(hold.AccessToken, default)).Status.ToString());
+        }
     }
 }

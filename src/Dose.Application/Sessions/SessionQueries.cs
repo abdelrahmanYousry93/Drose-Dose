@@ -38,6 +38,9 @@ public static class SessionPricing
         lang ??= FixedLanguage.Arabic;
         if (s.Mode != SessionMode.Group || s.TargetTier is null || s.PricingPlanVersion is null) return null;
         var worst = GroupPricing.WorstCasePrice(s.PricingPlanVersion, s.TargetTier);
+        // Fixed per-student price (the admin/teacher set one price; everyone pays theirs and that's it): there is no
+        // possible difference, so no group terms to explain or accept.
+        if (worst <= s.TargetTier.PricePerStudent) return null;
         return new GroupTermsDto(
             lang.Pick(s.TargetTier.NameAr, s.TargetTier.NameEn), s.TargetTier.MinParticipants, s.TargetTier.MaxParticipants,
             worst, worst - s.TargetTier.PricePerStudent, s.TierDecisionAtUtc);
