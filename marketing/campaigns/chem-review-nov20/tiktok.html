@@ -1,0 +1,113 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
+/*FONTS*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: clip; background: #070b1f; }
+body { font-family: Cairo, sans-serif; color: #fff; }
+/* TikTok safe area: keep content away from the right-side buttons and the bottom caption. */
+.scene { contain: paint; position: absolute; left: 70px; right: 170px; top: 230px; bottom: 470px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 40px; opacity: 0; }
+.bg { position: absolute; inset: 0; opacity: 0; }
+.bg1 { background: radial-gradient(circle at 50% 40%, #2a1650 0%, #070b1f 70%); }
+.bg2 { background: radial-gradient(circle at 50% 40%, #1d3fa8 0%, #0B1F6B 50%, #060f3a 100%); }
+.bg3 { background: #FFC30A; }
+.pov { font-weight: 900; font-size: 64px; color: #FFC30A; background: rgba(255,255,255,.08); border-radius: 999px; padding: 6px 36px; }
+.h1 { font-weight: 900; font-size: 96px; line-height: 1.2; }
+.h2 { font-weight: 800; font-size: 62px; line-height: 1.35; }
+.y { color: #FFC30A; } .b { color: #0061FA; } .n { color: #0B1F6B; }
+.emoji { font-size: 170px; line-height: 1; }
+.tiles { display: grid; grid-template-columns: repeat(5, 150px); gap: 16px; direction: ltr; }
+.el { position: relative; height: 150px; border-radius: 22px; background: rgba(255,255,255,.1); border: 3px solid rgba(255,255,255,.25); display: grid; place-items: center; font-weight: 900; font-size: 62px; }
+.el i { position: absolute; top: 8px; left: 12px; font-style: normal; font-size: 26px; color: #9ec2ff; font-weight: 700; }
+.el.fe { background: #FFC30A; color: #0B1F6B; border-color: #FFC30A; box-shadow: 0 0 60px rgba(255,195,10,.6); }
+.el.fe i { color: #0B1F6B; }
+.quiz { width: 100%; background: #fff; color: #0B1F6B; border-radius: 40px; padding: 40px 36px; display: grid; gap: 22px; text-align: right; }
+.quiz .q { font-weight: 900; font-size: 56px; line-height: 1.35; }
+.opt { border: 5px solid #dbe5f7; border-radius: 26px; padding: 16px 28px; font-weight: 800; font-size: 54px; direction: ltr; text-align: left; display: flex; gap: 20px; align-items: center; }
+.opt b { direction: rtl; color: #0061FA; }
+.cmt { font-weight: 900; font-size: 58px; color: #FFC30A; }
+.ribbon { width: 100%; background: #FFC30A; color: #0B1F6B; font-weight: 900; font-size: 92px; line-height: 1.2; border-radius: 36px; padding: 24px 10px; transform: rotate(-2deg); box-shadow: 0 20px 60px rgba(255,195,10,.45); }
+.facts { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+.facts span { background: rgba(255,255,255,.12); border: 2px solid rgba(255,255,255,.2); border-radius: 999px; padding: 10px 28px; font-weight: 800; font-size: 46px; }
+.code { direction: ltr; display: inline-block; background: #0061FA; color: #fff; border-radius: 22px; padding: 4px 30px; letter-spacing: 4px; }
+.logo { display: flex; align-items: center; gap: 22px; direction: ltr; }
+.logo .latin { font-weight: 900; font-size: 120px; color: #0061FA; } .logo .latin span { color: #fff; }
+.logo .ar { font-weight: 900; font-size: 96px; color: #0B1F6B; }
+.bio { font-weight: 900; font-size: 70px; color: #0B1F6B; }
+</style></head><body>
+<div class="bg bg1" data-s="0" data-e="5.2"></div>
+<div class="bg bg2" data-s="5" data-e="12.2"></div>
+<div class="bg bg3" data-s="12" data-e="16"></div>
+
+<!-- 0–2.6 hook -->
+<section class="scene" data-s="0" data-e="2.6">
+  <div class="pov" data-in="0" data-a="pop">POV 😭</div>
+  <div class="h1" data-in="0.15" data-a="up">امتحان الشهر<br><span class="y">بكرة</span></div>
+  <div class="h2" data-in="0.7" data-a="up">وإنت لسه مش فاهم<br>العناصر الانتقالية</div>
+  <div class="emoji" data-in="1.1" data-a="pop" data-shake="1.4">🫠</div>
+</section>
+
+<!-- 2.6–5.2 the chapter -->
+<section class="scene" data-s="2.6" data-e="5.2">
+  <div class="h2" data-in="2.7" data-a="up">متقلقش 👇 الباب الأول كله</div>
+  <div class="tiles" id="tiles"></div>
+  <div class="h2" data-in="4.1" data-a="up">في <span class="y">جلسة واحدة</span></div>
+</section>
+
+<!-- 5.2–9 quiz (no answer: people answer in the comments) -->
+<section class="scene" data-s="5.2" data-e="9">
+  <div class="quiz" data-in="5.3" data-a="pop">
+    <div class="q">سؤال سريع 🤔<br>التوزيع الإلكتروني لـ <span dir="ltr">Fe³⁺</span>؟</div>
+    <div class="opt" data-in="5.8" data-a="slide"><b>أ</b> [Ar] 3d⁶</div>
+    <div class="opt" data-in="6.0" data-a="slide"><b>ب</b> [Ar] 3d⁵</div>
+    <div class="opt" data-in="6.2" data-a="slide"><b>ج</b> [Ar] 4s² 3d³</div>
+  </div>
+  <div class="cmt" data-in="7" data-a="pop" data-bob="7.2">اكتب إجابتك في الكومنت 👇</div>
+</section>
+
+<!-- 9–12.2 offer -->
+<section class="scene" data-s="9" data-e="12.2">
+  <div class="h1" data-in="9.05" data-a="up"><span class="y">مراجعة</span> كيمياء</div>
+  <div class="h2" data-in="9.3" data-a="up">الباب الأول كله · تالتة ثانوي</div>
+  <div class="facts" data-in="9.6" data-a="up"><span>📅 الجمعة</span><span>⏰ 6 مساءً</span><span>💻 أونلاين</span></div>
+  <div class="ribbon" data-in="10.2" data-a="stamp">🎁 ببلاش لأول 20</div>
+</section>
+
+<!-- 12.2–16 CTA -->
+<section class="scene" data-s="12.2" data-e="16">
+  <div class="logo" data-in="12.3" data-a="pop"><span class="latin">D<span>o</span>se</span><span class="ar">دروس</span></div>
+  <div class="h2 n" data-in="12.7" data-a="up">احجز بالكود <span class="code">CHEM20</span></div>
+  <div class="bio" data-in="13.3" data-a="pop" data-bob="13.6">اللينك في البايو 👆</div>
+  <div class="h2 n" data-in="14" data-a="up" style="font-size:48px">جرعة فهم، مش اشتراك شهر 💊</div>
+</section>
+
+<script>
+const tiles = document.getElementById('tiles');
+[[21,'Sc'],[22,'Ti'],[23,'V'],[24,'Cr'],[25,'Mn'],[26,'Fe'],[27,'Co'],[28,'Ni'],[29,'Cu'],[30,'Zn']].forEach(([z,s],i) =>
+  tiles.insertAdjacentHTML('beforeend', `<div class="el ${s==='Fe'?'fe':''}" data-in="${(2.85+i*0.09).toFixed(2)}" data-a="pop"><i>${z}</i>${s}</div>`));
+const ease = (x) => 1 - Math.pow(1 - x, 3);
+const back = (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const cl = (x) => Math.max(0, Math.min(1, x));
+window.seek = (t) => {
+  for (const s of document.querySelectorAll('[data-s]')) {
+    const a = +s.dataset.s, b = +s.dataset.e, f = 0.18;
+    s.style.opacity = t < a || t > b ? 0 : (a === 0 ? cl((b - t) / f) : Math.min(cl((t - a) / f), cl((b - t) / f)));
+  }
+  for (const el of document.querySelectorAll('[data-in]')) {
+    const p = cl((t - el.dataset.in) / 0.35); let tr = '', op = ease(p);
+    switch (el.dataset.a) {
+      case 'up': tr = `translateY(${(1 - ease(p)) * 60}px)`; break;
+      case 'pop': tr = `scale(${0.4 + 0.6 * back(p)})`; break;
+      case 'slide': tr = `translateX(${(1 - ease(p)) * 120}px)`; break;
+      case 'stamp': tr = `scale(${p <= 0 ? 1 : 2 - ease(p)}) rotate(-2deg)`; op = cl(p * 2); break;
+    }
+    el.style.opacity = op; el.style.transform = tr;
+  }
+  for (const el of document.querySelectorAll('[data-shake]')) {
+    const u = t - el.dataset.shake; const dx = u > 0 && u < 1 ? Math.sin(u * 40) * 14 * (1 - u) : 0;
+    el.style.transform += ` translateX(${dx}px) rotate(${dx / 2}deg)`;
+  }
+  for (const el of document.querySelectorAll('[data-bob]')) {
+    const u = t - el.dataset.bob; if (u > 0) el.style.transform += ` translateY(${Math.abs(Math.sin(u * 5)) * -18}px)`;
+  }
+};
+window.seek(0);
+</script></body></html>
