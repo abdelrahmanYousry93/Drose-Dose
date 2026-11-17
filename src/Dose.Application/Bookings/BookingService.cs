@@ -145,6 +145,30 @@ public sealed class BookingService(
         booking.Status = BookingStatus.PendingPayment;
         booking.HoldExpiresAtUtc = null;
         booking.PaymentDueAtUtc = now.AddMinutes(cfg.PaymentProofDeadlineMinutes);
+        if (net <= 0)
+        {
+            // Nothing to pay (e.g. a 100% promo code): confirm straight away instead of waiting for a payment proof.
+            var version = session.PricingPlanVersion!;
+            var snapshot = new Domain.Pricing.PriceSnapshot
+            {
+                PlanId = version.PlanId, PlanVersionId = version.Id, Currency = booking.Currency,
+                BasePrice = booking.ListPrice, TargetTierId = session.TargetTierId,
+                TierMin = session.TargetTier?.MinParticipants, TierMax = session.TargetTier?.MaxParticipants,
+                WorstCasePrice = null, FinalAmount = 0, Policy = session.Policy, CalculatedAtUtc = now,
+            };
+            db.PriceSnapshots.Add(snapshot);
+            booking.Status = BookingStatus.Confirmed;
+            booking.ConfirmedAtUtc = now;
+            booking.PaymentDueAtUtc = null;
+            booking.PriceSnapshotId = snapshot.Id;
+            booking.TopUpTermsAcceptedAtUtc = null; // a free seat never owes a group difference
+            db.AuditLogs.Add(new Domain.Administration.AuditLog
+            {
+                Actor = "student", Entity = nameof(Booking), EntityId = booking.Id.ToString(), Action = "ConfirmedFree",
+                DataJson = System.Text.Json.JsonSerializer.Serialize(new { booking.Reference, promo = quote?.Promo.Code }), AtUtc = now,
+            });
+            await notify.QueueForBookingAsync(booking.Id, Domain.Notifications.TemplateCodes.BookingConfirmed, $"confirmed:{booking.Id}", ct);
+        }
 
         try
         {

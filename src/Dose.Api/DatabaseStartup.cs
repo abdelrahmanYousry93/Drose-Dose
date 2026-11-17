@@ -89,7 +89,10 @@ public sealed class DatabaseStartup(
         }
         // One-time launch catalog (teachers, free time, first group sessions); off in tests via Seed:LaunchCatalog=false.
         if (config.GetValue("Seed:LaunchCatalog", !isDev))
+        {
             await LaunchCatalog.EnsureAsync(db, DateTime.UtcNow, ct);
+            await ChemReviewNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
+        }
     }
 
     void StartJobs()

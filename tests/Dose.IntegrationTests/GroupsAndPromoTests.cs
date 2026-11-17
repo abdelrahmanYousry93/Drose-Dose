@@ -27,6 +27,35 @@ public sealed class GroupsAndPromoTests(DatabaseFixture fx)
     }
 
     [Fact]
+    public async Task Full_discount_code_confirms_the_booking_without_a_payment_and_stops_after_its_limit()
+    {
+        RequireDb();
+        var session = await fx.CreateSessionAsync(SessionMode.Group, "جروب متوسط (5–9)");
+        await PromoAsync("FREE1", "Percent", 100, perPhone: 1, total: 1, sessionId: session.Id);
+        var clock = new FakeClock(fx.SeedTime);
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, clock);
+            var hold = await svc.CreateHoldAsync(session.Id, default);
+            var phone = NextPhone();
+            var preview = await svc.PreviewPromoAsync(hold.AccessToken, new PromoPreviewRequest("FREE1", phone), default);
+            Assert.Equal(0m, preview.NetPrice);
+            await svc.SubmitDetailsAsync(hold.AccessToken, new SubmitDetailsRequest("مجاني", phone, null, null, true, true, 0m, "FREE1"), default);
+            var view = await svc.GetViewAsync(hold.AccessToken, default);
+            Assert.Equal("Confirmed", view.Status.ToString());
+            Assert.Equal(0m, view.Price);
+        }
+        // The single free use is taken: the next student gets the normal price.
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, clock);
+            var hold = await svc.CreateHoldAsync(session.Id, default);
+            var ex = await Assert.ThrowsAsync<DomainException>(() => svc.PreviewPromoAsync(hold.AccessToken, new PromoPreviewRequest("FREE1", NextPhone()), default));
+            Assert.Equal(PromoErrors.Invalid, ex.Code);
+        }
+    }
+
+    [Fact]
     public async Task Percent_promo_lowers_the_price_respects_per_number_limit_and_also_lowers_a_group_top_up()
     {
         RequireDb();
