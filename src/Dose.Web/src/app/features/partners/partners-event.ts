@@ -83,9 +83,9 @@ type Way = 'fund' | 'students';
   styles: `
     .flow { min-height: calc(100dvh - 150px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 12px 4px 20px; }
     .dots { display: flex; gap: 6px; } .dots i { width: 28px; height: 6px; border-radius: 3px; background: var(--dose-border); } .dots i.on { background: var(--dose-primary); }
-    h1 { margin: 0; font-size: 1.7rem; line-height: 1.35; color: var(--dose-navy); max-width: 22ch; }
+    h1 { margin: 0; font-size: clamp(1.35rem, 6vw, 1.7rem); line-height: 1.35; color: var(--dose-navy); max-width: 22ch; }
     .q { margin: 0; font-size: 1.15rem; font-weight: 700; }
-    .pill { width: 180px; height: 76px; border-radius: 38px; display: flex; overflow: hidden; box-shadow: 0 16px 40px rgb(11 31 107 / .25); }
+    .pill { width: 150px; height: 64px; border-radius: 32px; margin: 18px 0 6px; display: flex; overflow: hidden; box-shadow: 0 16px 40px rgb(11 31 107 / .25); }
     .pill i { flex: 1; } .pill i:first-child { background: var(--dose-primary); } .pill i:last-child { background: var(--dose-accent); }
     .wobble { animation: wob 2.4s ease-in-out infinite; } @keyframes wob { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg) translateY(-6px); } }
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 420px; }
@@ -98,12 +98,14 @@ type Way = 'fund' | 'students';
     .go { display: inline-block; background: var(--dose-primary); color: #fff; border: 0; border-radius: 999px; padding: 14px 34px; font: inherit; font-weight: 800; font-size: 1.1rem; cursor: pointer; text-decoration: none; }
     .tile { width: 100%; max-width: 420px; display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 18px; border: 2px solid var(--dose-primary); background: var(--dose-primary-50); font: inherit; font-weight: 800; font-size: 1.1rem; color: var(--dose-navy); cursor: pointer; text-decoration: none; text-align: start; }
     .tile b { font-size: 1.8rem; } .tile.wa { border-color: #25d366; background: #e9fbef; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 420px; }
+    @media (max-width: 380px) { .chips { grid-template-columns: repeat(2, 1fr); } }
     .chip { border: 2px solid var(--dose-border); background: var(--dose-surface); border-radius: 999px; padding: 10px 16px; font: inherit; font-weight: 800; cursor: pointer; }
     .chip.on { border-color: var(--dose-primary); background: var(--dose-primary); color: #fff; }
     .form { display: grid; gap: 10px; width: 100%; max-width: 420px; }
     .form input { padding: 14px 16px; border-radius: 14px; border: 2px solid var(--dose-border); font: inherit; font-size: 1.05rem; }
     .form input.err { border-color: var(--dose-danger, #e5484d); }
+    .back::before, .back::after { content: none !important; }
     .back, .more { background: none; border: 0; font: inherit; color: var(--dose-text-muted); cursor: pointer; text-decoration: underline; }
     .more { margin-top: 8px; font-size: .85rem; }
     .rain { position: relative; height: 90px; width: 100%; max-width: 320px; overflow: hidden; }
