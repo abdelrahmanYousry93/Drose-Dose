@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g06-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>POV 😅</div><div class='h1' style='font-size:96px'>قاعد تذاكر<br/>بقالك ساعتين…<br/><span class='yellow'>ولسه في أول صفحة</span></div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:92px'>المشكلة مش إنك<br/><span class='accent'>كسلان</span></div><div class='lead muted'>المشكلة إن البداية تقيلة</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:92px'>قول لنفسك:<br/><span class='accent'>5 دقايق بس</span></div><div class='lead muted'>والموبايل في أوضة تانية</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>2</div><div class='h1' style='font-size:88px'>ابدأ بأسهل<br/><span class='yellow'>جزء في الدرس</span></div><div class='lead'>وأول ما تبدأ… هتكمّل</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك<br/>اللي بيأجّل 👇</div><div class='lead muted'>وتابع Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
