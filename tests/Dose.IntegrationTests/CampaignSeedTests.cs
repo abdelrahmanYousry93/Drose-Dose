@@ -32,6 +32,21 @@ public sealed class CampaignSeedTests(DatabaseFixture fx)
             var code = await db.PromoCodes.SingleAsync(p => p.Code == ChemReviewNov2026.Code);
             Assert.Equal((100m, 20, (Guid?)s.Id), (code.Value, code.MaxTotalUses!.Value, code.SessionId));
         }
+        // The session page shows the free offer with the places left.
+        await using (var app = new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>().WithWebHostBuilder(b =>
+        {
+            Microsoft.AspNetCore.Hosting.HostingAbstractionsWebHostBuilderExtensions.UseEnvironment(b, "Production");
+            b.UseSetting("ConnectionStrings:Dose", fx.ConnectionString);
+            b.UseSetting("Jobs:Enabled", "false");
+            b.UseSetting("Seed:LaunchCatalog", "false");
+        }))
+        {
+            var res = await app.CreateClient().GetAsync($"/api/sessions/{ChemReviewNov2026.SessionId}/offer");
+            Assert.Equal(System.Net.HttpStatusCode.OK, res.StatusCode);
+            var o = await System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync<System.Text.Json.JsonElement>(res.Content);
+            Assert.Equal("CHEM20", o.GetProperty("code").GetString());
+            Assert.Equal(20, o.GetProperty("remaining").GetInt32());
+        }
         // Fixed price: no "how the group price works" terms, and no group-difference box to tick.
         var clock = new FakeClock(fx.SeedTime);
         await using (var db = fx.NewDb())
