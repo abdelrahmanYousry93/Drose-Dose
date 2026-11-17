@@ -35,14 +35,17 @@ body{{font-family:Cairo,sans-serif;color:#fff;background:radial-gradient(circle 
 .brand{{display:flex;align-items:center;gap:14px;font-weight:900;font-size:40px}}
 .brand .m{{width:56px;height:56px;background:#fff;border-radius:14px;padding:6px}} .brand .m svg{{width:100%;height:100%;display:block}}
 .free{{background:#FFC30A;color:#0B1F6B;font-weight:900;font-size:34px;padding:10px 26px;border-radius:999px;transform:rotate(-3deg);box-shadow:0 10px 30px rgba(255,195,10,.35)}}
+.grade{{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);font-weight:900;font-size:34px;padding:8px 26px;border-radius:999px}}
+.h2{{font-weight:900;font-size:{'72px' if story else '62px'};line-height:1.15;color:#fff;margin-top:-10px}}
+.ribbon{{align-self:stretch;text-align:center;background:#FFC30A;color:#0B1F6B;font-weight:900;font-size:{'74px' if story else '62px'};line-height:1.25;padding:{'18px 10px' if story else '12px 10px'};border-radius:26px;transform:rotate(-1.5deg);box-shadow:0 14px 40px rgba(255,195,10,.4)}}
 .kicker{{font-weight:800;font-size:36px;color:#9ec2ff}}
-.h1{{font-weight:900;font-size:{'112px' if story else '92px'};line-height:1.1}}
+.h1{{font-weight:900;font-size:{'132px' if story else '112px'};line-height:1.1}}
 .h1 .y{{color:#FFC30A}}
-.sub{{font-weight:700;font-size:{'40px' if story else '35px'};line-height:1.5;color:#dbe6ff}}
+.sub{{font-weight:700;font-size:{'35px' if story else '35px'};line-height:1.5;color:#dbe6ff}}
 .sub b{{color:#fff}}
 .tubes{{display:flex;gap:26px;justify-content:center;margin:{'10px 0' if story else '0'}}}
 .tube{{display:flex;flex-direction:column;align-items:center;gap:6px}}
-.glass{{position:relative;width:{'96px' if story else '78px'};height:{'250px' if story else '150px'};border:5px solid rgba(255,255,255,.75);border-top:none;border-radius:0 0 50px 50px;overflow:hidden;background:rgba(255,255,255,.06)}}
+.glass{{position:relative;width:{'96px' if story else '78px'};height:{'230px' if story else '120px'};border:5px solid rgba(255,255,255,.75);border-top:none;border-radius:0 0 50px 50px;overflow:hidden;background:rgba(255,255,255,.06)}}
 .glass:before{{content:"";position:absolute;top:0;left:-9px;right:-9px;height:10px;background:rgba(255,255,255,.75);border-radius:6px}}
 .liq{{position:absolute;inset:auto 0 0 0;height:58%;background:var(--c);box-shadow:0 0 40px var(--c)}}
 .bub{{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.55)}} .b1{{left:22%;bottom:30%}} .b2{{left:58%;bottom:15%;width:8px;height:8px}}
@@ -63,14 +66,15 @@ body{{font-family:Cairo,sans-serif;color:#fff;background:radial-gradient(circle 
 .foot{{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:28px;color:#9ec2ff}}
 .foot b{{color:#fff;direction:ltr}}
 </style></head><body><div class="grid"></div><div class="wrap">
-<div class="top"><div class="brand"><span class="m">{mark}</span>دروس Dose</div><div class="free">🔥 مجانًا لأول 20 طالب</div></div>
-<div class="kicker">مراجعة كيمياء · تالتة ثانوي</div>
-<div class="h1">الباب التاني<br/><span class="y">مقفّلك؟</span></div>
-<div class="sub">مراجعة <b>الباب الأول والتاني</b> في جلسة واحدة:<br/>العناصر الانتقالية · <b>الكشف عن الشقوق</b> · <b>مسائل المعايرة</b></div>
+<div class="top"><div class="brand"><span class="m">{mark}</span>دروس Dose</div><div class="grade">تالتة ثانوي 🧪</div></div>
+<div class="h1"><span class="y">مراجعة</span> كيمياء</div>
+<div class="h2">الباب الأول والتاني</div>
+<div class="ribbon">🎁 مجانًا لأول 20 طالب</div>
+<div class="sub">العناصر الانتقالية · <b>الكشف عن الشقوق</b> · <b>مسائل المعايرة</b></div>
 <div class="tubes">{tubes()}</div>
 <div class="when"><div><b>الجمعة</b><span>20 نوفمبر</span></div><div><b>6 مساءً</b><span>ساعتين مراجعة</span></div><div><b>أونلاين</b><span>من بيتك</span></div></div>
 <div class="offer"><div class="t">
-  <div class="l1">احجز بكود <span class="code">CHEM20</span><br/>وادخل ببلاش</div>
+  <div class="l1">احجز بالكود <span class="code">CHEM20</span><br/>والمراجعة عليك ببلاش</div>
   <div class="l2">لأول 20 بس، وبعدهم 100 جنيه للجلسة</div>
   <div class="l3">💊 جرعة مراجعة واحدة، مش اشتراك شهر</div>
 </div><div class="qrw"><div class="qr">{qr}</div><span>امسح واحجز</span></div></div>
