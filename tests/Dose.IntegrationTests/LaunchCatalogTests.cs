@@ -67,5 +67,20 @@ public sealed class LaunchCatalogTests(DatabaseFixture fx)
         var physicsSlots = await fx.Private(db, clock).SlotsAsync(grade.Id, physics.Id, track.Id, service.Id, 1, default);
         Assert.DoesNotContain(physicsSlots.Slots, s => s.StartUtc == new DateTime(2026, 11, 20, 17, 0, 0));
         Assert.Contains(physicsSlots.Slots, s => s.StartUtc == new DateTime(2026, 11, 20, 15, 0, 0));
+
+        // 17 Nov: open groups become a fixed 120 per student; the Saturday chapter-1 session is withdrawn.
+        await LaunchSessionsFixedPrice.EnsureAsync(db, now);
+        await LaunchSessionsFixedPrice.EnsureAsync(db, now); // once
+        db.ChangeTracker.Clear();
+        var after = await db.Sessions.Include(x => x.PricingPlanVersion!).ThenInclude(v => v.Tiers).Include(x => x.TargetTier)
+            .Where(x => ids.Contains(x.TeacherId)).ToListAsync();
+        Assert.Equal(SessionStatus.Cancelled, after.Single(x => x.ScopeTitleAr == "العناصر الانتقالية").Status);
+        var open = after.Where(x => x.Status == SessionStatus.Published).ToList();
+        Assert.Equal(5, open.Count);
+        Assert.All(open, x =>
+        {
+            Assert.Equal(120m, Dose.Application.Sessions.SessionPricing.CurrentPrice(x));
+            Assert.Null(Dose.Application.Sessions.SessionPricing.GroupTerms(x));
+        });
     }
 }
