@@ -620,12 +620,16 @@ export const en: typeof ar = {
   },
   "offer": {
     "after": "then {price}",
+    "bookFree": "Book your free place 🎁",
     "discount": "{v} off this session with the code",
     "free": "This session is free with the code",
     "freeFirst": "Free for the first {n} students",
     "gone": "The {n} free places are gone — you can still book at the regular price.",
     "how": "Book and the code is applied for you:",
-    "left": "free places left"
+    "left": "free places left",
+    "pay1": "With the code the booking is free — nothing to pay.",
+    "pay2": "Your place is confirmed as soon as you enter your name and number.",
+    "steps": "Just your name and number — confirmed instantly. No payment."
   },
   "partners": {
     "another": "Another pledge",

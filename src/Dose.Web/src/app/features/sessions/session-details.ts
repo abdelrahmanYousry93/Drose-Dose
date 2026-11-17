@@ -35,6 +35,10 @@ import { TeacherCard } from '../../shared/teacher-card';
               <div class="big">🎁 {{ (o.total ? 'offer.freeFirst' : 'offer.free') | t: { n: o.total ?? 0 } }}</div>
               @if (o.remaining != null) { <div class="left"><b>{{ o.remaining }}</b> {{ 'offer.left' | t }}</div> }
               <div class="how">{{ 'offer.how' | t }} <span class="code" dir="ltr">{{ o.code }}</span> · {{ 'offer.after' | t: { price: money(s.pricePerStudent, s.currency) } }}</div>
+              @if (d()!.isOpenForBooking) {
+                <button class="dose-btn dose-btn--primary btn-block big-book" (click)="book()" [disabled]="booking()">{{ (booking() ? 'details.booking' : 'offer.bookFree') | t }}</button>
+                <div class="steps">{{ 'offer.steps' | t }}</div>
+              }
             </div>
           } @else if ((o.remaining ?? 1) > 0) {
             <div class="offer soft"><div class="how">🎁 {{ 'offer.discount' | t: { v: o.kind === 'Percent' ? o.value + '%' : money(o.value, s.currency) } }} <span class="code" dir="ltr">{{ o.code }}</span></div></div>
@@ -51,7 +55,9 @@ import { TeacherCard } from '../../shared/teacher-card';
             <li><span>{{ 'details.when' | t }}</span><span>{{ date(s.startUtc) }} — {{ time(s.startUtc) }}</span></li>
             <li><span>{{ 'details.duration' | t }}</span><span>{{ duration(s.durationMinutes) }}</span></li>
             @if (s.mode === 'Group') {
-              <li><span>{{ 'details.booked' | t }}</span><span>{{ 'details.bookedOf' | t: { n: s.confirmedCount, cap: s.capacity } }}</span></li>
+              @if (s.confirmedCount >= 5) {
+                <li><span>{{ 'details.booked' | t }}</span><span>{{ 'details.bookedOf' | t: { n: s.confirmedCount, cap: s.capacity } }}</span></li>
+              }
               <li><span>{{ 'details.seatsLeft' | t }}</span><span>{{ s.remainingSeats }}</span></li>
             }
             <li><span>{{ 'details.deadline' | t }}</span><span>{{ dateTime(s.bookingDeadlineUtc) }}</span></li>
@@ -67,9 +73,14 @@ import { TeacherCard } from '../../shared/teacher-card';
         <div class="dose-card box">
           <h2>{{ 'details.payCancel' | t }}</h2>
           <ul class="bullets">
-            <li>{{ 'details.pay1' | t }}</li>
-            <li>{{ 'details.pay2' | t }}</li>
-            <li>{{ 'details.pay3' | t: { h: refundHours() } }}</li>
+            @if (free()) {
+              <li>{{ 'offer.pay1' | t }}</li>
+              <li>{{ 'offer.pay2' | t }}</li>
+            } @else {
+              <li>{{ 'details.pay1' | t }}</li>
+              <li>{{ 'details.pay2' | t }}</li>
+              <li>{{ 'details.pay3' | t: { h: refundHours() } }}</li>
+            }
             <li>{{ 'details.pay4' | t }}</li>
           </ul>
           @if (d()!.requiresGuardianContact) {
@@ -80,8 +91,13 @@ import { TeacherCard } from '../../shared/teacher-card';
         @if (bookError()) { <p class="alert alert--error">{{ bookError() }}</p> }
         @if (d()!.isOpenForBooking) {
           <button class="dose-btn dose-btn--primary btn-block" (click)="book()" [disabled]="booking()">
-            {{ (booking() ? 'details.booking' : 'details.book') | t }}
+            {{ (booking() ? 'details.booking' : free() ? 'offer.bookFree' : 'details.book') | t }}
           </button>
+          <div class="sticky-book">
+            <button class="dose-btn dose-btn--primary btn-block" (click)="book()" [disabled]="booking()">
+              {{ (booking() ? 'details.booking' : free() ? 'offer.bookFree' : 'details.book') | t }}
+            </button>
+          </div>
         } @else {
           <p class="alert">{{ 'details.closed' | t }} <a routerLink="/request-session">{{ 'sessions.requestNew' | t }}</a></p>
         }
@@ -95,6 +111,13 @@ import { TeacherCard } from '../../shared/teacher-card';
     .offer .how { font-weight: 700; }
     .offer .code { background: var(--dose-navy); color: #fff; border-radius: 8px; padding: 1px 10px; font-weight: 900; letter-spacing: 1px; }
     .offer.soft { background: var(--dose-primary-50); box-shadow: none; }
+    .big-book { margin-top: 6px; font-size: 1.15rem; padding: 14px; }
+    .steps { font-size: .85rem; font-weight: 700; color: #3c4a6e; }
+    .sticky-book { display: none; }
+    @media (max-width: 700px) {
+      .sticky-book { display: block; position: fixed; inset-inline: 0; bottom: 0; z-index: 30; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(255 255 255 / .96); box-shadow: 0 -6px 20px rgb(11 31 107 / .12); }
+      :host { display: block; padding-bottom: 76px; }
+    }
     .offer.gone { background: #f3f4f7; color: var(--dose-text-muted); box-shadow: none; }
 
     .back { text-decoration: none; font-weight: 600; }
@@ -125,6 +148,8 @@ export class SessionDetailsPage {
   protected readonly money = fmtMoney;
 
   protected readonly offer = signal<SessionOffer | null>(null);
+  /** A 100% code for this session still has free places. */
+  protected readonly free = computed(() => { const o = this.offer(); return !!o && o.kind === 'Percent' && o.value >= 100 && (o.remaining ?? 1) > 0; });
 
   constructor() {
     effect(() => {

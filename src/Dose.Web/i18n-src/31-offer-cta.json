@@ -1,0 +1,6 @@
+{
+ "offer.bookFree": ["احجز مكانك ببلاش 🎁", "Book your free place 🎁"],
+ "offer.steps": ["اسمك ورقمك بس، والحجز بيتأكد على طول. مفيش دفع.", "Just your name and number — confirmed instantly. No payment."],
+ "offer.pay1": ["بالكود الحجز مجاني ومش هتدفع أي حاجة.", "With the code the booking is free — nothing to pay."],
+ "offer.pay2": ["الحجز بيتأكد على طول أول ما تكتب اسمك ورقمك.", "Your place is confirmed as soon as you enter your name and number."]
+}
