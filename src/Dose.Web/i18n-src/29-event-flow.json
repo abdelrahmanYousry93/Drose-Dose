@@ -108,31 +108,31 @@
   "Want more details?"
  ],
  "ev.founderTitle": [
-  "تواصل مع المؤسس",
-  "Talk to the founder"
- ],
- "ev.founderName": [
-  "عبدالرحمن يسري",
-  "Abdelrahman Yousry"
+  "تواصل مع المؤسسين",
+  "Talk to the founders"
  ],
  "ev.founderRole": [
-  "Founder · دروس Dose",
-  "Founder · Dose"
+  "دروس Dose",
+  "Dose"
  ],
  "ev.founderLine": [
-  "عايز تتكلم معايا على طول؟ كلّمني أو ابعتلي واتساب 👋",
-  "Want to talk to me directly? Call me or send a WhatsApp 👋"
+  "عايز تتكلم معانا على طول؟ كلّمنا أو ابعتلنا واتساب 👋",
+  "Want to talk to us directly? Call or send a WhatsApp 👋"
  ],
  "ev.callMe": [
-  "اتصل بيا",
-  "Call me"
+  "اتصل بينا",
+  "Call us"
  ],
  "ev.waMe": [
   "واتساب",
   "WhatsApp"
  ],
  "ev.founderWa": [
-  "أهلاً عبدالرحمن، شفت Dose في الـSummit ({lesson}) وحابب نتكلم.",
-  "Hi Abdelrahman, I saw Dose at the Summit ({lesson}) and would like to talk."
+  "أهلاً، شفت Dose في الـSummit ({lesson}) وحابب نتكلم.",
+  "Hi, I saw Dose at the Summit ({lesson}) and would like to talk."
+ ],
+ "ev.founderName": [
+  "تواصل مع المؤسسين",
+  "Talk to the founders"
  ]
 }

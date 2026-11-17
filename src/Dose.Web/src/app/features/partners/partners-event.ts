@@ -82,7 +82,7 @@ type Way = 'fund' | 'students';
           <div class="who">
             <span class="avatar" aria-hidden="true">ع</span>
             <div>
-              <div class="fname">{{ 'ev.founderName' | t }}</div>
+              <div class="fname">{{ 'ev.founderTitle' | t }}</div>
               <div class="frole">{{ 'ev.founderRole' | t }}</div>
             </div>
           </div>
@@ -92,10 +92,10 @@ type Way = 'fund' | 'students';
               <span class="ic" aria-hidden="true">📞</span>
               <span><b>{{ 'ev.callMe' | t }}</b><small dir="ltr">{{ founderPhoneShown }}</small></span>
             </a>
-            @if (settings.whatsAppLink(founderWa()); as link) {
+            @if (founderWaLink(); as link) {
               <a class="fbtn wa" [href]="link" target="_blank" rel="noopener" (click)="tracker.trackEvent('ev-chat')">
                 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
-                <span><b>{{ 'ev.waMe' | t }}</b><small dir="ltr">{{ waShown() }}</small></span>
+                <span><b>{{ 'ev.waMe' | t }}</b><small dir="ltr">{{ founderPhoneShown }}</small></span>
               </a>
             }
           </div>
@@ -179,13 +179,10 @@ export class PartnersEvent {
   protected answer(dose: boolean) { this.right.set(dose); this.step.set('reveal'); this.tracker.trackEvent(dose ? 'ev-dose' : 'ev-month'); }
   protected toChoices() { this.step.set('how'); this.tracker.trackEvent('ev-how'); }
   protected pick(w: Way) { this.way.set(w); this.step.set('form'); this.tracker.trackEvent(w === 'fund' ? 'ev-fund' : 'ev-students'); }
-  /** The founder's direct line, shown publicly on the summit page at his request. WhatsApp goes to Dose's business number. */
+  /** The founders' direct line, call and WhatsApp, shown publicly on the summit page at the owner's request. */
   protected readonly founderPhone = '+201010372614';
   protected readonly founderPhoneShown = '0101 037 2614';
-  protected waShown() {
-    const n = this.settings.settings()?.whatsAppBusinessNumber?.replace(/\D/g, '') ?? '';
-    return n.startsWith('20') ? `0${n.slice(2, 5)} ${n.slice(5, 8)} ${n.slice(8)}` : n;
-  }
+  protected founderWaLink() { return `https://wa.me/${this.founderPhone.replace(/\D/g, '')}?text=${encodeURIComponent(this.founderWa())}`; }
   protected founderWa() { return translate('ev.founderWa', { lesson: this.lesson() ?? '' }).replace(/\s+\(\)/, ''); }
   protected waText() { return translate('event.waText', { lesson: this.lesson() ?? '' }).replace(/\s+\(\)/, ''); }
 
