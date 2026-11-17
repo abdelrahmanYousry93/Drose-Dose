@@ -27,7 +27,7 @@ public sealed class CampaignSeedTests(DatabaseFixture fx)
         {
             var s = await db.Sessions.Include(x => x.PricingPlanVersion!).ThenInclude(v => v.Tiers).SingleAsync(x => x.Id == ChemReviewNov2026.SessionId);
             Assert.Equal(new DateTime(2026, 11, 20, 16, 0, 0, DateTimeKind.Utc), s.StartUtc); // 6 pm Cairo
-            Assert.StartsWith("مراجعة الباب الأول:", s.ScopeTitleAr);
+            Assert.Equal("مراجعة شاملة على الباب الأول كله: العناصر الانتقالية", s.ScopeTitleAr);
             Assert.All(s.PricingPlanVersion!.Tiers, t => Assert.Equal(100m, t.PricePerStudent));
             var code = await db.PromoCodes.SingleAsync(p => p.Code == ChemReviewNov2026.Code);
             Assert.Equal((100m, 20, (Guid?)s.Id), (code.Value, code.MaxTotalUses!.Value, code.SessionId));

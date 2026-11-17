@@ -41,6 +41,8 @@ export class BookingPage {
 
   // Promo code (details step)
   protected promoCode = '';
+  /** Code handed over by the session page's offer banner (navigation state), applied once on load. */
+  private offerCode: string = (() => { try { const c = history.state?.offerCode; return typeof c === 'string' && /^[A-Z0-9-]{2,30}$/.test(c) ? c : ''; } catch { return ''; } })();
   protected readonly promo = signal<PromoPreview | null>(null);
   protected readonly promoError = signal('');
   protected readonly promoBusy = signal(false);
@@ -133,6 +135,12 @@ export class BookingPage {
       // A booking the team prepared for you already has your name and number.
       if (v.status === 'PendingHold' && !this.studentName && v.studentName) this.studentName = v.studentName;
       if (v.status === 'PendingHold' && !this.contactPhone && v.prefillPhone) this.contactPhone = v.prefillPhone.replace(/^\+20/, '0');
+      // Came from a session page that advertises a code for this session (e.g. free for the first 20): apply it.
+      if (v.status === 'PendingHold' && !this.promoCode && !this.promo() && this.offerCode) {
+        this.promoCode = this.offerCode;
+        this.offerCode = '';
+        queueMicrotask(() => void this.applyPromo());
+      }
       this.b.set(v);
       this.error.set('');
       myBookings.add(v.reference, token); // links opened from WhatsApp also show up in "My bookings"

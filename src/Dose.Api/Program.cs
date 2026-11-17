@@ -131,6 +131,7 @@ app.MapMessagingEndpoints();
 app.MapPhase6Endpoints();
 app.MapPartnerEndpoints();
 app.MapStudentAccessEndpoints();
+app.MapSessionOfferEndpoints();
 app.MapDoseSpa();
 
 app.Run();

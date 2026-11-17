@@ -19,14 +19,14 @@ public static class ChemReviewNov2026
     public static readonly Guid SessionId = Guid.Parse("01a1f3c0-c4e3-7a20-8000-000000002011");
     public const string Code = "CHEM20";
     // Owner narrowed the review to chapter 1 only (17 Nov, 12:41).
-    const string ScopeAr = "مراجعة الباب الأول: العناصر الانتقالية (السلسلة الانتقالية الأولى + الحديد)";
-    const string ScopeEn = "Review of chapter 1: transition elements (first transition series + iron)";
+    const string ScopeAr = "مراجعة شاملة على الباب الأول كله: العناصر الانتقالية";
+    const string ScopeEn = "Full review of all of chapter 1: transition elements";
     const string OldScopeAr = "مراجعة الباب الأول والتاني: العناصر الانتقالية والتحليل الكيميائي (الكشف عن الشقوق + المعايرة)";
 
     /// <summary>If an earlier deploy already created the session with chapters 1+2, narrow it to chapter 1.</summary>
     public static async Task NarrowToChapterOneAsync(DoseDbContext db, CancellationToken ct = default)
     {
-        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == SessionId && x.ScopeTitleAr == OldScopeAr, ct);
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == SessionId && (x.ScopeTitleAr == OldScopeAr || x.ScopeTitleAr.StartsWith("مراجعة الباب الأول:")), ct);
         if (s is null) return;
         s.ScopeTitleAr = ScopeAr;
         s.ScopeTitleEn = ScopeEn;

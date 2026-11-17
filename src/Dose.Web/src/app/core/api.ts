@@ -82,6 +82,7 @@ export interface PaymentProofAdmin {
 export interface Setting { key: string; value: string; descriptionAr: string | null }
 
 /** Error carrying the API's stable error code (see DomainExceptionHandler). */
+export interface SessionOffer { code: string; kind: 'Percent' | 'Fixed'; value: number; total: number | null; remaining: number | null; validToUtc: string | null }
 export interface RestoredItems { bookings: { reference: string; token: string }[]; requests: { reference: string; subject: string; grade: string; sentAtUtc: string }[] }
 export interface PledgeBody {
   organization: string; contactName: string; contactPhone: string; role: string | null;
@@ -130,6 +131,7 @@ export class Api {
     return this.get<SessionSummary[]>('/sessions', f);
   }
   session(id: string) { return this.get<SessionDetails>(`/sessions/${id}`); }
+  sessionOffer(id: string) { return this.get<SessionOffer | null>(`/sessions/${id}/offer`); }
 
   // Booking (secret-link token)
   hold(sessionId: string) { return this.post<HoldResponse>('/bookings/holds', { sessionId }); }

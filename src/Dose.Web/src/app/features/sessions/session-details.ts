@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { Api, SessionDetails } from '../../core/api';
+import { Api, SessionDetails, SessionOffer } from '../../core/api';
 import { MarketingTracker } from '../../core/marketing-tracker';
 import { errorMessage, fmtDate, fmtDateTime, fmtDuration, fmtMoney, fmtTime, myBookings } from '../../core/format';
 import { TranslatePipe } from '../../core/i18n';
@@ -28,6 +28,20 @@ import { TeacherCard } from '../../shared/teacher-card';
           <h1 class="page-title" dir="auto">{{ s.subjectName }} — {{ s.scopeTitle }}</h1>
           <p class="muted">{{ s.gradeName }} · {{ s.studyTrackName }} · {{ s.serviceTypeName }}</p>
         </div>
+
+        @if (offer(); as o) {
+          @if (o.kind === 'Percent' && o.value >= 100 && (o.remaining ?? 1) > 0) {
+            <div class="offer">
+              <div class="big">🎁 {{ (o.total ? 'offer.freeFirst' : 'offer.free') | t: { n: o.total ?? 0 } }}</div>
+              @if (o.remaining != null) { <div class="left"><b>{{ o.remaining }}</b> {{ 'offer.left' | t }}</div> }
+              <div class="how">{{ 'offer.how' | t }} <span class="code" dir="ltr">{{ o.code }}</span> · {{ 'offer.after' | t: { price: money(s.pricePerStudent, s.currency) } }}</div>
+            </div>
+          } @else if ((o.remaining ?? 1) > 0) {
+            <div class="offer soft"><div class="how">🎁 {{ 'offer.discount' | t: { v: o.kind === 'Percent' ? o.value + '%' : money(o.value, s.currency) } }} <span class="code" dir="ltr">{{ o.code }}</span></div></div>
+          } @else if (o.total) {
+            <div class="offer gone"><div class="how">{{ 'offer.gone' | t: { n: o.total } }}</div></div>
+          }
+        }
 
         <dose-teacher-card [teacher]="d()!.teacher" />
 
@@ -75,6 +89,14 @@ import { TeacherCard } from '../../shared/teacher-card';
     </section>
   `,
   styles: `
+    .offer { background: linear-gradient(135deg, #FFC30A, #ffd84d); color: var(--dose-navy); border-radius: var(--dose-radius); padding: 18px 16px; display: grid; gap: 6px; text-align: center; box-shadow: 0 10px 30px rgb(255 195 10 / .3); }
+    .offer .big { font-size: 1.6rem; font-weight: 900; line-height: 1.3; }
+    .offer .left { font-weight: 800; } .offer .left b { font-size: 1.4rem; }
+    .offer .how { font-weight: 700; }
+    .offer .code { background: var(--dose-navy); color: #fff; border-radius: 8px; padding: 1px 10px; font-weight: 900; letter-spacing: 1px; }
+    .offer.soft { background: var(--dose-primary-50); box-shadow: none; }
+    .offer.gone { background: #f3f4f7; color: var(--dose-text-muted); box-shadow: none; }
+
     .back { text-decoration: none; font-weight: 600; }
     h1 { margin-top: 8px; }
     p { margin: 4px 0 0; }
@@ -102,9 +124,12 @@ export class SessionDetailsPage {
   protected readonly duration = fmtDuration;
   protected readonly money = fmtMoney;
 
+  protected readonly offer = signal<SessionOffer | null>(null);
+
   constructor() {
     effect(() => {
       const id = this.id();
+      this.api.sessionOffer(id).then((o) => this.offer.set(o ?? null)).catch(() => this.offer.set(null));
       this.api.session(id).then((d) => {
         this.d.set(d);
         this.context.setSupport({ step: 'support.step.viewing', session: `${d.summary.subjectName} — ${d.summary.scopeTitle}`,
@@ -120,7 +145,8 @@ export class SessionDetailsPage {
       const hold = await this.api.hold(this.id());
       myBookings.add(hold.reference, hold.accessToken);
       this.tracker.track('hold', hold.reference);
-      await this.router.navigate(['/b', hold.accessToken]);
+      const o = this.offer();
+      await this.router.navigate(['/b', hold.accessToken], { state: o && (o.remaining ?? 1) > 0 ? { offerCode: o.code } : {} });
     } catch (e) {
       this.bookError.set(errorMessage(e));
     } finally {

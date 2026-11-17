@@ -32,16 +32,17 @@ body{{font-family:Cairo,sans-serif;color:#fff;background:radial-gradient(circle 
 .free{{background:#FFC30A;color:#0B1F6B;font-weight:900;font-size:34px;padding:10px 26px;border-radius:999px;transform:rotate(-3deg);box-shadow:0 10px 30px rgba(255,195,10,.35)}}
 .grade{{background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);font-weight:900;font-size:34px;padding:8px 26px;border-radius:999px}}
 .h2{{font-weight:900;font-size:{'60px' if story else '62px'};line-height:1.15;color:#fff;margin-top:-10px}}
-.ribbon{{align-self:stretch;text-align:center;background:#FFC30A;color:#0B1F6B;font-weight:900;font-size:{'74px' if story else '62px'};line-height:1.25;padding:{'18px 10px' if story else '12px 10px'};border-radius:26px;transform:rotate(-1.5deg);box-shadow:0 14px 40px rgba(255,195,10,.4)}}
+.ribbon{{align-self:stretch;text-align:center;background:#FFC30A;color:#0B1F6B;font-weight:900;font-size:{'80px' if story else '76px'};line-height:1.2;padding:{'20px 10px 16px' if story else '12px 10px 10px'};display:grid;border-radius:26px;transform:rotate(-1.5deg);box-shadow:0 14px 40px rgba(255,195,10,.4)}}
+.ribbon small{{font-size:{'34px' if story else '28px'};font-weight:800;color:#3c4a6e}}
 .kicker{{font-weight:800;font-size:36px;color:#9ec2ff}}
-.h1{{font-weight:900;font-size:{'132px' if story else '112px'};line-height:1.1}}
+.h1{{font-weight:900;font-size:{'124px' if story else '100px'};line-height:1.1}}
 .h1 .y{{color:#FFC30A}}
 .sub{{font-weight:700;font-size:{'35px' if story else '35px'};line-height:1.5;color:#dbe6ff}}
 .sub b{{color:#fff}}
 .tubes{{display:grid;grid-template-columns:repeat(5,1fr);gap:{'16px' if story else '12px'};direction:ltr;margin:{'10px 0' if story else '0'}}}
-.el{{position:relative;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.22);border-radius:18px;height:{'130px' if story else '92px'};display:grid;place-items:center}}
+.el{{position:relative;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.22);border-radius:18px;height:{'120px' if story else '78px'};display:grid;place-items:center}}
 .el i{{position:absolute;top:6px;left:10px;font-style:normal;font-weight:700;font-size:{'24px' if story else '19px'};color:#9ec2ff}}
-.el b{{font-weight:900;font-size:{'58px' if story else '44px'}}}
+.el b{{font-weight:900;font-size:{'54px' if story else '38px'}}}
 .el.fe{{background:#FFC30A;border-color:#FFC30A;color:#0B1F6B;box-shadow:0 0 40px rgba(255,195,10,.5);transform:scale(1.06)}} .el.fe i{{color:#0B1F6B}}
 .when{{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}}
 .when div{{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.16);border-radius:22px;padding:16px 10px;text-align:center}}
@@ -62,8 +63,8 @@ body{{font-family:Cairo,sans-serif;color:#fff;background:radial-gradient(circle 
 <div class="top"><div class="brand"><span class="m">{mark}</span>دروس Dose</div><div class="grade">تالتة ثانوي 🧪</div></div>
 <div class="h1"><span class="y">مراجعة</span> كيمياء</div>
 <div class="h2">الباب الأول: العناصر الانتقالية</div>
-<div class="ribbon">🎁 مجانًا لأول 20 طالب</div>
-<div class="sub">السلسلة الانتقالية الأولى · <b>حالات التأكسد</b> · <b>الحديد واستخلاصه</b></div>
+<div class="ribbon">🎁 ببلاش لأول 20 طالب<small>20 مكان مجاني بس · اللي يحجز الأول ياخده</small></div>
+<div class="sub"><b>مراجعة شاملة على الباب كله</b> في جلسة واحدة</div>
 <div class="tubes">{tubes()}</div>
 <div class="when"><div><b>الجمعة</b><span>20 نوفمبر</span></div><div><b>6 مساءً</b><span>ساعتين مراجعة</span></div><div><b>أونلاين</b><span>من بيتك</span></div></div>
 <div class="offer"><div class="t">

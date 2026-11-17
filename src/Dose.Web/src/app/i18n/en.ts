@@ -564,6 +564,15 @@ export const en: typeof ar = {
     "whatsapp": "Chat with us on WhatsApp",
     "whatsappHello": "Hi Dose, I need some help"
   },
+  "offer": {
+    "after": "then {price}",
+    "discount": "{v} off this session with the code",
+    "free": "This session is free with the code",
+    "freeFirst": "Free for the first {n} students",
+    "gone": "The {n} free places are gone — you can still book at the regular price.",
+    "how": "Book and the code is applied for you:",
+    "left": "free places left"
+  },
   "partners": {
     "another": "Another pledge",
     "bDose": "Dosage: one explanation session — 60 minutes online",
