@@ -56,6 +56,57 @@ public sealed class GroupsAndPromoTests(DatabaseFixture fx)
     }
 
     [Fact]
+    public async Task Confirmed_bookings_get_distinct_join_codes_and_join_clicks_are_counted_per_device()
+    {
+        RequireDb();
+        var session = await fx.CreateSessionAsync(SessionMode.Group, "جروب متوسط (5–9)");
+        await PromoAsync("JOINFREE", "Percent", 100, perPhone: 1, total: 5, sessionId: session.Id);
+        await using (var db = fx.NewDb())
+        {
+            var s = await db.Sessions.SingleAsync(x => x.Id == session.Id);
+            s.MeetingUrl = "https://meet.google.com/abc-defg-hij";
+            await db.SaveChangesAsync();
+        }
+        var tokens = new List<string>();
+        var clock = new FakeClock(fx.SeedTime);
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, clock);
+            for (var i = 0; i < 2; i++)
+            {
+                var hold = await svc.CreateHoldAsync(session.Id, default);
+                await svc.SubmitDetailsAsync(hold.AccessToken, new SubmitDetailsRequest($"طالب {i}", NextPhone(), null, null, true, true, 0m, "JOINFREE"), default);
+                tokens.Add(hold.AccessToken);
+            }
+        }
+        string[] codes;
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, clock);
+            codes = [(await svc.GetViewAsync(tokens[0], default)).JoinCode!, (await svc.GetViewAsync(tokens[1], default)).JoinCode!];
+            Assert.All(codes, c => Assert.Matches("^[A-Z][0-9]$", c));
+            Assert.NotEqual(codes[0], codes[1]);
+            Assert.Equal(codes[0], (await svc.GetViewAsync(tokens[0], default)).JoinCode); // stable
+        }
+        var atStart = new FakeClock(session.StartUtc.AddMinutes(-5));
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, atStart);
+            Assert.Equal("https://meet.google.com/abc-defg-hij", (await svc.JoinAsync(tokens[0], "phone-a", default)).MeetingUrl);
+            await svc.JoinAsync(tokens[0], "laptop-b", default);
+            await svc.JoinAsync(tokens[1], "phone-c", default);
+        }
+        await using (var db = fx.NewDb())
+        {
+            var list = await fx.AdminSessions(db, atStart).BookingsAsync(session.Id, default);
+            var first = list.Single(b => b.JoinCode == codes[0]);
+            Assert.Equal((2, 2), (first.JoinClicks, first.JoinDevices));
+            var second = list.Single(b => b.JoinCode == codes[1]);
+            Assert.Equal((1, 1), (second.JoinClicks, second.JoinDevices));
+        }
+    }
+
+    [Fact]
     public async Task Percent_promo_lowers_the_price_respects_per_number_limit_and_also_lowers_a_group_top_up()
     {
         RequireDb();

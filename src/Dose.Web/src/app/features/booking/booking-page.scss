@@ -67,3 +67,9 @@
 .invite .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .invite .actions > * { flex: 1 1 160px; }
 .friends { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--dose-success); font-weight: 600; }
+
+.join-code { display: grid; gap: 6px; justify-items: center; margin: 8px 0 4px; padding: 14px 12px; border-radius: 16px; background: #fff8dc; border: 2px dashed #FFC30A; }
+.jc-label { font-weight: 800; color: var(--dose-navy); font-size: .92rem; }
+.jc-code { font-weight: 900; font-size: 2.4rem; letter-spacing: 6px; color: var(--dose-navy); line-height: 1.1; }
+.jc-how { font-weight: 700; font-size: .92rem; }
+.jc-warn { font-size: .8rem; color: var(--dose-text-muted); }

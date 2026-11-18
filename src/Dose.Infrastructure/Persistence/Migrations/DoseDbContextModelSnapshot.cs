@@ -326,6 +326,10 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)");
 
+                    b.Property<string>("JoinCode")
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(5)
@@ -408,6 +412,10 @@ namespace Dose.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UX_Bookings_ActivePerContact")
                         .HasFilter("[ContactPhoneE164] IS NOT NULL AND [Status] IN (0,1,2,3,4)");
+
+                    b.HasIndex("SessionId", "JoinCode")
+                        .IsUnique()
+                        .HasFilter("[JoinCode] IS NOT NULL");
 
                     b.HasIndex("SessionId", "Status");
 

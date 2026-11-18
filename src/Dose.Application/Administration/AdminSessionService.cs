@@ -130,11 +130,25 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         return bookings.Count(b => b.Status == BookingStatus.RefundPending);
     }
 
-    public async Task<IReadOnlyList<SessionBookingAdminDto>> BookingsAsync(Guid sessionId, CancellationToken ct) =>
-        await db.Bookings.AsNoTracking().Where(b => b.SessionId == sessionId).OrderBy(b => b.CreatedAtUtc)
+    /// <summary>Bookings of a session, doubling as the attendance list: join code, join clicks and distinct devices.</summary>
+    public async Task<IReadOnlyList<SessionBookingAdminDto>> BookingsAsync(Guid sessionId, CancellationToken ct)
+    {
+        var codes = await Dose.Application.Bookings.JoinCodes.EnsureAsync(db, sessionId, ct);
+        var rows = await db.Bookings.AsNoTracking().Where(b => b.SessionId == sessionId).OrderBy(b => b.CreatedAtUtc)
             .Select(b => new SessionBookingAdminDto(b.Id, b.Reference, b.Status.ToString(), b.Student!.Name, b.Student.ContactPhoneE164,
-                b.Student.GuardianName, b.Student.GuardianPhoneE164, b.QuotedPrice, b.Currency, b.CreatedAtUtc, b.ConfirmedAtUtc))
+                b.Student.GuardianName, b.Student.GuardianPhoneE164, b.QuotedPrice, b.Currency, b.CreatedAtUtc, b.ConfirmedAtUtc,
+                b.JoinCode, 0, 0, null))
             .ToListAsync(ct);
+        var ids = rows.Select(r => r.Id.ToString()).ToList();
+        var joins = await db.AuditLogs.AsNoTracking()
+            .Where(a => a.Entity == Dose.Application.Bookings.JoinCodes.AuditEntity && ids.Contains(a.EntityId))
+            .Select(a => new { a.EntityId, a.Actor, a.AtUtc }).ToListAsync(ct);
+        var byBooking = joins.GroupBy(j => j.EntityId).ToDictionary(g => g.Key, g => g.ToList());
+        return rows.Select(r => byBooking.TryGetValue(r.Id.ToString(), out var j)
+                ? r with { JoinClicks = j.Count, JoinDevices = j.Select(x => x.Actor).Distinct().Count(), LastJoinAtUtc = j.Max(x => x.AtUtc) }
+                : r)
+            .OrderBy(r => r.JoinCode is null).ThenBy(r => r.JoinCode).ToList();
+    }
 
     /// <summary>
     /// Issues a new secret link for a booking (the old link stops working). Only the hash is stored, so this is

@@ -48,7 +48,8 @@ public sealed record SessionAdminDto(
 
 public sealed record SessionBookingAdminDto(
     Guid Id, string Reference, string Status, string? StudentName, string? ContactPhone, string? GuardianName,
-    string? GuardianPhone, decimal Price, string Currency, DateTime CreatedAtUtc, DateTime? ConfirmedAtUtc);
+    string? GuardianPhone, decimal Price, string Currency, DateTime CreatedAtUtc, DateTime? ConfirmedAtUtc,
+    string? JoinCode = null, int JoinClicks = 0, int JoinDevices = 0, DateTime? LastJoinAtUtc = null);
 
 public sealed record ReissueLinkResponse(string Reference, string AccessToken, string? ContactPhone, string Message);
 

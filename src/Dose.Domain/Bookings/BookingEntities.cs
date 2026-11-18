@@ -66,6 +66,11 @@ public sealed class Booking : Entity
 {
     /// <summary>Short public reference, e.g. DS-7K3Q9P. Not a secret.</summary>
     public required string Reference { get; init; }
+    /// <summary>
+    /// Two-character code unique inside the session (e.g. "K7"), given once the booking is confirmed. The student writes it
+    /// next to their name in the meeting so the host admits only booked students, and spots one booking used twice.
+    /// </summary>
+    public string? JoinCode { get; set; }
     public Guid SessionId { get; init; }
     public Session? Session { get; set; }
     public Guid? StudentId { get; set; }

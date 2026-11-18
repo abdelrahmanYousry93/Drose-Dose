@@ -139,8 +139,8 @@ public static class Endpoints
             await alerts.ProofUploadedAsync(token);
             return Results.NoContent();
         }).DisableAntiforgery();
-        booking.MapGet("/b/{token}/join", async (string token, BookingService svc, CancellationToken ct) =>
-            Results.Ok(await svc.JoinAsync(token, ct)));
+        booking.MapGet("/b/{token}/join", async (string token, BookingService svc, HttpContext http, CancellationToken ct) =>
+            Results.Ok(await svc.JoinAsync(token, JoinCodes.Device(http.Request.Headers.UserAgent.ToString(), http.Connection.RemoteIpAddress?.ToString()), ct)));
 
         // ---------- Auth (admin / teacher) ----------
         var auth = api.MapGroup("/auth");

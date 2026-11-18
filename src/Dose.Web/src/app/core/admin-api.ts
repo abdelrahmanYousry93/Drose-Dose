@@ -58,6 +58,7 @@ export interface SessionA {
 export interface SessionBookingA {
   id: string; reference: string; status: string; studentName: string | null; contactPhone: string | null;
   guardianName: string | null; guardianPhone: string | null; price: number; currency: string; createdAtUtc: string; confirmedAtUtc: string | null;
+  joinCode: string | null; joinClicks: number; joinDevices: number; lastJoinAtUtc: string | null;
 }
 export interface FollowUp {
   bookingId: string; kind: 'TopUp' | 'Refund' | 'Transfer'; bookingReference: string; bookingStatus: string;

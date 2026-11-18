@@ -175,6 +175,14 @@
           <span class="big ok">✓</span>
           <h2>{{ 'booking.confirmed' | t }}</h2>
           @if (v.invitedBy) { <p class="muted">{{ 'invite.joinedBody' | t: { name: v.invitedBy } }}</p> }
+          @if (v.joinCode; as code) {
+            <div class="join-code">
+              <span class="jc-label">{{ 'join.codeLabel' | t }}</span>
+              <span class="jc-code" dir="ltr">{{ code }}</span>
+              <span class="jc-how">{{ 'join.codeHow' | t: { name: (v.studentName ?? '').split(' ')[0], code: code } }}</span>
+              <span class="jc-warn">{{ 'join.codeWarn' | t }}</span>
+            </div>
+          }
           @if (v.canJoinNow) {
             <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="joinSession()">{{ 'booking.joinNow' | t }}</button>
           } @else {

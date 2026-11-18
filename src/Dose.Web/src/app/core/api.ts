@@ -47,6 +47,7 @@ export interface BookingView {
   topUp: TopUpView | null; fullRefundUntilUtc: string; canCancel: boolean;
   listPrice: number; discountAmount: number; promoCode: string | null; seatCount: number; isClosed: boolean;
   invite: InviteInfo | null; invitedBy: string | null; prefillPhone: string | null;
+  joinCode: string | null;
 }
 export interface InviteInfo { code: string; seats: number; joined: number; friendFirstNames: string[] }
 export interface PromoPreview { code: string; description: string | null; kind: 'Percent' | 'Fixed'; value: number; discount: number; netPrice: number; currency: string }

@@ -98,7 +98,8 @@ public sealed record BookingViewDto(
     bool IsClosed = false,
     InviteDto? Invite = null,
     string? InvitedBy = null,
-    string? PrefillPhone = null);
+    string? PrefillPhone = null,
+    string? JoinCode = null);
 
 /// <summary>Private group organizer's invite: friends join with the code or link; their seats are already paid.</summary>
 public sealed record InviteDto(string Code, int Seats, int Joined, IReadOnlyList<string> FriendFirstNames);

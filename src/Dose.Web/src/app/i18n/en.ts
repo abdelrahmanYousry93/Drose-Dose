@@ -543,6 +543,11 @@ export const en: typeof ar = {
     "title": "Invite your friends",
     "yourDetails": "Your details"
   },
+  "join": {
+    "codeHow": "When you join the meeting, set your name to: “{name} · {code}”",
+    "codeLabel": "Your session code",
+    "codeWarn": "This code is yours. Anyone joining without a code, or with a code already used, won't be admitted."
+  },
   "login": {
     "email": "Email",
     "hint": "For admins and teachers. Students don't need an account — they use their booking link.",
@@ -990,6 +995,8 @@ export const en: typeof ar = {
     "fromPlan": "Priced by plan:",
     "fromRequest": "From request {ref}: {name} — preferred: {days} ({times}). After saving, the request is marked fulfilled; send the student the session link on WhatsApp.",
     "groupSize": "Group size",
+    "joinCodeTitle": "Join code: the student writes it next to their name in the meeting",
+    "joined": "Joined {n}× · {d} device(s)",
     "lesson": "Lesson (optional)",
     "link": "Meeting link",
     "linkHint": "Send this message to the student on WhatsApp. The link is secret and opens their booking page.",

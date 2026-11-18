@@ -158,7 +158,13 @@
           @if (bookings().length === 0) { <p class="muted">{{ 'sessionsAdmin.noBookings' | t }}</p> }
           @for (b of bookings(); track b.id) {
             <div class="booking">
-              <div class="row"><strong dir="ltr">{{ b.reference }}</strong><span class="badge badge--gray">{{ statusAr(b.status) }}</span></div>
+              <div class="row">
+                @if (b.joinCode) { <span class="code-chip" dir="ltr" [attr.title]="'sessionsAdmin.joinCodeTitle' | t">{{ b.joinCode }}</span> }
+                <strong dir="ltr">{{ b.reference }}</strong><span class="badge badge--gray">{{ statusAr(b.status) }}</span>
+                @if (b.joinClicks) {
+                  <span class="badge" [class.badge--red]="b.joinDevices > 1">{{ 'sessionsAdmin.joined' | t: { n: b.joinClicks, d: b.joinDevices } }}@if (b.joinDevices > 1) { ⚠️ }</span>
+                }
+              </div>
               <span class="small">{{ b.studentName ?? '—' }} · <span dir="ltr">{{ b.contactPhone ?? '' }}</span>
                 @if (b.guardianPhone) { · {{ 'admin.guardian' | t }} <span dir="ltr">{{ b.guardianPhone }}</span> }</span>
               @if (b.contactPhone) {

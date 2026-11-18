@@ -164,6 +164,8 @@ internal sealed class BookingConfig : IEntityTypeConfiguration<Booking>
         e.Property(x => x.Language).HasMaxLength(5);
         e.Property(x => x.Reference).HasMaxLength(16);
         e.HasIndex(x => x.Reference).IsUnique();
+        e.Property(x => x.JoinCode).HasMaxLength(4);
+        e.HasIndex(x => new { x.SessionId, x.JoinCode }).IsUnique().HasFilter("[JoinCode] IS NOT NULL");
         e.Property(x => x.AccessTokenHash).HasMaxLength(32).IsFixedLength();
         e.Property(x => x.AccessTokenProtected).HasMaxLength(1000);
         e.HasIndex(x => x.AccessTokenHash).IsUnique();

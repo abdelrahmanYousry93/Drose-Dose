@@ -264,6 +264,10 @@ public sealed class BookingService(
             invitedBy = FirstName(await db.Bookings.Where(b => b.Id == sponsorId).Select(b => b.Student!.Name).FirstOrDefaultAsync(ct) ?? "");
         var promoCode = booking.PromoCodeId is { } pid ? await db.PromoCodes.Where(p => p.Id == pid).Select(p => p.Code).FirstOrDefaultAsync(ct) : null;
 
+        string? joinCode = null;
+        if (status == BookingStatus.Confirmed)
+            joinCode = booking.JoinCode ?? (await JoinCodes.EnsureAsync(db, session.Id, ct)).GetValueOrDefault(booking.Id);
+
         return new BookingViewDto(
             booking.Reference, status.ToString(),
             SessionQueries.ToSummary(session, counts.GetValueOrDefault(session.Id), lang),
@@ -280,7 +284,8 @@ public sealed class BookingService(
             CanCancel(status, session, now),
             booking.ListPrice == 0 ? booking.QuotedPrice : booking.ListPrice, booking.DiscountAmount, promoCode,
             booking.SeatCount, session.IsClosed, invite, invitedBy,
-            status == BookingStatus.PendingHold ? booking.Student?.ContactPhoneE164 : null);
+            status == BookingStatus.PendingHold ? booking.Student?.ContactPhoneE164 : null,
+            joinCode);
     }
 
     /// <summary>Checks a promo code before the student submits their details (the price shown updates).</summary>
@@ -456,7 +461,10 @@ public sealed class BookingService(
         string.IsNullOrWhiteSpace(s) ? null : s.Trim()[..Math.Min(s.Trim().Length, 100)];
 
     /// <summary>Returns the meeting URL only for confirmed bookings inside the join window.</summary>
-    public async Task<JoinResponse> JoinAsync(string token, CancellationToken ct)
+    public async Task<JoinResponse> JoinAsync(string token, CancellationToken ct) => await JoinAsync(token, null, ct);
+
+    /// <summary>Same as <see cref="JoinAsync(string, CancellationToken)"/>, logging the click with a device fingerprint.</summary>
+    public async Task<JoinResponse> JoinAsync(string token, string? device, CancellationToken ct)
     {
         var bookingId = await FindIdAsync(token, ct);
         var cfg = await settings.GetBookingSettingsAsync(ct);
@@ -473,6 +481,11 @@ public sealed class BookingService(
             throw new DomainException(BookingErrors.JoinNotAvailable, "الجلسة دي خلصت.", "This session has ended.");
         if (string.IsNullOrWhiteSpace(row.MeetingUrl))
             throw new DomainException(BookingErrors.JoinNotAvailable, "رابط الجلسة لسه متضافش. كلّمنا على واتساب.", "The meeting link has not been added yet. Please contact us on WhatsApp.");
+        db.AuditLogs.Add(new Dose.Domain.Administration.AuditLog
+        {
+            Actor = device ?? "unknown", Entity = JoinCodes.AuditEntity, EntityId = bookingId.ToString(), Action = "join", AtUtc = now,
+        });
+        await db.SaveChangesAsync(ct);
         return new JoinResponse(row.MeetingUrl);
     }
 

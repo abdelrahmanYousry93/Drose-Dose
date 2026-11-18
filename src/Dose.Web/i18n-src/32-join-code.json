@@ -1,0 +1,22 @@
+{
+ "join.codeLabel": [
+  "كودك في الجلسة",
+  "Your session code"
+ ],
+ "join.codeHow": [
+  "لما تدخل الميت اكتب اسمك كده: «{name} · {code}»",
+  "When you join the meeting, set your name to: “{name} · {code}”"
+ ],
+ "join.codeWarn": [
+  "الكود ده خاص بيك. اللي بيدخل من غير كود أو بكود متكرر مش هيتقبل.",
+  "This code is yours. Anyone joining without a code, or with a code already used, won't be admitted."
+ ],
+ "sessionsAdmin.joinCodeTitle": [
+  "كود الدخول: الطالب بيكتبه جنب اسمه في الميت",
+  "Join code: the student writes it next to their name in the meeting"
+ ],
+ "sessionsAdmin.joined": [
+  "دخل {n} مرة · {d} جهاز",
+  "Joined {n}× · {d} device(s)"
+ ]
+}
