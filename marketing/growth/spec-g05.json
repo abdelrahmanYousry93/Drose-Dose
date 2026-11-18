@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g07-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>طالب ثانوي؟ 👀</div><div class='h1' style='font-size:92px'>حافظ الدرس…<br/><span class='yellow'>وأول سؤال بصيغة<br/>تانية بتتوه؟</span></div>" },
+        { "bg": "light", "body": "<div class='lead muted'>بدل ما تقول:</div><div class='h1' style='font-size:96px'>«أنا <span class='accent'>حافظه</span>»</div><div class='lead muted'>قول:</div><div class='h1' style='font-size:96px'>«أقدر <span class='accent'>أشرحه</span>؟»</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:92px'>اقفل الكتاب<br/><span class='accent'>واشرحه بصوت عالي</span></div><div class='lead muted'>كأنك بتشرحه لصاحبك</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>2</div><div class='h1' style='font-size:88px'>المكان اللي<br/><span class='yellow'>هتقف عنده</span></div><div class='lead'>هو الجزء اللي محتاج تفهمه…<br/>مش تحفظه</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظ الريل 📌<br/>وجرّبها النهارده</div><div class='lead muted'>وتابع Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
