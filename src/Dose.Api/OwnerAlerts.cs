@@ -268,6 +268,27 @@ public sealed class OwnerFollowUps(DoseDbContext db, OwnerAlertQueue queue, IOpt
             queue.Enqueue($"✅ جلسة خلصت — ابعت متابعة\n\n📘 {b.ScopeTitleAr}\n🔖 {b.Reference}\n👤 {b.Name}\n\n💬 رسالة المتابعة بضغطة:\n{WhatsApp(b.Phone, msg)}");
             db.AuditLogs.Add(new AuditLog { Actor = "followup", Entity = "FollowUp", EntityId = $"after:{b.Id}", Action = "alerted", AtUtc = now });
         }
+
+        // 3. A WhatsApp message to a student is waiting (booking confirmed, reminder, …): one tap opens it ready to send.
+        //    The secret booking link is not put in Telegram; the admin page fills it in when opened.
+        var waiting = await db.Notifications.AsNoTracking()
+            .Where(n => n.Status == Dose.Domain.Notifications.NotificationStatus.Pending && n.DueAtUtc <= now && n.CreatedAtUtc > now.AddDays(-2))
+            .OrderBy(n => n.DueAtUtc)
+            .Select(n => new { n.Id, n.TemplateCode, n.RecipientName, Phone = n.RecipientPhoneE164, Ref = n.BookingId == null ? null : db.Bookings.Where(b => b.Id == n.BookingId).Select(b => b.Reference).FirstOrDefault() })
+            .Take(20).ToListAsync(ct);
+        foreach (var n in waiting.Where(n => !done.Contains($"msg:{n.Id}")))
+        {
+            var what = n.TemplateCode switch
+            {
+                Dose.Domain.Notifications.TemplateCodes.BookingConfirmed => "✅ حجز اتأكد — ابعتله لينك الحجز على واتساب",
+                Dose.Domain.Notifications.TemplateCodes.SessionReminder => "⏰ تذكير بالجلسة — ابعته للطالب",
+                Dose.Domain.Notifications.TemplateCodes.PaymentRejected => "❌ إيصال اترفض — بلّغ الطالب",
+                _ => "💬 رسالة مستنية تتبعت للطالب",
+            };
+            queue.Enqueue($"{what}\n\n👤 {n.RecipientName}\n📱 {n.Phone}" + (n.Ref is null ? "" : $"\n🔖 {n.Ref}") +
+                          $"\n\n👇 افتحها وابعتها على واتساب بضغطة:\n{site}/admin/messages?open={n.Id}");
+            db.AuditLogs.Add(new AuditLog { Actor = "followup", Entity = "FollowUp", EntityId = $"msg:{n.Id}", Action = "alerted", AtUtc = now });
+        }
         await db.SaveChangesAsync(ct);
     }
 }

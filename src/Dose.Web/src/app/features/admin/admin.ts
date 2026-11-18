@@ -5,15 +5,18 @@ import { Api, ApiError, PaymentProofAdmin, Setting } from '../../core/api';
 import { errorMessage, fmtDateTime, fmtMoney } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 
+/** Sends to login and remembers the admin page asked for (e.g. a message opened from a Telegram alert). */
+const toLogin = (router: Router, url: string) => router.createUrlTree(['/login'], { queryParams: url.startsWith('/admin/') ? { next: url } : {} });
+
 /** Route guard: admin area requires an authenticated Admin (checked server-side on every call too). */
-export const adminGuard: CanActivateFn = async () => {
+export const adminGuard: CanActivateFn = async (_route, state) => {
   const api = inject(Api);
   const router = inject(Router);
   try {
     const me = await api.me();
-    return me.roles.includes('Admin') ? true : router.parseUrl('/login');
+    return me.roles.includes('Admin') ? true : toLogin(router, state.url);
   } catch {
-    return router.parseUrl('/login');
+    return toLogin(router, state.url);
   }
 };
 
@@ -50,7 +53,9 @@ export class AdminLogin {
     try {
       await this.api.login(this.email, this.password);
       const me = await this.api.me();
-      await this.router.navigateByUrl(me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/');
+      const next = new URLSearchParams(location.search).get('next');
+      const back = me.roles.includes('Admin') && next?.startsWith('/admin/') ? next : null;
+      await this.router.navigateByUrl(back ?? (me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/'));
     } catch (e) {
       this.error.set(e instanceof ApiError && e.status === 401 ? translate('login.invalid') : errorMessage(e));
     } finally {

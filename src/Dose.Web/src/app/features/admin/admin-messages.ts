@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, ComposedMessage, MessageA, MessageStatus, TemplateA } from '../../core/admin-api';
 import { errorMessage, fmtDateTime } from '../../core/format';
@@ -56,7 +57,7 @@ import { LANG, TranslatePipe, translate as tr } from '../../core/i18n';
         }
       } @else {
         @for (m of messages(); track m.id) {
-          <article class="dose-card item" [class.due]="m.status === 'Pending' && isDue(m)">
+          <article class="dose-card item" [attr.id]="'msg-' + m.id" [class.due]="m.status === 'Pending' && isDue(m)">
             <div class="row">
               <strong>{{ title(m) }}</strong>
               <span class="badge badge--gray">{{ m.language === 'en' ? 'EN' : 'ع' }}</span>
@@ -144,7 +145,18 @@ export class AdminMessages {
   protected readonly copied = signal(false);
   protected readonly dt = fmtDateTime;
 
-  constructor() { void this.load(); }
+  private readonly route = inject(ActivatedRoute);
+
+  constructor() {
+    // Opened from the Telegram alert (?open=<id>): prepare that message straight away so one tap sends it on WhatsApp.
+    const open = this.route.snapshot.queryParamMap.get('open');
+    void this.load().then(async () => {
+      const m = open ? this.messages().find((x) => x.id === open) : undefined;
+      if (!m) return;
+      await this.prepare(m);
+      setTimeout(() => document.getElementById('msg-' + m.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    });
+  }
 
   protected setTab(t: MessageStatus | 'templates') {
     this.tab.set(t);

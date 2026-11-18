@@ -117,7 +117,7 @@ public sealed class DatabaseStartup(
         jobs.AddOrUpdate<BookingMaintenance>("expire-stale-bookings", s => s.ExpireStaleAsync(CancellationToken.None), "*/10 * * * *");
         jobs.AddOrUpdate<Dose.Application.Payments.ProofRetention>("delete-old-payment-screenshots", s => s.PurgeAsync(CancellationToken.None), "30 3 * * *");
         jobs.AddOrUpdate<MarketingPublisher>("publish-marketing-posts", s => s.RunAsync(CancellationToken.None), "*/5 * * * *");
-        jobs.AddOrUpdate<OwnerFollowUps>("owner-follow-ups", s => s.RunAsync(CancellationToken.None), "*/10 * * * *");
+        jobs.AddOrUpdate<OwnerFollowUps>("owner-follow-ups", s => s.RunAsync(CancellationToken.None), "*/2 * * * *");
         log.LogInformation("Background jobs started");
     }
 

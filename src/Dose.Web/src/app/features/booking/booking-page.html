@@ -158,9 +158,6 @@
           <button class="dose-btn dose-btn--primary btn-block" type="button" (click)="uploadProof()" [disabled]="busy()">
             {{ (busy() ? 'booking.uploading' : 'booking.upload') | t }}
           </button>
-          @if (whatsAppLink(); as wa) {
-            <a class="dose-btn dose-btn--whatsapp btn-block" [href]="wa" target="_blank" rel="noopener">{{ 'booking.orWhatsapp' | t }}</a>
-          }
         </div>
       }
 
