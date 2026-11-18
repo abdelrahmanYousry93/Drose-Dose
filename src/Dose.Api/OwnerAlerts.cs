@@ -202,6 +202,15 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
              + $"\n📱 {Chat(p.ContactPhoneE164)}\n\n{Admin}/partners";
     });
 
+    public Task AdviceAsync(Guid id) => Try(async () =>
+    {
+        var p = await db.PartnerPledges.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (p is null) return null;
+        return $"💡 نصيحة / تعليق جديد\n\n📝 {p.Note}" + (p.Source is null ? "" : $"\n📍 جاي من: {p.Source}")
+             + $"\n\n👤 {p.ContactName}" + (string.IsNullOrEmpty(p.ContactPhoneE164) ? "" : $"\n📱 {Chat(p.ContactPhoneE164)}")
+             + $"\n\n{Admin}/partners";
+    });
+
     public Task AvailabilitySubmittedAsync(Guid id) => Try(async () =>
     {
         var a = await db.TeacherAvailabilities.AsNoTracking().Where(x => x.Id == id)

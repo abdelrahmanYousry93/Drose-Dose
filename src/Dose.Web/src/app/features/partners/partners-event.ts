@@ -78,6 +78,21 @@ type Way = 'fund' | 'students';
       }
 
       @if (step() !== 'form') {
+        <section class="advice">
+          @if (adviceSent()) {
+            <p class="adv-done">🙏 {{ 'ev.adviceThanks' | t }}</p>
+          } @else {
+            <h3>💡 {{ 'ev.adviceTitle' | t }}</h3>
+            <p class="adv-sub">{{ 'ev.adviceSub' | t }}</p>
+            <textarea [(ngModel)]="adviceText" rows="3" maxlength="1000" [placeholder]="'ev.advicePh' | t" [attr.aria-label]="'ev.adviceTitle' | t"></textarea>
+            <div class="adv-row">
+              <input [(ngModel)]="adviceName" maxlength="100" [placeholder]="'ev.adviceName' | t" [attr.aria-label]="'ev.adviceName' | t" />
+              <input [(ngModel)]="advicePhone" inputmode="tel" dir="ltr" maxlength="20" [placeholder]="'ev.advicePhone' | t" [attr.aria-label]="'ev.advicePhone' | t" />
+            </div>
+            @if (adviceError()) { <p class="adv-err">{{ adviceError() }}</p> }
+            <button type="button" class="adv-btn" (click)="sendAdvice()" [disabled]="adviceBusy() || !adviceText.trim()">{{ (adviceBusy() ? 'ev.adviceSending' : 'ev.adviceSend') | t }}</button>
+          }
+        </section>
         <a class="try" routerLink="/sessions" (click)="tracker.trackEvent('ev-try')">
           <span class="try-ic" aria-hidden="true">💊</span>
           <span class="try-t"><b>{{ 'ev.tryTitle' | t }}</b><small>{{ 'ev.tryLine' | t }}</small></span>
@@ -140,6 +155,16 @@ type Way = 'fund' | 'students';
     .back::before, .back::after { content: none !important; }
     .back, .more { background: none; border: 0; font: inherit; color: var(--dose-text-muted); cursor: pointer; text-decoration: underline; }
     .more { margin-top: 8px; font-size: .85rem; }
+    .advice { width: 100%; max-width: 420px; margin-top: 14px; padding: 16px; border-radius: 20px; background: #fff; border: 2px solid #e3e8f4; text-align: start; display: grid; gap: 8px; }
+    .advice h3 { margin: 0; font-size: 1.08rem; font-weight: 900; color: var(--dose-navy, #0B1F6B); }
+    .adv-sub { margin: 0; font-size: .85rem; color: var(--dose-text-muted, #5b6785); }
+    .advice textarea, .advice input { width: 100%; font: inherit; border: 1.5px solid #d5dcec; border-radius: 12px; padding: 10px 12px; background: #fbfcff; }
+    .advice textarea { resize: vertical; min-height: 84px; }
+    .adv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .adv-btn { border: 0; border-radius: 12px; padding: 12px; font: inherit; font-weight: 900; background: var(--dose-navy, #0B1F6B); color: #fff; }
+    .adv-btn:disabled { opacity: .5; }
+    .adv-err { margin: 0; color: #b42318; font-size: .85rem; font-weight: 700; }
+    .adv-done { margin: 0; font-weight: 800; color: #22a85a; text-align: center; }
     .try { width: 100%; max-width: 420px; margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px;
       background: #FFC30A; color: #0B1F6B; text-decoration: none; text-align: start; box-shadow: 0 6px 0 #0B1F6B; border: 3px solid #0B1F6B; animation: tryPulse 2.4s ease-in-out infinite; }
     .try:active { transform: translateY(3px); box-shadow: 0 3px 0 #0B1F6B; }
@@ -177,6 +202,22 @@ export class PartnersEvent {
   readonly full = output<void>();
 
   protected readonly step = signal<Step>('hook');
+  protected adviceText = '';
+  protected adviceName = '';
+  protected advicePhone = '';
+  protected readonly adviceSent = signal(false);
+  protected readonly adviceBusy = signal(false);
+  protected readonly adviceError = signal('');
+
+  protected async sendAdvice() {
+    this.adviceBusy.set(true);
+    this.adviceError.set('');
+    try {
+      await this.api.advice({ message: this.adviceText.trim(), name: this.adviceName.trim() || null, phone: this.advicePhone.trim() || null, source: this.tracker.current() });
+      this.adviceSent.set(true);
+    } catch (e) { this.adviceError.set(errorMessage(e)); }
+    finally { this.adviceBusy.set(false); }
+  }
   protected readonly right = signal(false);
   protected readonly way = signal<Way>('fund');
   protected readonly doses = signal(0);

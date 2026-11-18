@@ -142,5 +142,41 @@
  "ev.tryLine": [
   "مش شريك؟ جرّب بنفسك: اختار المادة والدرس اللي واقف معاك",
   "Not a partner? Try it: pick the subject and the lesson you're stuck on"
+ ],
+ "ev.adviceTitle": [
+  "عندك نصيحة أو تعليق؟",
+  "Any advice or a comment?"
+ ],
+ "ev.adviceSub": [
+  "رأيك هيفرق معانا جدًا وإحنا لسه بنبني Dose 🙏",
+  "Your view really matters while we build Dose 🙏"
+ ],
+ "ev.advicePh": [
+  "اكتب نصيحتك، فكرة، أو أي ملاحظة…",
+  "Write your advice, an idea or any note…"
+ ],
+ "ev.adviceName": [
+  "اسمك (اختياري)",
+  "Your name (optional)"
+ ],
+ "ev.advicePhone": [
+  "موبايلك (اختياري)",
+  "Mobile (optional)"
+ ],
+ "ev.adviceSend": [
+  "ابعت",
+  "Send"
+ ],
+ "ev.adviceSending": [
+  "بيتبعت…",
+  "Sending…"
+ ],
+ "ev.adviceThanks": [
+  "وصلتنا، شكرًا ليك!",
+  "Got it — thank you!"
+ ],
+ "partners.i.advice": [
+  "💡 نصيحة / تعليق",
+  "💡 Advice / comment"
  ]
 }

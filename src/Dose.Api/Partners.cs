@@ -9,6 +9,7 @@ namespace Dose.Api;
 public sealed record PledgeRequest(string? Organization, string? ContactName, string? ContactPhone, string? Role,
     string? Interest, int? Doses, bool ShowOnWall, string? Note, string? Source);
 public sealed record PledgeResponse(string Reference);
+public sealed record AdviceRequest(string? Message, string? Name, string? Phone, string? Source);
 public sealed record WallEntry(string Organization, int Doses);
 public sealed record PledgeWall(int TotalDoses, int Organizations, List<WallEntry> Names, DateTime? LastAtUtc);
 public sealed record AdminPledge(Guid Id, string Reference, string Organization, string ContactName, string ContactPhone,
@@ -60,6 +61,20 @@ public sealed partial class PartnerService(DoseDbContext db)
         return p;
     }
 
+    /// <summary>Advice or a comment from a visitor (event QR page). Only the message is required.</summary>
+    public async Task<PartnerPledge> AdviceAsync(AdviceRequest req, CancellationToken ct)
+    {
+        var message = Required(req.Message, 1000, "partner.advice", "اكتب نصيحتك أو تعليقك.", "Write your advice or comment.");
+        var phone = string.IsNullOrWhiteSpace(req.Phone) ? "" : PhoneNumber.TryNormalize(req.Phone)
+                    ?? throw new DomainException("partner.phone", "رقم الموبايل مش صحيح.", "The mobile number is not valid.");
+        var source = req.Source?.Trim().ToLowerInvariant();
+        if (source is not null && !SourcePattern().IsMatch(source)) source = null;
+        var p = new PartnerPledge("—", Optional(req.Name, 100) ?? "زائر", phone, null, PartnerPledge.Advice, 0, false, message, source, DateTime.UtcNow);
+        db.Add(p);
+        await db.SaveChangesAsync(ct);
+        return p;
+    }
+
     /// <summary>Public wall: total doses pledged and the names of organizations that agreed to be shown.</summary>
     public async Task<PledgeWall> WallAsync(string? source, CancellationToken ct)
     {
@@ -96,6 +111,7 @@ public sealed partial class PartnerService(DoseDbContext db)
         "students" => "عندنا طلاب محتاجين دعم",
         "employees" => "ميزة لأولاد الموظفين",
         "content" => "شراكة محتوى / توعية",
+        PartnerPledge.Advice => "نصيحة / تعليق",
         _ => "حاجة تانية",
     };
 }
@@ -109,6 +125,12 @@ public static class PartnerEndpoints
         {
             var p = await s.CreateAsync(req, ct);
             await alerts.PledgeAsync(p.Id);
+            return new PledgeResponse(p.Reference);
+        }).RequireRateLimiting(Endpoints.BookingRateLimit);
+        api.MapPost("/partners/advice", async (AdviceRequest req, PartnerService s, OwnerAlerts alerts, CancellationToken ct) =>
+        {
+            var p = await s.AdviceAsync(req, ct);
+            await alerts.AdviceAsync(p.Id);
             return new PledgeResponse(p.Reference);
         }).RequireRateLimiting(Endpoints.BookingRateLimit);
         api.MapGet("/partners/wall", (string? src, PartnerService s, CancellationToken ct) => s.WallAsync(src, ct));

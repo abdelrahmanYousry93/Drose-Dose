@@ -45,5 +45,7 @@ public sealed class PartnerPledge : Entity
     public bool Hidden { get; set; }
 
     public static readonly string[] Interests = ["fund", "students", "employees", "content", "other"];
+    /// <summary>Advice / a comment left from the event page; contact details optional.</summary>
+    public const string Advice = "advice";
     public const int MaxDoses = 100_000;
 }

@@ -301,6 +301,14 @@ export const en: typeof ar = {
     "http_too_large": "The file or data you sent is too large."
   },
   "ev": {
+    "adviceName": "Your name (optional)",
+    "advicePh": "Write your advice, an idea or any note…",
+    "advicePhone": "Mobile (optional)",
+    "adviceSend": "Send",
+    "adviceSending": "Sending…",
+    "adviceSub": "Your view really matters while we build Dose 🙏",
+    "adviceThanks": "Got it — thank you!",
+    "adviceTitle": "Any advice or a comment?",
     "back": "Back",
     "callMe": "Call us",
     "callYou": "We'll call you within 48 hours.",
@@ -669,6 +677,7 @@ export const en: typeof ar = {
     "heroBody": "Every dose = one student who finally understands the lesson they were stuck on. Your organization can pledge doses for students in need; we deliver them and send you an impact report.",
     "heroTitle": "Write a student a prescription",
     "i": {
+      "advice": "💡 Advice / comment",
       "content": "Content or outreach partnership",
       "contentHint": "Content, events, or introducing Dose to your audience.",
       "employees": "A benefit for employees' children",

@@ -171,6 +171,7 @@ export class Api {
   }
   restore(token: string) { return this.get<RestoredItems>(`/me/${encodeURIComponent(token)}`); }
   pledge(body: PledgeBody) { return this.post<{ reference: string }>('/partners/pledges', body); }
+  advice(body: { message: string; name: string | null; phone: string | null; source: string | null }) { return this.post<{ reference: string }>('/partners/advice', body); }
   pledgeWall(src?: string | null) { return this.get<PledgeWall>('/partners/wall', { src }); }
   createRequest(body: SessionRequestBody) { return this.post<{ reference: string; whatsAppMessage: string }>('/session-requests', body); }
 
