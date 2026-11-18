@@ -35,6 +35,19 @@ public static class ProgReviewNov2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Owner's request (18 Nov): one Google Meet room for both campaign sessions (chemistry Fri 6 pm, programming Sat 4 pm).
+    /// Fills it only where no link was set yet, so a later change from the admin page is kept.
+    /// </summary>
+    public static async Task SetMeetingLinksAsync(DoseDbContext db, CancellationToken ct = default)
+    {
+        const string Url = "https://meet.google.com/qrn-siof-kxa";
+        Guid[] ids = [ChemReviewNov2026.SessionId, SessionId];
+        var sessions = await db.Sessions.Where(s => ids.Contains(s.Id) && s.MeetingUrl == null).ToListAsync(ct);
+        foreach (var s in sessions) { s.MeetingUrl = Url; s.MeetingProvider = "GoogleMeet"; }
+        if (sessions.Count > 0) await db.SaveChangesAsync(ct);
+    }
+
     public static async Task EnsureAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
     {
         if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == Marker, ct)) return;
