@@ -8,7 +8,7 @@ the growth track only aims at **new followers** on the Facebook Page «دروس 
 - No bought followers/likes, no follow-for-follow groups, no spam messages, no fake accounts or fake testimonials.
 - Contests: entry by **commenting only** (Facebook rules forbid "share to enter" / "tag friends to enter"). Prizes are
   free sessions — draft the contest for approval, never announce one the owner hasn't approved.
-- Calls to action are "تابع Dose" / "احفظ" / "ابعته لصاحبك" — not "احجز" while the site has no bookable sessions.
+- Calls to action are "تابع دروس Dose" / "احفظ" / "ابعته لصاحبك" — not "احجز" while the site has no bookable sessions.
 - No money is spent without the owner's explicit approval of each boost (budget: HQ task g3).
 
 ## Daily — growth reel (scheduled run)

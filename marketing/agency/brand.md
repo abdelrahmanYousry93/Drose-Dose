@@ -19,6 +19,7 @@ Site: https://lionfish-app-n6c49.ondigitalocean.app · WhatsApp: 01009160638
 Tagline: **جرعتك المركزة من الفهم**.
 
 ## Voice
+**Brand name in Arabic text: always «دروس Dose», never «Dose» alone** (captions, on-screen text, replies, CTAs — e.g. «تابع دروس Dose»). Owner's standing rule, 19 Nov 2026. Hashtag `#Dose` stays as is.
 Egyptian colloquial Arabic, short sentences, talks to the student like an older sibling who explains well.
 Warm, never preachy, never fear-mongering. Emojis: at most 3 per caption. Hashtags: 3–5, end of caption.
 Every caption ends with one clear action (comment, save, share, book, WhatsApp).
