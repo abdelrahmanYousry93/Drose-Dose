@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g08-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>خرافة ولا حقيقة؟ 🤔</div><div class='h1' style='font-size:90px'>«لو مفهمتش الدرس<br/>من أول مرة…<br/><span class='yellow'>يبقى أنا مش شاطر»</span></div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:130px'><span class='accent'>❌ خرافة</span></div><div class='h2'>الدرس الصعب<br/>طبيعي ياخد<br/>أكتر من شرح</div><div class='lead muted'>ده مش مقياس لشطارتك</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:88px'>حدّد بالظبط<br/><span class='accent'>وقفت عند أنهي خطوة</span></div><div class='lead muted'>مش «الدرس كله مش فاهمه»</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>2</div><div class='h1' style='font-size:88px'>اسمع الجزء ده<br/><span class='yellow'>بشرح تاني</span></div><div class='lead'>بطريقة مختلفة…<br/>وهتلاقيه فجأة بقى سهل</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك<br/>اللي فاكر نفسه مش شاطر 💙</div><div class='lead muted'>وتابع Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
