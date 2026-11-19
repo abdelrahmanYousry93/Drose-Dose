@@ -44,6 +44,24 @@ public static class ChemReviewNov2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Owner's decision (20 Nov 2026): nobody booked the Friday review, so it is cancelled and taken off the list.
+    /// Only while it has no live booking; runs once (audit marker).
+    /// </summary>
+    public static async Task CancelUnbookedAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
+    {
+        const string marker = "ChemSession/2026-11-20/cancel";
+        if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == marker, ct)) return;
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == SessionId, ct);
+        if (s is null || s.Status is SessionStatus.Cancelled or SessionStatus.Completed) return;
+        BookingStatus[] dead = [BookingStatus.Cancelled, BookingStatus.Expired, BookingStatus.Refunded];
+        if (await db.Bookings.AnyAsync(b => b.SessionId == SessionId && !dead.Contains(b.Status), ct)) return;
+        s.Status = SessionStatus.Cancelled;
+        s.IsClosed = true;
+        db.AuditLogs.Add(new AuditLog { Actor = "owner", Entity = "Campaign", EntityId = marker, Action = "cancelled: no bookings", AtUtc = nowUtc });
+        await db.SaveChangesAsync(ct);
+    }
+
     public static async Task EnsureAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
     {
         if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == Marker, ct)) return;

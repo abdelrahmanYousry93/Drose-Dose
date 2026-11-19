@@ -99,6 +99,7 @@ public sealed class DatabaseStartup(
             await ProgReviewNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
             await ProgReviewNov2026.RenameTeacherAsync(db, ct);
             await ProgReviewNov2026.SetMeetingLinksAsync(db, ct);
+            await ChemReviewNov2026.CancelUnbookedAsync(db, DateTime.UtcNow, ct);
         }
     }
 
