@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g09-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>POV 📱</div><div class='h1' style='font-size:96px'>«هبص على الموبايل<br/>دقيقة بس»…<br/><span class='yellow'>وعدّت ساعة</span></div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:92px'>مش إنت اللي<br/><span class='accent'>ماعندكش إرادة</span></div><div class='lead muted'>الموبايل معمول عشان يشدّك</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:92px'>ذاكر <span class='accent'>25 دقيقة</span></div><div class='lead muted'>والموبايل مقلوب وبعيد عنك</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>2</div><div class='h1' style='font-size:88px'>5 دقايق راحة<br/><span class='yellow'>وبعدها ارجع</span></div><div class='lead'>الموبايل يبقى مكافأة…<br/>مش مقاطعة</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظ الريل 📌<br/>وجرّبها النهارده</div><div class='lead muted'>وتابع دروس Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
