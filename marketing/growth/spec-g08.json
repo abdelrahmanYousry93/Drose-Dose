@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g10-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>طالب ثانوي أو إعدادي؟</div><div class='h1' style='font-size:92px'>بتغلط <span class='yellow'>نفس الغلطة</span><br/>في كل امتحان؟</div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:90px'>اعمل <span class='accent'>كراسة<br/>الغلطات</span></div><div class='lead muted'>كراسة صغيرة… بس بتفرق جامد</div>" },
+        { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:88px'>اكتب <span class='accent'>الغلطة</span><br/>والحل الصح</div><div class='lead muted'>أول ما تكتشفها، مش بعدين</div>" },
+        { "bg": "blue", "body": "<div class='num' style='margin:0 auto;background:#FFC30A;color:#0B1F6B'>2</div><div class='h1' style='font-size:84px'>اكتب <span class='yellow'>ليه</span> غلطت</div><div class='lead'>سرحت؟ قانون غلط؟<br/>مافهمتش السؤال؟</div><div class='num' style='margin:30px auto 0;background:#FFC30A;color:#0B1F6B'>3</div><div class='lead'>وراجعها قبل كل امتحان</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك<br/>اللي بيكرر غلطاته 😅</div><div class='lead muted'>وتابع دروس Dose للحيلة الجاية</div>" }
+      ] }
+  ]
+}
