@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g11-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>طالب ثانوي أو إعدادي؟</div><div class='h1' style='font-size:90px'>بطّل تقول<br/><span class='yellow'>«أنا مش فاهم<br/>حاجة»</span></div>" },
+        { "bg": "light", "body": "<div class='h2 accent'>قول كده بدل كده 👇</div><div class='lead muted' style='margin-top:40px;text-decoration:line-through'>«مش فاهم الدرس كله»</div><div class='h1' style='font-size:80px;margin-top:20px'>«أنا واقف عند<br/><span class='accent'>الخطوة دي</span>»</div>" },
+        { "bg": "light", "body": "<div class='lead muted' style='text-decoration:line-through'>«أنا فاشل في المسائل»</div><div class='h1' style='font-size:80px;margin-top:20px'>«لسه <span class='accent'>متدربتش</span><br/>على النوع ده»</div>" },
+        { "bg": "blue", "body": "<div class='h1' style='font-size:84px'>ليه <span class='yellow'>تفرق؟</span></div><div class='lead' style='margin-top:30px'>لما تحدد وقفت فين<br/>بتعرف تسأل صح<br/>وتصلّح النقطة دي بس</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>ابعته لصاحبك اللي<br/>دايمًا بيقول «مش فاهم» 😅</div><div class='lead muted'>واحفظه، وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
