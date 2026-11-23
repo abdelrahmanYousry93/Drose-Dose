@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g12-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>امتحانات الترم الأول في يناير</div><div class='h1' style='font-size:90px'>مش عارف<br/><span class='yellow'>تبدأ مراجعة<br/>منين؟</span></div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='h1' style='font-size:76px;margin-top:30px'>اكتب كل دروس<br/>المادة في <span class='accent'>ورقة</span></div><div class='lead muted' style='margin-top:20px'>وحط جنب كل درس لون</div>" },
+        { "bg": "light", "body": "<div class='num'>٢</div><div class='h2' style='margin-top:30px'><span style='color:#12B76A'>🟢 فاهمه</span><br/><span style='color:#B54708'>🟡 نص نص</span><br/><span style='color:#D92D20'>🔴 واقف معايا</span></div><div class='lead muted' style='margin-top:20px'>بصراحة مع نفسك</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٣</div><div class='h1' style='font-size:80px;margin-top:30px'>ابدأ <span class='yellow'>بالأحمر</span><br/>مش بالأسهل</div><div class='lead' style='margin-top:20px'>درس أحمر كل يوم،<br/>والأصفر راجعه بأسئلة</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه عشان تبدأ بيه<br/>وابعته لصاحبك 📌</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
