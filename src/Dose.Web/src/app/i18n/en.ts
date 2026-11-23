@@ -995,6 +995,8 @@ export const en: typeof ar = {
       }
     },
     "enter": "Enter the room",
+    "exitFull": "Exit",
+    "full": "Full screen",
     "handDown": "Lower hand",
     "handUp": "Raise hand",
     "hostEmpty": "Share your screen or turn on your camera so students can see you.",

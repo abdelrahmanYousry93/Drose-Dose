@@ -76,8 +76,11 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
           @if (reconnecting()) { <span class="warn">{{ 'room.reconnecting' | t }}</span> }
         </header>
         <main class="grid">
-          <section class="stage">
+          <section class="stage" #stageBox (dblclick)="toggleFull()">
             <video #stage autoplay playsinline [class.hidden]="!hasStage()"></video>
+            @if (hasStage()) {
+              <button class="fs" (click)="toggleFull(); $event.stopPropagation()" [attr.aria-label]="(isFull() ? 'room.exitFull' : 'room.full') | t">{{ isFull() ? '✕' : '⛶' }}<small>{{ (isFull() ? 'room.exitFull' : 'room.full') | t }}</small></button>
+            }
             @if (!hasStage()) {
               <div class="empty">{{ (isHost() ? 'room.hostEmpty' : hostHere() ? 'room.teacherNoVideo' : 'room.waitTeacher') | t }}</div>
             }
@@ -149,6 +152,9 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
     .stage{position:relative;background:#000;display:grid;place-items:center;min-height:240px}
     .stage video{width:100%;height:100%;max-height:calc(100dvh - 290px);object-fit:contain}
     .empty{color:#9fb0e0;padding:20px;text-align:center}
+    .fs{position:absolute;top:10px;inset-inline-end:10px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;font-size:1.1rem;cursor:pointer;z-index:2}
+    .fs small{font-size:.75rem}
+    .stage:fullscreen{width:100vw;height:100vh} .stage:fullscreen video{max-height:100vh;height:100vh}
     .side{border-inline-start:1px solid #1d2856;display:flex;flex-direction:column;min-height:0}
     .tabs{display:flex} .tabs button{flex:1;background:none;border:0;color:#9fb0e0;padding:10px;font:inherit;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
     .tabs button.on{color:#fff;border-color:#FFC30A} .tabs i{font-style:normal;background:#e5484d;color:#fff;border-radius:99px;padding:0 7px;margin-inline-start:4px}
@@ -198,6 +204,9 @@ export class RoomPage implements OnDestroy {
   protected draft = '';
 
   private readonly stageEl = viewChild<ElementRef<HTMLVideoElement>>('stage');
+  private readonly stageBox = viewChild<ElementRef<HTMLElement>>('stageBox');
+  protected readonly isFull = signal(false);
+  private readonly onFullChange = () => this.isFull.set(!!document.fullscreenElement);
   private readonly audioEl = viewChild<ElementRef<HTMLDivElement>>('audio');
   private room: Room | null = null;
   private stageTrack: VideoTrack | null = null;
@@ -206,7 +215,22 @@ export class RoomPage implements OnDestroy {
   private readonly enc = new TextEncoder();
   private readonly dec = new TextDecoder();
 
-  constructor() { queueMicrotask(() => this.load()); }
+  constructor() {
+    queueMicrotask(() => this.load());
+    document.addEventListener('fullscreenchange', this.onFullChange);
+  }
+
+  /** Full screen for the stage (the shared screen reads much better); iPhone only allows it on the video itself. */
+  protected async toggleFull() {
+    if (document.fullscreenElement) { await document.exitFullscreen().catch(() => undefined); return; }
+    const box = this.stageBox()?.nativeElement;
+    const video = this.stageEl()?.nativeElement as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | undefined;
+    if (box?.requestFullscreen) {
+      await box.requestFullscreen().catch(() => video?.webkitEnterFullscreen?.());
+      // On phones, turn sideways so the shared screen uses the whole width.
+      await (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> })?.lock?.('landscape').catch(() => undefined);
+    } else video?.webkitEnterFullscreen?.();
+  }
 
   private async load() {
     try {
@@ -229,7 +253,7 @@ export class RoomPage implements OnDestroy {
       // A fresh pass each time (the first may be old by now).
       const a = this.token() ? await this.api.roomPass(this.token()!) : await this.api.roomHostPass(this.sessionId()!);
       this.access.set(a);
-      const room = new Room({ adaptiveStream: true, dynacast: true });
+      const room = new Room({ adaptiveStream: { pixelDensity: 'screen' }, dynacast: true });
       this.room = room;
       room
         .on(RoomEvent.ParticipantConnected, () => this.refresh())
@@ -374,7 +398,9 @@ export class RoomPage implements OnDestroy {
     if (!this.room) return;
     try {
       const on = !this.screenOn();
-      await this.room.localParticipant.setScreenShareEnabled(on, { audio: true });
+      // Sharp text: capture as text content at 1080p and give the share enough bitrate.
+      await this.room.localParticipant.setScreenShareEnabled(on, { audio: true, contentHint: 'text', resolution: { width: 1920, height: 1080, frameRate: 15 } },
+        { screenShareEncoding: { maxBitrate: 3_000_000, maxFramerate: 15 }, screenShareSimulcastLayers: [] });
       this.screenOn.set(on);
     } catch { this.flash(translate('room.shareFailed')); }
     this.refresh();
@@ -420,6 +446,7 @@ export class RoomPage implements OnDestroy {
   }
 
   ngOnDestroy() {
+    document.removeEventListener('fullscreenchange', this.onFullChange);
     clearTimeout(this.noticeTimer);
     void this.room?.disconnect();
   }

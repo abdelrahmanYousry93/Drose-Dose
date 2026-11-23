@@ -198,5 +198,13 @@
  "sessionsAdmin.roomHint": [
   "💊 اكتب dose علشان الجلسة تبقى في غرفة دروس Dose بدل جوجل ميت.",
   "💊 Type dose to hold the session in the Dose room instead of Google Meet."
+ ],
+ "room.full": [
+  "ملء الشاشة",
+  "Full screen"
+ ],
+ "room.exitFull": [
+  "خروج",
+  "Exit"
  ]
 }
