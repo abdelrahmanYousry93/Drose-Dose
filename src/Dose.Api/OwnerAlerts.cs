@@ -144,21 +144,27 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
         return $"📘 {s.ScopeTitleAr}\n{s.Subject} — {s.Grade}\n🕒 {When(s.StartUtc)} (مصر) — {kind}\n👨‍🏫 {s.Teacher}";
     }
 
-    async Task<string?> BookingTextAsync(System.Linq.Expressions.Expression<Func<Dose.Domain.Bookings.Booking, bool>> which, string title, bool withContact)
+    async Task<string?> BookingTextAsync(System.Linq.Expressions.Expression<Func<Dose.Domain.Bookings.Booking, bool>> which, string title, bool withContact,
+        string? freeTitle = null, string adminPath = "")
     {
         var b = await db.Bookings.AsNoTracking().Where(which)
-            .Select(x => new { x.Reference, x.SessionId, x.QuotedPrice, x.SeatCount, Name = x.Student!.Name, Phone = x.Student.ContactPhoneE164,
+            .Select(x => new { x.Reference, x.SessionId, x.QuotedPrice, x.ListPrice, x.SeatCount, x.Status, Name = x.Student!.Name, Phone = x.Student.ContactPhoneE164,
                 Guardian = x.Student.GuardianName, GuardianPhone = x.Student.GuardianPhoneE164 })
             .FirstOrDefaultAsync();
         if (b is null) return null;
+        // A 100% code confirms the booking at once: say so instead of "waiting for payment".
+        var free = freeTitle is not null && b.Status == Dose.Domain.Bookings.BookingStatus.Confirmed && b.QuotedPrice == 0;
+        if (free) { title = freeTitle!; adminPath = "/messages"; }
         if (b.Name is null) title += " (لسه ماكتبش بياناته)";
-        var text = $"{title}\n\n{await SessionLinesAsync(b.SessionId)}\n💵 {b.QuotedPrice:0.##} ج.م" + (b.SeatCount > 1 ? $" ({b.SeatCount} طلاب)" : "") + $"\n🔖 {b.Reference}";
+        var price = free ? $"💵 ببلاش بكود خصم (سعر الجلسة {b.ListPrice:0.##} ج.م)"
+            : b.Name is null ? $"💵 سعر الجلسة {b.QuotedPrice:0.##} ج.م" : $"💵 هيدفع {b.QuotedPrice:0.##} ج.م";
+        var text = $"{title}\n\n{await SessionLinesAsync(b.SessionId)}\n{price}" + (b.SeatCount > 1 ? $" ({b.SeatCount} طلاب)" : "") + $"\n🔖 {b.Reference}";
         if (withContact && b.Name is not null)
         {
             text += $"\n\n👤 {b.Name}\n📱 {Chat(b.Phone)}";
             if (!string.IsNullOrWhiteSpace(b.Guardian) || !string.IsNullOrWhiteSpace(b.GuardianPhone)) text += $"\nولي الأمر: {b.Guardian} {Chat(b.GuardianPhone)}";
         }
-        return text + $"\n\n{Admin}";
+        return text + $"\n\n🔧 لوحة الإدارة (ليك إنت بس): {Admin}{adminPath}";
     }
 
     public Task HoldStartedAsync(string reference) => Try(() =>
@@ -167,13 +173,14 @@ public sealed class OwnerAlerts(DoseDbContext db, OwnerAlertQueue queue, IOption
     public Task DetailsSubmittedAsync(string token) => Try(() =>
     {
         var hash = AccessTokens.Hash(token);
-        return BookingTextAsync(b => b.AccessTokenHash == hash, "🟢 طالب كتب بياناته — مستني الدفع", withContact: true);
+        return BookingTextAsync(b => b.AccessTokenHash == hash, "🟢 طالب كتب بياناته — مستني الدفع", withContact: true,
+            freeTitle: "✅ حجز مجاني اتأكد على طول (كود خصم 100%)", adminPath: "/follow-ups");
     });
 
     public Task ProofUploadedAsync(string token) => Try(() =>
     {
         var hash = AccessTokens.Hash(token);
-        return BookingTextAsync(b => b.AccessTokenHash == hash, "💰 إثبات دفع اترفع — راجعه ووافق من لوحة الإدارة", withContact: true);
+        return BookingTextAsync(b => b.AccessTokenHash == hash, "💰 إثبات دفع اترفع — راجعه ووافق من لوحة الإدارة", withContact: true, adminPath: "/payments");
     });
 
     public Task RequestCreatedAsync(string reference) => Try(async () =>
@@ -295,7 +302,7 @@ public sealed class OwnerFollowUps(DoseDbContext db, OwnerAlertQueue queue, IOpt
                 _ => "💬 رسالة مستنية تتبعت للطالب",
             };
             queue.Enqueue($"{what}\n\n👤 {n.RecipientName}\n📱 {n.Phone}" + (n.Ref is null ? "" : $"\n🔖 {n.Ref}") +
-                          $"\n\n👇 افتحها وابعتها على واتساب بضغطة:\n{site}/admin/messages?open={n.Id}");
+                          $"\n\n👇 الرسالة جاهزة في لوحة الإدارة (ليك إنت). افتحها واضغط إرسال على واتساب:\n{site}/admin/messages?open={n.Id}");
             db.AuditLogs.Add(new AuditLog { Actor = "followup", Entity = "FollowUp", EntityId = $"msg:{n.Id}", Action = "alerted", AtUtc = now });
         }
         await db.SaveChangesAsync(ct);
