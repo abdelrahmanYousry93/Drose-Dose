@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   AdminApi, ChapterA, GradeA, LessonA, PricingPreview, ReissueLink, SessionA, SessionBookingA, SessionRequestA, SessionSave, cairoToUtc, utcToCairo,
@@ -18,7 +19,7 @@ export const statusLabel = (s: string) => { const k = `status.${s}`; const t = t
 
 @Component({
   selector: 'dose-admin-sessions',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   templateUrl: './admin-sessions.html',
   styleUrl: './admin-sessions.scss',
 })

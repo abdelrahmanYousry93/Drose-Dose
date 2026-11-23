@@ -47,6 +47,9 @@ public sealed class CampaignSeedTests(DatabaseFixture fx)
             await db.SaveChangesAsync();
             await ChemReviewNov2026.EnsureAsync(db, fx.SeedTime);
             await ChemReviewNov2026.EnsureAsync(db, fx.SeedTime); // second run is a no-op
+            // Production later cancelled this unbooked session at startup; keep it live here so the offer and booking checks still run.
+            db.AuditLogs.Add(new Dose.Domain.Administration.AuditLog { Actor = "test", Entity = "Campaign", EntityId = "ChemSession/2026-11-20/cancel", Action = "skip", AtUtc = fx.SeedTime });
+            await db.SaveChangesAsync();
         }
         await using (var db = fx.NewDb())
         {
@@ -57,7 +60,8 @@ public sealed class CampaignSeedTests(DatabaseFixture fx)
             var code = await db.PromoCodes.SingleAsync(p => p.Code == ChemReviewNov2026.Code);
             Assert.Equal((100m, 20, (Guid?)s.Id), (code.Value, code.MaxTotalUses!.Value, code.SessionId));
         }
-        // The session page shows the free offer with the places left.
+        // The session page shows the free offer with the places left (the live app uses the real clock, so only before the session).
+        if (DateTime.UtcNow < new DateTime(2026, 11, 20, 16, 0, 0, DateTimeKind.Utc))
         await using (var app = new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>().WithWebHostBuilder(b =>
         {
             Microsoft.AspNetCore.Hosting.HostingAbstractionsWebHostBuilderExtensions.UseEnvironment(b, "Production");

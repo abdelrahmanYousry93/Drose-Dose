@@ -38,6 +38,8 @@ builder.Services.AddScoped<StudentAccessService>();
 // Owner alerts on Telegram (inactive until Telegram__BotToken is set as an encrypted environment variable).
 builder.Services.AddOptions<TelegramSettings>().Bind(builder.Configuration.GetSection(TelegramSettings.SectionName));
 builder.Services.AddHttpClient("telegram", c => c.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddHttpClient("livekit", c => c.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddSingleton<LiveKitRooms>();
 builder.Services.AddSingleton<OwnerAlertQueue>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<OwnerAlertQueue>());
 builder.Services.AddScoped<OwnerAlerts>();
@@ -127,6 +129,7 @@ app.MapDoseEndpoints();
 app.MapAdminConfigEndpoints();
 app.MapPhase3Endpoints();
 app.MapPhase4Endpoints();
+app.MapRoomEndpoints();
 app.MapMessagingEndpoints();
 app.MapPhase6Endpoints();
 app.MapPartnerEndpoints();

@@ -1,0 +1,202 @@
+{
+ "titles.room": [
+  "غرفة الجلسة",
+  "Session room"
+ ],
+ "room.cantEnter": [
+  "مش قادرين ندخّلك الغرفة",
+  "We couldn't let you into the room"
+ ],
+ "room.backToBooking": [
+  "ارجع لصفحة الحجز",
+  "Back to my booking"
+ ],
+ "room.badge": [
+  "غرفة دروس Dose",
+  "Dose room"
+ ],
+ "room.with": [
+  "مع",
+  "with"
+ ],
+ "room.studentHint": [
+  "هتدخل والميكروفون مقفول. ارفع إيدك ✋ لو عايز تسأل، أو اكتب في الشات.",
+  "You'll join with your mic off. Raise your hand ✋ to ask, or use the chat."
+ ],
+ "room.hostHint": [
+  "إنت مدير الجلسة: تقدر تشارك الشاشة والكاميرا، وتكتم أو تطلّع أي طالب.",
+  "You're the host: share your screen and camera, mute or remove any student."
+ ],
+ "room.enter": [
+  "ادخل الغرفة",
+  "Enter the room"
+ ],
+ "room.rejoin": [
+  "ادخل تاني",
+  "Join again"
+ ],
+ "room.reconnecting": [
+  "بنحاول نرجّع الاتصال…",
+  "Reconnecting…"
+ ],
+ "room.hostEmpty": [
+  "شارك شاشتك أو افتح الكاميرا علشان الطلاب يشوفوك.",
+  "Share your screen or turn on your camera so students can see you."
+ ],
+ "room.teacherNoVideo": [
+  "المدرس موجود، ولسه ما شاركش شاشته.",
+  "The teacher is here and hasn't shared yet."
+ ],
+ "room.waitTeacher": [
+  "المدرس لسه ما دخلش. خليك هنا، الجلسة هتبدأ أول ما يدخل.",
+  "The teacher hasn't joined yet. Stay here; the session starts when they arrive."
+ ],
+ "room.people": [
+  "الحاضرين",
+  "People"
+ ],
+ "room.chat": [
+  "الشات",
+  "Chat"
+ ],
+ "room.you": [
+  "إنت",
+  "you"
+ ],
+ "room.teacher": [
+  "المدرس",
+  "teacher"
+ ],
+ "room.mute": [
+  "اكتم",
+  "Mute"
+ ],
+ "room.lowerHand": [
+  "نزّل الإيد",
+  "Lower hand"
+ ],
+ "room.remove": [
+  "طلّعه",
+  "Remove"
+ ],
+ "room.confirmRemove": [
+  "تطلّع {name} من الجلسة؟",
+  "Remove {name} from the session?"
+ ],
+ "room.chatEmpty": [
+  "لسه مفيش رسايل.",
+  "No messages yet."
+ ],
+ "room.chatPh": [
+  "اكتب سؤالك…",
+  "Type your question…"
+ ],
+ "room.send": [
+  "ابعت",
+  "Send"
+ ],
+ "room.micOn": [
+  "الميك شغال",
+  "Mic on"
+ ],
+ "room.micOff": [
+  "الميك مقفول",
+  "Mic off"
+ ],
+ "room.camOn": [
+  "الكاميرا شغالة",
+  "Camera on"
+ ],
+ "room.camOff": [
+  "الكاميرا مقفولة",
+  "Camera off"
+ ],
+ "room.share": [
+  "شارك الشاشة",
+  "Share screen"
+ ],
+ "room.stopShare": [
+  "وقّف المشاركة",
+  "Stop sharing"
+ ],
+ "room.handUp": [
+  "ارفع إيدك",
+  "Raise hand"
+ ],
+ "room.handDown": [
+  "نزّل إيدك",
+  "Lower hand"
+ ],
+ "room.leave": [
+  "اخرج",
+  "Leave"
+ ],
+ "room.micBlocked": [
+  "المتصفح مانع الميكروفون. اسمح له من إعدادات الموقع.",
+  "The browser is blocking the microphone. Allow it in the site settings."
+ ],
+ "room.camBlocked": [
+  "المتصفح مانع الكاميرا. اسمح لها من إعدادات الموقع.",
+  "The browser is blocking the camera. Allow it in the site settings."
+ ],
+ "room.shareFailed": [
+  "مشاركة الشاشة ما اشتغلتش. جرّب من كمبيوتر بمتصفح كروم.",
+  "Screen sharing didn't start. Try Chrome on a computer."
+ ],
+ "room.connectFailed": [
+  "الاتصال بالغرفة فشل. اتأكد من النت وجرّب تاني.",
+  "Couldn't connect to the room. Check your internet and try again."
+ ],
+ "room.end.left.title": [
+  "خرجت من الجلسة",
+  "You left the session"
+ ],
+ "room.end.left.text": [
+  "تقدر ترجع تاني طول ما الجلسة شغالة.",
+  "You can come back while the session is running."
+ ],
+ "room.end.moved.title": [
+  "دخلت من جهاز تاني",
+  "You joined from another device"
+ ],
+ "room.end.moved.text": [
+  "الحجز ده بيدخل من جهاز واحد بس في نفس الوقت.",
+  "This booking can be in the room from one device at a time."
+ ],
+ "room.end.removed.title": [
+  "المدرس طلّعك من الجلسة",
+  "The teacher removed you from the session"
+ ],
+ "room.end.removed.text": [
+  "لو ده حصل بالغلط، كلّمنا على واتساب.",
+  "If this was a mistake, message us on WhatsApp."
+ ],
+ "room.end.ended.title": [
+  "الجلسة خلصت",
+  "The session has ended"
+ ],
+ "room.end.ended.text": [
+  "شكرًا إنك حضرت مع دروس Dose 💊",
+  "Thanks for joining دروس Dose 💊"
+ ],
+ "room.end.lost.title": [
+  "الاتصال اتقطع",
+  "Connection lost"
+ ],
+ "room.end.lost.text": [
+  "اتأكد من النت وادخل تاني.",
+  "Check your internet and join again."
+ ],
+ "teacher.openRoom": [
+  "ادخل غرفة الجلسة",
+  "Open the session room"
+ ],
+ "sessionsAdmin.openRoom": [
+  "افتح الغرفة كمدير",
+  "Open the room as host"
+ ],
+ "sessionsAdmin.roomHint": [
+  "💊 اكتب dose علشان الجلسة تبقى في غرفة دروس Dose بدل جوجل ميت.",
+  "💊 Type dose to hold the session in the Dose room instead of Google Meet."
+ ]
+}

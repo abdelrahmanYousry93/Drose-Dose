@@ -20,6 +20,17 @@ export const routes: Routes = [
     title: 'titles.openGroups',
   },
   {
+    // Dose's own video room. Student: /room/<booking token>. Teacher / admin (signed in): /room/host/<session id>.
+    path: 'room/host/:sessionId',
+    loadComponent: () => import('./features/room/room').then((m) => m.RoomPage),
+    title: 'titles.room',
+  },
+  {
+    path: 'room/:token',
+    loadComponent: () => import('./features/room/room').then((m) => m.RoomPage),
+    title: 'titles.room',
+  },
+  {
     // Secret booking link: /b/<token>. The token is the only key to the booking.
     path: 'b/:token',
     loadComponent: () => import('./features/booking/booking-page').then((m) => m.BookingPage),

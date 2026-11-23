@@ -49,6 +49,10 @@ export interface BookingView {
   invite: InviteInfo | null; invitedBy: string | null; prefillPhone: string | null;
   joinCode: string | null;
 }
+export interface RoomAccess {
+  serverUrl: string; token: string; identity: string; name: string; role: 'host' | 'student';
+  title: string | null; teacherName: string | null; endUtc: string;
+}
 export interface InviteInfo { code: string; seats: number; joined: number; friendFirstNames: string[] }
 export interface PromoPreview { code: string; description: string | null; kind: 'Percent' | 'Fixed'; value: number; discount: number; netPrice: number; currency: string }
 export interface Slot { teacherId: string; teacherName: string; teacherPhotoUrl: string | null; startUtc: string }
@@ -146,6 +150,12 @@ export class Api {
     return this.post<void>(`/b/${encodeURIComponent(token)}/payment-proofs`, form);
   }
   join(token: string) { return this.get<{ meetingUrl: string }>(`/b/${encodeURIComponent(token)}/join`); }
+  /** Dose room: a short-lived LiveKit pass for this booking (student) or for the session's host (teacher / admin). */
+  roomPass(token: string) { return this.get<RoomAccess>(`/b/${encodeURIComponent(token)}/room`); }
+  roomHostPass(sessionId: string) { return this.get<RoomAccess>(`/room/${encodeURIComponent(sessionId)}/host`); }
+  roomModerate(sessionId: string, body: { action: 'mute' | 'remove'; identity: string; trackSid?: string }) {
+    return this.post<void>(`/room/${encodeURIComponent(sessionId)}/moderate`, body);
+  }
   topUpChoice(token: string, choice: string) { return this.post<void>(`/b/${encodeURIComponent(token)}/top-up-choice`, { choice }); }
   uploadTopUpProof(token: string, methodId: string, file: File, senderReference: string) {
     const form = new FormData();

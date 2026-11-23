@@ -486,7 +486,22 @@ public sealed class BookingService(
             Actor = device ?? "unknown", Entity = JoinCodes.AuditEntity, EntityId = bookingId.ToString(), Action = "join", AtUtc = now,
         });
         await db.SaveChangesAsync(ct);
-        return new JoinResponse(row.MeetingUrl);
+        return new JoinResponse(Dose.Domain.Sessions.DoseRoom.Is(row.MeetingUrl) ? $"/room/{token}" : row.MeetingUrl);
+    }
+
+    /// <summary>
+    /// Who is entering a Dose room with this booking link: same checks as <see cref="JoinAsync(string, string?, CancellationToken)"/>
+    /// (confirmed, join window open, not ended) and the session must use the Dose room.
+    /// </summary>
+    public async Task<RoomSeat> RoomSeatAsync(string token, string? device, CancellationToken ct)
+    {
+        var join = await JoinAsync(token, device, ct);
+        if (!join.MeetingUrl.StartsWith("/room/", StringComparison.Ordinal))
+            throw new DomainException(BookingErrors.JoinNotAvailable, "الجلسة دي مش في غرفة دروس Dose.", "This session isn't held in a Dose room.");
+        var bookingId = await FindIdAsync(token, ct);
+        return await db.Bookings.AsNoTracking().Where(b => b.Id == bookingId)
+            .Select(b => new RoomSeat(b.Id, b.SessionId, b.Student!.Name, b.Session!.ScopeTitleAr, b.Session.Teacher!.DisplayNameAr, b.Session.EndUtc))
+            .SingleAsync(ct);
     }
 
     private async Task<Guid> FindIdAsync(string token, CancellationToken ct)

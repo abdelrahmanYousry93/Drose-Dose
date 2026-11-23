@@ -104,6 +104,25 @@ public sealed class GroupsAndPromoTests(DatabaseFixture fx)
             var second = list.Single(b => b.JoinCode == codes[1]);
             Assert.Equal((1, 1), (second.JoinClicks, second.JoinDevices));
         }
+
+        // Same session moved to the Dose room: Join now points at the room page, and the room seat is this booking's.
+        await using (var db = fx.NewDb())
+        {
+            var s = await db.Sessions.SingleAsync(x => x.Id == session.Id);
+            Assert.True(DoseRoom.IsRequested(" Dose "));
+            s.MeetingUrl = DoseRoom.Marker;
+            s.MeetingProvider = DoseRoom.Provider;
+            await db.SaveChangesAsync();
+        }
+        await using (var db = fx.NewDb())
+        {
+            var svc = fx.Bookings(db, atStart);
+            Assert.Equal($"/room/{tokens[0]}", (await svc.JoinAsync(tokens[0], "phone-a", default)).MeetingUrl);
+            var seat = await svc.RoomSeatAsync(tokens[0], "phone-a", default);
+            Assert.Equal(session.Id, seat.SessionId);
+            Assert.Equal("طالب 0", seat.StudentName);
+            await Assert.ThrowsAsync<DomainException>(() => fx.Bookings(db, clock).RoomSeatAsync(tokens[1], "phone-c", default));
+        }
     }
 
     [Fact]

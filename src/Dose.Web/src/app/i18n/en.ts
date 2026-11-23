@@ -960,6 +960,66 @@ export const en: typeof ar = {
     "loading": "Restoring your bookings…",
     "open": "Open my bookings"
   },
+  "room": {
+    "backToBooking": "Back to my booking",
+    "badge": "Dose room",
+    "camBlocked": "The browser is blocking the camera. Allow it in the site settings.",
+    "camOff": "Camera off",
+    "camOn": "Camera on",
+    "cantEnter": "We couldn't let you into the room",
+    "chat": "Chat",
+    "chatEmpty": "No messages yet.",
+    "chatPh": "Type your question…",
+    "confirmRemove": "Remove {name} from the session?",
+    "connectFailed": "Couldn't connect to the room. Check your internet and try again.",
+    "end": {
+      "ended": {
+        "text": "Thanks for joining دروس Dose 💊",
+        "title": "The session has ended"
+      },
+      "left": {
+        "text": "You can come back while the session is running.",
+        "title": "You left the session"
+      },
+      "lost": {
+        "text": "Check your internet and join again.",
+        "title": "Connection lost"
+      },
+      "moved": {
+        "text": "This booking can be in the room from one device at a time.",
+        "title": "You joined from another device"
+      },
+      "removed": {
+        "text": "If this was a mistake, message us on WhatsApp.",
+        "title": "The teacher removed you from the session"
+      }
+    },
+    "enter": "Enter the room",
+    "handDown": "Lower hand",
+    "handUp": "Raise hand",
+    "hostEmpty": "Share your screen or turn on your camera so students can see you.",
+    "hostHint": "You're the host: share your screen and camera, mute or remove any student.",
+    "leave": "Leave",
+    "lowerHand": "Lower hand",
+    "micBlocked": "The browser is blocking the microphone. Allow it in the site settings.",
+    "micOff": "Mic off",
+    "micOn": "Mic on",
+    "mute": "Mute",
+    "people": "People",
+    "reconnecting": "Reconnecting…",
+    "rejoin": "Join again",
+    "remove": "Remove",
+    "send": "Send",
+    "share": "Share screen",
+    "shareFailed": "Screen sharing didn't start. Try Chrome on a computer.",
+    "stopShare": "Stop sharing",
+    "studentHint": "You'll join with your mic off. Raise your hand ✋ to ask, or use the chat.",
+    "teacher": "teacher",
+    "teacherNoVideo": "The teacher is here and hasn't shared yet.",
+    "waitTeacher": "The teacher hasn't joined yet. Stay here; the session starts when they arrive.",
+    "with": "with",
+    "you": "you"
+  },
   "session": {
     "details": "Details",
     "openGroup": "Open group session",
@@ -1018,6 +1078,7 @@ export const en: typeof ar = {
     "mode": "Session type",
     "new": "New session",
     "noBookings": "No bookings.",
+    "openRoom": "Open the room as host",
     "privatePrice": "Private session price:",
     "proposed": "Proposed by teachers",
     "proposedBy": "Proposed by {name}.",
@@ -1025,6 +1086,7 @@ export const en: typeof ar = {
     "publish": "Publish",
     "published": "Published ✓",
     "reissueConfirm": "A new link will be created for booking {ref} and the old one will stop working. Continue?",
+    "roomHint": "💊 Type dose to hold the session in the Dose room instead of Google Meet.",
     "saveDraft": "Save as draft",
     "savePublish": "Save and publish",
     "saved": "Session saved ✓",
@@ -1129,6 +1191,7 @@ export const en: typeof ar = {
     "noSlots": "You haven't added any times yet.",
     "noStudents": "No confirmed students yet.",
     "openMeet": "Open Google Meet",
+    "openRoom": "Open the session room",
     "past": "Past sessions",
     "present": "Present",
     "saveAttendance": "Save attendance",
@@ -1187,6 +1250,7 @@ export const en: typeof ar = {
     "private": "Book a private session or group",
     "request": "Request a session",
     "restore": "Restore my bookings",
+    "room": "Session room",
     "sessions": "Available sessions",
     "teacherAvailability": "My availability",
     "teacherSession": "Session",

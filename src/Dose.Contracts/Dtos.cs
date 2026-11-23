@@ -128,6 +128,14 @@ public sealed record CancelBookingRequest(bool AcceptNoRefund);
 
 public sealed record JoinResponse(string MeetingUrl);
 
+/// <summary>A confirmed booking entering a Dose room (internal: the API turns it into a LiveKit pass).</summary>
+public sealed record RoomSeat(Guid BookingId, Guid SessionId, string StudentName, string? Title, string? TeacherName, DateTime EndUtc);
+
+/// <summary>What the room page needs to connect: LiveKit server URL, a short-lived pass, and what to show.</summary>
+public sealed record RoomAccessDto(string ServerUrl, string Token, string Identity, string Name, string Role, string? Title, string? TeacherName, DateTime EndUtc);
+
+public sealed record RoomModerateRequest(string? Action, string? Identity, string? TrackSid);
+
 // ---------- Admin ----------
 public sealed record PaymentProofAdminDto(
     Guid Id,

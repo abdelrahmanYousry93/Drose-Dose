@@ -165,7 +165,9 @@ export class TeacherSessions {
           <span class="muted">{{ s.gradeName }} · {{ s.studyTrackName }}</span>
           <span>{{ dt(s.startUtc) }} – {{ time(s.endUtc) }}</span>
           @if (s.details) { <p class="small">{{ s.details }}</p> }
-          @if (s.meetingUrl) {
+          @if (s.meetingUrl === 'dose:room') {
+            <a class="dose-btn dose-btn--primary" [routerLink]="['/room/host', s.id]">{{ 'teacher.openRoom' | t }}</a>
+          } @else if (s.meetingUrl) {
             <a class="dose-btn dose-btn--primary" [href]="s.meetingUrl" target="_blank" rel="noopener">{{ 'teacher.openMeet' | t }}</a>
           } @else if (s.status !== 'Cancelled') {
             <p class="alert small">{{ 'teacher.noLink' | t }}</p>

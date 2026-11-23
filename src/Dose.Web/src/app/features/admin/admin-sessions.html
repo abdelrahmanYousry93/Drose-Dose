@@ -67,7 +67,8 @@
           </select></label>
         <label class="field wide"><span>{{ 'sessionsAdmin.meet' | t }}</span>
           <input name="meet" [(ngModel)]="f.meetingUrl" dir="ltr" placeholder="https://meet.google.com/..." />
-          <span class="hint">{{ 'sessionsAdmin.meetHint' | t }}</span></label>
+          <span class="hint">{{ 'sessionsAdmin.meetHint' | t }}</span>
+          <span class="hint">{{ 'sessionsAdmin.roomHint' | t }}</span></label>
       </div>
 
       <fieldset class="mode" [disabled]="lockedPricing()">
@@ -139,7 +140,7 @@
         <li><span>{{ 'sessionsAdmin.bookings' | t }}</span><span>{{ 'sessionsAdmin.bookingsLine' | t: { c: s.confirmedCount, o: s.occupiedCount, cap: s.capacity } }}</span></li>
         <li><span>{{ 'sessionsAdmin.deadline' | t }}</span><span>{{ dt(s.bookingDeadlineUtc) }}</span></li>
         @if (s.tierDecisionAtUtc) { <li><span>{{ 'sessionsAdmin.decision' | t }}</span><span>{{ dt(s.tierDecisionAtUtc) }}</span></li> }
-        <li><span>{{ 'sessionsAdmin.link' | t }}</span><span>{{ (s.meetingUrl ? 'sessionsAdmin.linkYes' : 'sessionsAdmin.linkNo') | t }}</span></li>
+        <li><span>{{ 'sessionsAdmin.link' | t }}</span><span>{{ (s.meetingUrl ? 'sessionsAdmin.linkYes' : 'sessionsAdmin.linkNo') | t }}@if (s.meetingUrl === 'dose:room') { · 💊 <a [routerLink]="['/room/host', s.id]">{{ 'sessionsAdmin.openRoom' | t }}</a> }</span></li>
       </ul>
       <div class="actions">
         @if (s.status !== 'Cancelled' && s.status !== 'Completed') {

@@ -54,7 +54,7 @@ export class AdminLogin {
       await this.api.login(this.email, this.password);
       const me = await this.api.me();
       const next = new URLSearchParams(location.search).get('next');
-      const back = me.roles.includes('Admin') && next?.startsWith('/admin/') ? next : null;
+      const back = (me.roles.includes('Admin') && next?.startsWith('/admin/')) || next?.startsWith('/room/host/') ? next : null;
       await this.router.navigateByUrl(back ?? (me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/'));
     } catch (e) {
       this.error.set(e instanceof ApiError && e.status === 401 ? translate('login.invalid') : errorMessage(e));

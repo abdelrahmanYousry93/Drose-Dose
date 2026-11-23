@@ -280,9 +280,17 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
         s.TeacherId = req.TeacherId;
         s.StartUtc = start;
         s.EndUtc = start.AddMinutes(req.DurationMinutes);
-        s.MeetingUrl = AdminGuard.Url(req.MeetingUrl);
-        s.MeetingProvider = s.MeetingUrl is null ? null
-            : s.MeetingUrl.Contains("meet.google.com", StringComparison.OrdinalIgnoreCase) ? "GoogleMeet" : "Other";
+        if (Dose.Domain.Sessions.DoseRoom.IsRequested(req.MeetingUrl))
+        {
+            s.MeetingUrl = Dose.Domain.Sessions.DoseRoom.Marker;
+            s.MeetingProvider = Dose.Domain.Sessions.DoseRoom.Provider;
+        }
+        else
+        {
+            s.MeetingUrl = AdminGuard.Url(req.MeetingUrl);
+            s.MeetingProvider = s.MeetingUrl is null ? null
+                : s.MeetingUrl.Contains("meet.google.com", StringComparison.OrdinalIgnoreCase) ? "GoogleMeet" : "Other";
+        }
 
         if (mode == SessionMode.Group)
         {
