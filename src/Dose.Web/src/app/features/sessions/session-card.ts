@@ -21,7 +21,12 @@ import { TranslatePipe } from '../../core/i18n';
       <ul class="meta">
         <li>📅 {{ date(s.startUtc) }} — {{ time(s.startUtc) }}</li>
         <li>⏱️ {{ duration(s.durationMinutes) }}</li>
-        @if (s.mode === 'Group') { <li>👥 {{ 'session.seatsLine' | t: { n: s.confirmedCount, cap: s.capacity, left: s.remainingSeats } }}</li> }
+        @if (s.mode === 'Group') {
+          <!-- Scarcity, honestly: the real seats left once half are taken; until then just the cap. -->
+          @if (s.remainingSeats === 0) { <li>✅ {{ 'session.seatsFull' | t }}</li> }
+          @else if (s.confirmedCount * 2 >= s.capacity) { <li class="hot">🔥 {{ 'session.seatsLeftOf' | t: { left: s.remainingSeats, cap: s.capacity } }}</li> }
+          @else { <li>👥 {{ 'session.seatsOnly' | t: { cap: s.capacity } }}</li> }
+        }
         <li>👤 {{ s.teacherName }}</li>
       </ul>
       <div class="bottom">
@@ -40,6 +45,7 @@ import { TranslatePipe } from '../../core/i18n';
     .bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
     .go { min-height: 40px; padding: 0 16px; }
     .price + .muted { margin-inline-start: 4px; }
+    .hot { color: #c2410c; font-weight: 800; }
   `,
 })
 export class SessionCard {

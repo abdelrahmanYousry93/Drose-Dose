@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, SessionDetails, SessionOffer } from '../../core/api';
@@ -12,7 +13,7 @@ import { TeacherCard } from '../../shared/teacher-card';
 /** Session details (spec 9.4): teacher identity and all terms are visible before the student commits. */
 @Component({
   selector: 'dose-session-details',
-  imports: [RouterLink, TeacherCard, GroupTermsBox, TranslatePipe],
+  imports: [RouterLink, FormsModule, TeacherCard, GroupTermsBox, TranslatePipe],
   template: `
     <section class="page">
       <a routerLink="/sessions" class="back">{{ 'details.back' | t }}</a>
@@ -33,7 +34,7 @@ import { TeacherCard } from '../../shared/teacher-card';
           @if (o.kind === 'Percent' && o.value >= 100 && (o.remaining ?? 1) > 0) {
             <div class="offer">
               <div class="big">🎁 {{ (o.total ? 'offer.freeFirst' : 'offer.free') | t: { n: o.total ?? 0 } }}</div>
-              @if (o.remaining != null) { <div class="left"><b>{{ o.remaining }}</b> {{ 'offer.left' | t }}</div> }
+              @if (o.remaining != null && o.total && o.remaining <= o.total / 2) { <div class="left">🔥 <b>{{ o.remaining }}</b> {{ 'offer.left' | t }}</div> }
               <div class="how">{{ 'offer.how' | t }} <span class="code" dir="ltr">{{ o.code }}</span> · {{ 'offer.after' | t: { price: money(s.pricePerStudent, s.currency) } }}</div>
               @if (d()!.isOpenForBooking) {
                 <button class="dose-btn dose-btn--primary btn-block big-book" (click)="book()" [disabled]="booking()">{{ (booking() ? 'details.booking' : 'offer.bookFree') | t }}</button>
@@ -98,6 +99,21 @@ import { TeacherCard } from '../../shared/teacher-card';
               {{ (booking() ? 'details.booking' : free() ? 'offer.bookFree' : 'details.book') | t }}
             </button>
           </div>
+        } @else if (d()!.summary.mode === 'Group' && d()!.summary.remainingSeats === 0) {
+          <!-- Full round: the seat was a real chance; offer the next round first. -->
+          <div class="wait">
+            <h3>✅ {{ 'wait.full' | t }}</h3>
+            @if (waitDone()) { <p class="ok">{{ waitDone() }}</p> }
+            @else {
+              <p>{{ 'wait.text' | t }}</p>
+              <form (ngSubmit)="joinWait()">
+                <input name="wn" [(ngModel)]="waitName" [placeholder]="'wait.name' | t" required maxlength="100" autocomplete="name" />
+                <input name="wp" [(ngModel)]="waitPhone" [placeholder]="'wait.phone' | t" required inputmode="tel" dir="ltr" autocomplete="tel" />
+                <button class="dose-btn dose-btn--primary btn-block" [disabled]="waitBusy()">{{ 'wait.join' | t }}</button>
+              </form>
+              @if (waitError()) { <p class="alert alert--error">{{ waitError() }}</p> }
+            }
+          </div>
         } @else {
           <p class="alert">{{ 'details.closed' | t }} <a routerLink="/request-session">{{ 'sessions.requestNew' | t }}</a></p>
         }
@@ -118,6 +134,8 @@ import { TeacherCard } from '../../shared/teacher-card';
       .sticky-book { display: block; position: fixed; inset-inline: 0; bottom: 0; z-index: 30; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(255 255 255 / .96); box-shadow: 0 -6px 20px rgb(11 31 107 / .12); }
       :host { display: block; padding-bottom: 76px; }
     }
+    .wait { background: var(--dose-primary-50); border-radius: var(--dose-radius); padding: 16px; display: grid; gap: 8px; text-align: center; }
+    .wait h3 { margin: 0; } .wait form { display: grid; gap: 8px; } .wait input { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--dose-border, #d6dbe8); font: inherit; } .wait .ok { font-weight: 800; color: #1d7a47; }
     .offer.gone { background: #f3f4f7; color: var(--dose-text-muted); box-shadow: none; }
 
     .back { text-decoration: none; font-weight: 600; }
@@ -148,6 +166,21 @@ export class SessionDetailsPage {
   protected readonly money = fmtMoney;
 
   protected readonly offer = signal<SessionOffer | null>(null);
+  protected waitName = '';
+  protected waitPhone = '';
+  protected readonly waitBusy = signal(false);
+  protected readonly waitDone = signal('');
+  protected readonly waitError = signal('');
+
+  protected async joinWait() {
+    this.waitBusy.set(true); this.waitError.set('');
+    try {
+      const r = await this.api.joinWaitlist(this.id(), { studentName: this.waitName, contactPhone: this.waitPhone });
+      this.waitDone.set(r.whatsAppMessage);
+      this.tracker.track('request');
+    } catch (e) { this.waitError.set(errorMessage(e)); }
+    finally { this.waitBusy.set(false); }
+  }
   /** A 100% code for this session still has free places. */
   protected readonly free = computed(() => { const o = this.offer(); return !!o && o.kind === 'Percent' && o.value >= 100 && (o.remaining ?? 1) > 0; });
 

@@ -1027,7 +1027,10 @@ export const en: typeof ar = {
     "openGroup": "Open group session",
     "perStudent": "per student",
     "private": "Private session",
-    "seatsLine": "{n} of {cap} students · {left} left"
+    "seatsFull": "Seats are full",
+    "seatsLeftOf": "{left} of {cap} seats left",
+    "seatsLine": "{n} of {cap} students · {left} left",
+    "seatsOnly": "Only {cap} seats"
   },
   "sessions": {
     "all": "All",
@@ -1294,6 +1297,13 @@ export const en: typeof ar = {
     "scope": "Write the part you need explained.",
     "subject": "Choose the subject.",
     "times": "Choose at least one time."
+  },
+  "wait": {
+    "full": "All seats are taken",
+    "join": "Save me a spot in the next round",
+    "name": "Your name",
+    "phone": "WhatsApp number",
+    "text": "Leave your name and WhatsApp number and we'll message you before anyone else when the next round opens."
   },
   "wall": {
     "empty": "The first organization to pledge will be the first name here",

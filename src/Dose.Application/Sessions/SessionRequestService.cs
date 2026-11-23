@@ -85,6 +85,35 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
             : $"مرحباً Dose، بعت طلب جلسة جديدة رقم {entity.Reference}");
     }
 
+    /// <summary>
+    /// A full (or closed) session: the student leaves a name and WhatsApp number to be told first when the next round opens.
+    /// Stored as a session request (scope marked as waitlist) so it shows in the admin requests list.
+    /// </summary>
+    public async Task<CreateSessionRequestResponse> WaitlistAsync(Guid sessionId, WaitlistRequest req, CancellationToken ct)
+    {
+        var name = AdminGuard.Name(req.StudentName, Fields.StudentName);
+        var phone = PhoneNumber.TryNormalize(req.ContactPhone)
+                    ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم الواتساب مش صحيح.", "The WhatsApp number is not valid.");
+        var s = await db.Sessions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == sessionId, ct)
+                ?? throw new DomainException(AdminErrors.NotFound, "الجلسة مش موجودة.", "Session not found.");
+        var scope = $"📋 قايمة انتظار الدفعة الجاية: {s.ScopeTitleAr}";
+        if (await db.SessionRequests.AnyAsync(r => r.ContactPhoneE164 == phone && r.ScopeText == scope, ct))
+            return new CreateSessionRequestResponse("", lang.IsEnglish ? "You're already on the list." : "إنت على القايمة بالفعل.");
+        var entity = new SessionRequest
+        {
+            Reference = "RQ-" + AccessTokens.NewReference()[3..],
+            StudentName = name, ContactPhoneE164 = phone,
+            GradeId = s.GradeId, StudyTrackId = s.StudyTrackId, SubjectId = s.SubjectId, ServiceTypeId = s.ServiceTypeId,
+            ScopeText = scope, PreferredDays = "أي يوم", PreferredTimes = "أي وقت", Mode = SessionMode.Group,
+            Notes = $"waitlist:{sessionId}", CreatedAtUtc = clock.UtcNow, Language = lang.Code,
+        };
+        db.SessionRequests.Add(entity);
+        await db.SaveChangesAsync(ct);
+        return new CreateSessionRequestResponse(entity.Reference, lang.IsEnglish
+            ? "You're on the list. We'll message you on WhatsApp before anyone else when the next round opens."
+            : "تمام، إنت على القايمة. هنبعتلك على واتساب قبل أي حد أول ما الدفعة الجاية تفتح.");
+    }
+
     public async Task<IReadOnlyList<SessionRequestAdminDto>> ListAsync(string? status, CancellationToken ct)
     {
         var q = db.SessionRequests.AsNoTracking();

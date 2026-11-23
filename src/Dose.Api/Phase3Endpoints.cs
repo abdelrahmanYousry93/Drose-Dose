@@ -26,6 +26,13 @@ public static class Phase3Endpoints
                 return created;
             })
             .RequireRateLimiting(Endpoints.BookingRateLimit);
+        api.MapPost("/sessions/{id:guid}/waitlist", async (Guid id, WaitlistRequest req, SessionRequestService s, OwnerAlerts alerts, CancellationToken ct) =>
+            {
+                var created = await s.WaitlistAsync(id, req, ct);
+                if (created.Reference.Length > 0) await alerts.RequestCreatedAsync(created.Reference);
+                return created;
+            })
+            .RequireRateLimiting(Endpoints.BookingRateLimit);
 
         var b = api.MapGroup("/b/{token}").RequireRateLimiting(Endpoints.BookingRateLimit);
         b.MapPost("/top-up-choice", async (string token, TopUpChoiceRequest req, BookingService s, CancellationToken ct) =>

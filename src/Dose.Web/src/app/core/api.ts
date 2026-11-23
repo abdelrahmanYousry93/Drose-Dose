@@ -151,6 +151,9 @@ export class Api {
   }
   join(token: string) { return this.get<{ meetingUrl: string }>(`/b/${encodeURIComponent(token)}/join`); }
   /** Dose room: a short-lived LiveKit pass for this booking (student) or for the session's host (teacher / admin). */
+  joinWaitlist(sessionId: string, body: { studentName: string; contactPhone: string }) {
+    return this.post<{ reference: string; whatsAppMessage: string }>(`/sessions/${encodeURIComponent(sessionId)}/waitlist`, body);
+  }
   roomPass(token: string) { return this.get<RoomAccess>(`/b/${encodeURIComponent(token)}/room`); }
   roomHostPass(sessionId: string) { return this.get<RoomAccess>(`/room/${encodeURIComponent(sessionId)}/host`); }
   roomModerate(sessionId: string, body: { action: 'mute' | 'remove'; identity: string; trackSid?: string }) {

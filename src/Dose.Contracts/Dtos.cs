@@ -174,6 +174,7 @@ public sealed record CreateSessionRequest(
     IReadOnlyList<string> PreferredDays, IReadOnlyList<string> PreferredTimes, string Mode, Guid? PreferredTierId, string? Notes,
     int? GroupSize = null);
 public sealed record CreateSessionRequestResponse(string Reference, string WhatsAppMessage);
+public sealed record WaitlistRequest(string StudentName, string ContactPhone);
 
 // ---------- Teacher area ----------
 public sealed record TeacherMeDto(Guid TeacherId, string DisplayName, string Email);

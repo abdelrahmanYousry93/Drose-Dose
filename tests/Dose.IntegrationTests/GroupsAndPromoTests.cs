@@ -123,6 +123,17 @@ public sealed class GroupsAndPromoTests(DatabaseFixture fx)
             Assert.Equal("طالب 0", seat.StudentName);
             await Assert.ThrowsAsync<DomainException>(() => fx.Bookings(db, clock).RoomSeatAsync(tokens[1], "phone-c", default));
         }
+
+        // A full round: the waiting list keeps one entry per number for this session and shows up as a session request.
+        await using (var db = fx.NewDb())
+        {
+            var req = fx.Requests(db, clock);
+            var first = await req.WaitlistAsync(session.Id, new WaitlistRequest("طالب منتظر", NextPhone()), default);
+            Assert.StartsWith("RQ-", first.Reference);
+            var again = await db.SessionRequests.SingleAsync(r => r.Reference == first.Reference);
+            Assert.Equal($"waitlist:{session.Id}", again.Notes);
+            Assert.Equal("", (await req.WaitlistAsync(session.Id, new WaitlistRequest("طالب منتظر", again.ContactPhoneE164), default)).Reference);
+        }
     }
 
     [Fact]

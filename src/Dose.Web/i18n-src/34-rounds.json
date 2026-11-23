@@ -1,0 +1,34 @@
+{
+ "session.seatsOnly": [
+  "{cap} مقعد بس",
+  "Only {cap} seats"
+ ],
+ "session.seatsLeftOf": [
+  "باقي {left} من {cap} مقعد",
+  "{left} of {cap} seats left"
+ ],
+ "session.seatsFull": [
+  "المقاعد اكتملت",
+  "Seats are full"
+ ],
+ "wait.full": [
+  "المقاعد اكتملت",
+  "All seats are taken"
+ ],
+ "wait.text": [
+  "سيب اسمك ورقم واتسابك، وهنبعتلك قبل أي حد أول ما الدفعة الجاية تفتح.",
+  "Leave your name and WhatsApp number and we'll message you before anyone else when the next round opens."
+ ],
+ "wait.name": [
+  "اسمك",
+  "Your name"
+ ],
+ "wait.phone": [
+  "رقم الواتساب",
+  "WhatsApp number"
+ ],
+ "wait.join": [
+  "احجزلي مكان في الدفعة الجاية",
+  "Save me a spot in the next round"
+ ]
+}
