@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, computed, inject, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -8,6 +8,31 @@ import { Api, ApiError, RoomAccess } from '../../core/api';
 import { errorMessage } from '../../core/format';
 import { TranslatePipe, translate } from '../../core/i18n';
 
+/** One camera tile: attaches the LiveKit track to its own video element and detaches when it goes. */
+@Component({
+  selector: 'dose-tile',
+  template: `<video #v autoplay playsinline [muted]="true"></video><span class="tn">{{ name() }}</span>`,
+  styles: [`:host{position:relative;display:block;flex:none;width:168px;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#121d45;border:2px solid #23306a}
+    :host(.host){border-color:#FFC30A} video{width:100%;height:100%;object-fit:cover;display:block}
+    .tn{position:absolute;bottom:4px;inset-inline-start:6px;font-size:.75rem;background:rgba(0,0,0,.55);padding:1px 8px;border-radius:99px;max-width:90%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    @media (max-width:800px){:host{width:112px}}`],
+  host: { '[class.host]': 'host()' },
+})
+export class VideoTile {
+  readonly track = input.required<VideoTrack>();
+  readonly name = input('');
+  readonly host = input(false);
+  private readonly v = viewChild.required<ElementRef<HTMLVideoElement>>('v');
+  constructor() {
+    effect((onCleanup) => {
+      const t = this.track(); const el = this.v().nativeElement;
+      t.attach(el);
+      onCleanup(() => t.detach(el));
+    });
+  }
+}
+
+interface Tile { key: string; name: string; host: boolean; track: VideoTrack }
 interface Person { identity: string; name: string; host: boolean; me: boolean; micOn: boolean; micSid: string | null; hand: boolean; speaking: boolean }
 interface ChatLine { from: string; text: string; host: boolean; at: number }
 
@@ -18,7 +43,7 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
  */
 @Component({
   selector: 'dose-room',
-  imports: [FormsModule, RouterLink, TranslatePipe],
+  imports: [FormsModule, RouterLink, TranslatePipe, VideoTile],
   template: `
   <div class="room" [class.live]="state() === 'live'">
     @switch (state()) {
@@ -56,8 +81,12 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
             @if (!hasStage()) {
               <div class="empty">{{ (isHost() ? 'room.hostEmpty' : hostHere() ? 'room.teacherNoVideo' : 'room.waitTeacher') | t }}</div>
             }
-            <video #selfView autoplay playsinline muted class="self" [class.hidden]="!camOn()"></video>
           </section>
+          @if (tiles().length) {
+            <div class="strip">
+              @for (v of tiles(); track v.key) { <dose-tile [track]="v.track" [name]="v.name" [host]="v.host" /> }
+            </div>
+          }
           <aside class="side">
             <nav class="tabs">
               <button [class.on]="tab() === 'people'" (click)="tab.set('people')">{{ 'room.people' | t }} ({{ people().length }})</button>
@@ -90,8 +119,8 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
         </main>
         <footer class="controls">
           <button class="ctl" [class.on]="micOn()" (click)="toggleMic()">{{ micOn() ? '🎙️' : '🔇' }}<small>{{ (micOn() ? 'room.micOn' : 'room.micOff') | t }}</small></button>
+          <button class="ctl" [class.on]="camOn()" (click)="toggleCam()">📷<small>{{ (camOn() ? 'room.camOn' : 'room.camOff') | t }}</small></button>
           @if (isHost()) {
-            <button class="ctl" [class.on]="camOn()" (click)="toggleCam()">📷<small>{{ (camOn() ? 'room.camOn' : 'room.camOff') | t }}</small></button>
             <button class="ctl" [class.on]="screenOn()" (click)="toggleScreen()">🖥️<small>{{ (screenOn() ? 'room.stopShare' : 'room.share') | t }}</small></button>
           } @else {
             <button class="ctl" [class.on]="handUp()" (click)="toggleHand()">✋<small>{{ (handUp() ? 'room.handDown' : 'room.handUp') | t }}</small></button>
@@ -114,10 +143,11 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
     .bar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #1d2856}
     .ttl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ttl span{color:#9fb0e0}
     .warn{color:#FFC30A;font-weight:700}
-    .grid{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0}
+    .grid{flex:1;display:grid;grid-template-columns:1fr 320px;grid-template-rows:1fr auto;min-height:0}
+    .stage{grid-column:1;grid-row:1}.side{grid-column:2;grid-row:1/span 2}
+    .strip{grid-column:1;grid-row:2;display:flex;gap:8px;overflow-x:auto;padding:8px;background:#070d24}
     .stage{position:relative;background:#000;display:grid;place-items:center;min-height:240px}
-    .stage video{width:100%;height:100%;max-height:calc(100dvh - 150px);object-fit:contain}
-    .stage .self{position:absolute;bottom:12px;inset-inline-start:12px;width:150px;height:auto;border-radius:12px;border:2px solid #FFC30A;object-fit:cover}
+    .stage video{width:100%;height:100%;max-height:calc(100dvh - 290px);object-fit:contain}
     .empty{color:#9fb0e0;padding:20px;text-align:center}
     .side{border-inline-start:1px solid #1d2856;display:flex;flex-direction:column;min-height:0}
     .tabs{display:flex} .tabs button{flex:1;background:none;border:0;color:#9fb0e0;padding:10px;font:inherit;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
@@ -135,7 +165,7 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
     .ctl small{font-size:.72rem;color:#c9d3f5} .ctl.on{border-color:#FFC30A;background:#1d2a62} .ctl.leave{background:#7a1f2a;border-color:#7a1f2a}
     .toast{position:fixed;bottom:90px;inset-inline:0;margin:auto;width:max-content;max-width:90vw;background:#FFC30A;color:#0B1F6B;font-weight:700;border-radius:12px;padding:8px 16px}
     .hidden{display:none!important}
-    @media (max-width:800px){.grid{grid-template-columns:1fr;grid-template-rows:auto 1fr}.side{border-inline-start:0;border-top:1px solid #1d2856;max-height:45dvh}.stage video{max-height:40dvh}.stage .self{width:96px}}
+    @media (max-width:800px){.grid{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}.stage{grid-row:1}.strip{grid-row:2}.side{grid-column:1;grid-row:3;border-inline-start:0;border-top:1px solid #1d2856;max-height:45dvh}.stage video{max-height:40dvh}}
   `],
 })
 export class RoomPage implements OnDestroy {
@@ -149,6 +179,7 @@ export class RoomPage implements OnDestroy {
   protected readonly error = signal('');
   protected readonly busy = signal(false);
   protected readonly people = signal<Person[]>([]);
+  protected readonly tiles = signal<Tile[]>([]);
   protected readonly chat = signal<ChatLine[]>([]);
   protected readonly unread = signal(0);
   protected readonly tab = signal<'people' | 'chat'>('people');
@@ -167,7 +198,6 @@ export class RoomPage implements OnDestroy {
   protected draft = '';
 
   private readonly stageEl = viewChild<ElementRef<HTMLVideoElement>>('stage');
-  private readonly selfEl = viewChild<ElementRef<HTMLVideoElement>>('selfView');
   private readonly audioEl = viewChild<ElementRef<HTMLDivElement>>('audio');
   private room: Room | null = null;
   private stageTrack: VideoTrack | null = null;
@@ -228,6 +258,7 @@ export class RoomPage implements OnDestroy {
 
   private onDisconnected(reason?: DisconnectReason) {
     this.detachStage();
+    this.tiles.set([]);
     this.room = null;
     this.micOn.set(false); this.camOn.set(false); this.screenOn.set(false); this.handUp.set(false);
     if (this.state() !== 'live') return;
@@ -269,9 +300,19 @@ export class RoomPage implements OnDestroy {
       if (best && el) { best.attach(el); this.stageTrack = best; }
     }
     this.hasStage.set(!!this.stageTrack);
-    const mine = room.localParticipant.getTrackPublication(Track.Source.Camera)?.videoTrack;
-    const self = this.selfEl()?.nativeElement;
-    if (mine && self && !mine.attachedElements.includes(self)) mine.attach(self);
+
+    // Cameras always stay visible (teacher and students see each other), except the one already on the stage.
+    const tiles: Tile[] = [];
+    for (const p of all) {
+      const cam = p.getTrackPublication(Track.Source.Camera);
+      const t = cam?.videoTrack;
+      if (!t || cam.isMuted || t === this.stageTrack) continue;
+      const me = p === room.localParticipant;
+      tiles.push({ key: `${p.identity}:${t.sid ?? 'local'}`, name: me ? translate('room.you') : (p.name || p.identity), host: this.roleOf(p) === 'host', track: t });
+    }
+    tiles.sort((a, b) => Number(b.host) - Number(a.host));
+    const prev = this.tiles();
+    if (prev.length !== tiles.length || prev.some((x, i) => x.key !== tiles[i].key || x.track !== tiles[i].track)) this.tiles.set(tiles);
   }
 
   private detachStage() { if (this.stageTrack) { this.stageTrack.detach(); this.stageTrack = null; } }

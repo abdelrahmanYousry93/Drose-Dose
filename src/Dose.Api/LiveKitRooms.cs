@@ -16,7 +16,7 @@ namespace Dose.Api;
 /// Dose's own video room on LiveKit Cloud. Reads LIVEKIT_URL / LIVEKIT_API_KEY / LIVEKIT_API_SECRET (set on the server only;
 /// the secret never reaches a browser). Issues short-lived room passes (HS256 JWT, the LiveKit access-token format) and calls
 /// LiveKit's RoomService for host actions (mute a student, remove someone).
-/// Students: one participant per booking (a second device with the same link replaces the first), microphone only.
+/// Students: one participant per booking (a second device with the same link replaces the first), camera and microphone.
 /// Teacher / admin: host — camera, screen share, room admin.
 /// </summary>
 public sealed class LiveKitRooms(IConfiguration config, IHttpClientFactory http)
@@ -38,7 +38,7 @@ public sealed class LiveKitRooms(IConfiguration config, IHttpClientFactory http)
         var video = new Dictionary<string, object>
         {
             ["room"] = room, ["roomJoin"] = true, ["canSubscribe"] = true, ["canPublish"] = true, ["canPublishData"] = true,
-            ["canPublishSources"] = host ? new[] { "camera", "microphone", "screen_share", "screen_share_audio" } : new[] { "microphone" },
+            ["canPublishSources"] = host ? new[] { "camera", "microphone", "screen_share", "screen_share_audio" } : new[] { "camera", "microphone" },
         };
         if (host) video["roomAdmin"] = true;
         var claims = new Dictionary<string, object>

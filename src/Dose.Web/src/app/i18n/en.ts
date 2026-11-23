@@ -1013,7 +1013,7 @@ export const en: typeof ar = {
     "share": "Share screen",
     "shareFailed": "Screen sharing didn't start. Try Chrome on a computer.",
     "stopShare": "Stop sharing",
-    "studentHint": "You'll join with your mic off. Raise your hand ✋ to ask, or use the chat.",
+    "studentHint": "You'll join with mic and camera off. Turn them on when you like, and raise your hand ✋ to ask.",
     "teacher": "teacher",
     "teacherNoVideo": "The teacher is here and hasn't shared yet.",
     "waitTeacher": "The teacher hasn't joined yet. Stay here; the session starts when they arrive.",

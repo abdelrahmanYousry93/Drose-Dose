@@ -20,8 +20,8 @@
   "with"
  ],
  "room.studentHint": [
-  "هتدخل والميكروفون مقفول. ارفع إيدك ✋ لو عايز تسأل، أو اكتب في الشات.",
-  "You'll join with your mic off. Raise your hand ✋ to ask, or use the chat."
+  "هتدخل والميك والكاميرا مقفولين. افتحهم وقت ما تحب، وارفع إيدك ✋ لو عايز تسأل.",
+  "You'll join with mic and camera off. Turn them on when you like, and raise your hand ✋ to ask."
  ],
  "room.hostHint": [
   "إنت مدير الجلسة: تقدر تشارك الشاشة والكاميرا، وتكتم أو تطلّع أي طالب.",
