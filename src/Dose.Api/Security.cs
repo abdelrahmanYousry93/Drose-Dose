@@ -16,11 +16,11 @@ public static class Security
     /// Content Security Policy for the Angular app served from the same origin. Styles allow 'unsafe-inline' because
     /// Angular component styles are injected at runtime; scripts are same-origin only (no inline scripts are built).
     /// Images allow https: for teacher photo URLs entered by admins. The Meta and TikTok pixels (ad measurement) load
-    /// their scripts from their own CDNs and report to their endpoints.
+    /// their scripts from their own CDNs and report to their endpoints. The Dose room talks to LiveKit Cloud (*.livekit.cloud).
     /// </summary>
     public const string ContentSecurityPolicy =
         "default-src 'self'; script-src 'self' https://connect.facebook.net https://analytics.tiktok.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; " +
-        "font-src 'self'; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.tiktokw.us https://*.tiktok.com; manifest-src 'self'; worker-src 'self'; frame-src 'none'; " +
+        "font-src 'self'; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.tiktokw.us https://*.tiktok.com wss://*.livekit.cloud https://*.livekit.cloud; media-src 'self' blob:; manifest-src 'self'; worker-src 'self'; frame-src 'none'; " +
         "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'";
 
     public static void AddDoseSecurity(this WebApplicationBuilder builder)
@@ -76,7 +76,8 @@ public static class Security
             headers.XContentTypeOptions = "nosniff";
             headers["Referrer-Policy"] = "no-referrer";
             headers.XFrameOptions = "DENY";
-            headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=()";
+            // Camera, microphone and screen sharing only for the site itself (the Dose video room).
+            headers["Permissions-Policy"] = "camera=(self), microphone=(self), display-capture=(self), geolocation=(), payment=(), usb=()";
             headers["Cross-Origin-Opener-Policy"] = "same-origin";
             headers.ContentSecurityPolicy = ContentSecurityPolicy;
 
