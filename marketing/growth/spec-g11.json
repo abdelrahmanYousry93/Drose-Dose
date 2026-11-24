@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g13-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>طالب ثانوي ولا إعدادي؟</div><div class='h1' style='font-size:92px'>لو إنت <span class='yellow'>المدرس</span>…<br/>هتجيب إيه<br/>في الامتحان؟</div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='h1' style='font-size:76px;margin-top:30px'>بعد كل درس<br/>اكتب <span class='accent'>٣ أسئلة</span></div><div class='lead muted' style='margin-top:20px'>زي ما المدرس<br/>هيسألها بالظبط</div>" },
+        { "bg": "light", "body": "<div class='num'>٢</div><div class='h1' style='font-size:76px;margin-top:30px'>تاني يوم جاوبهم<br/><span class='accent'>من غير كتاب</span></div><div class='lead muted' style='margin-top:20px'>السؤال اللي وقفت فيه<br/>هو اللي تراجعه</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٣</div><div class='h1' style='font-size:80px;margin-top:30px'>بدّل الأسئلة<br/><span class='yellow'>مع صاحبك</span></div><div class='lead' style='margin-top:20px'>هو يمتحنك… وإنت تمتحنه</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه 📌 وابعته<br/>لصاحبك اللي هتبدّل معاه</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
