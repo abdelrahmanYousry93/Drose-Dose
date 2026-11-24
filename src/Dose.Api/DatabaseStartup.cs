@@ -102,6 +102,7 @@ public sealed class DatabaseStartup(
             await ChemReviewNov2026.CancelUnbookedAsync(db, DateTime.UtcNow, ct);
             await TestRoomNov2026.EnsureAsync(db, DateTime.UtcNow, ct);
             await ProgCohortsDec2026.EnsureAsync(db, DateTime.UtcNow, ct);
+            await ProgCohortsDec2026.TenSeatsAsync(db, DateTime.UtcNow, ct);
         }
     }
 

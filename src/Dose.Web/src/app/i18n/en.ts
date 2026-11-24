@@ -1030,7 +1030,7 @@ export const en: typeof ar = {
     "seatsFull": "Seats are full",
     "seatsLeftOf": "{left} of {cap} seats left",
     "seatsLine": "{n} of {cap} students · {left} left",
-    "seatsOnly": "Only {cap} seats"
+    "seatsOnly": "Limited: only {cap} seats"
   },
   "sessions": {
     "all": "All",
@@ -1300,10 +1300,10 @@ export const en: typeof ar = {
   },
   "wait": {
     "full": "All seats are taken",
-    "join": "Save me a spot in the next round",
+    "join": "Save me a spot in the next session",
     "name": "Your name",
     "phone": "WhatsApp number",
-    "text": "Leave your name and WhatsApp number and we'll message you before anyone else when the next round opens."
+    "text": "Leave your name and WhatsApp number and we'll message you before anyone else when the next session opens."
   },
   "wall": {
     "empty": "The first organization to pledge will be the first name here",

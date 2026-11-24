@@ -46,6 +46,27 @@ public static class ProgCohortsDec2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Owner's change (24 Nov): 10 seats only, free for those 10, and no "round" wording (people don't get it).
+    /// Applied once, only while no more than 10 have booked.
+    /// </summary>
+    public static async Task TenSeatsAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
+    {
+        const string marker = "ProgCohort/1/ten-seats";
+        if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == marker, ct)) return;
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == Round1Id, ct);
+        if (s is null) return;
+        BookingStatus[] dead = [BookingStatus.Cancelled, BookingStatus.Expired, BookingStatus.Refunded];
+        if (await db.Bookings.CountAsync(b => b.SessionId == Round1Id && !dead.Contains(b.Status), ct) > 10) return;
+        s.Capacity = 10;
+        s.ScopeTitleAr = "تطبيقات الويب: الموقع بيشتغل إزاي؟ (Client / Server / HTTP)";
+        s.ScopeTitleEn = "Web applications: how a website works (Client / Server / HTTP)";
+        var promo = await db.PromoCodes.FirstOrDefaultAsync(p => p.Code == Round1Code, ct);
+        if (promo is not null) { promo.MaxTotalUses = 10; promo.Description = "حصة البرمجة 28 نوفمبر — ببلاش لأول 10"; }
+        db.AuditLogs.Add(new AuditLog { Actor = "owner", Entity = "Campaign", EntityId = marker, Action = "10 seats", AtUtc = nowUtc });
+        await db.SaveChangesAsync(ct);
+    }
+
     static DateTime CairoToUtc(DateTime local)
     {
         try { return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo")); }

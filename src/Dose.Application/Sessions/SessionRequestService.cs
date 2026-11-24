@@ -86,7 +86,7 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
     }
 
     /// <summary>
-    /// A full (or closed) session: the student leaves a name and WhatsApp number to be told first when the next round opens.
+    /// A full (or closed) session: the student leaves a name and WhatsApp number to be told first when the next session opens.
     /// Stored as a session request (scope marked as waitlist) so it shows in the admin requests list.
     /// </summary>
     public async Task<CreateSessionRequestResponse> WaitlistAsync(Guid sessionId, WaitlistRequest req, CancellationToken ct)
@@ -96,7 +96,7 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
                     ?? throw new DomainException(BookingErrors.InvalidPhone, "رقم الواتساب مش صحيح.", "The WhatsApp number is not valid.");
         var s = await db.Sessions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == sessionId, ct)
                 ?? throw new DomainException(AdminErrors.NotFound, "الجلسة مش موجودة.", "Session not found.");
-        var scope = $"📋 قايمة انتظار الدفعة الجاية: {s.ScopeTitleAr}";
+        var scope = $"📋 قايمة انتظار الحصة الجاية: {s.ScopeTitleAr}";
         if (await db.SessionRequests.AnyAsync(r => r.ContactPhoneE164 == phone && r.ScopeText == scope, ct))
             return new CreateSessionRequestResponse("", lang.IsEnglish ? "You're already on the list." : "إنت على القايمة بالفعل.");
         var entity = new SessionRequest
@@ -110,8 +110,8 @@ public sealed class SessionRequestService(IDoseDbContext db, IClock clock, IRequ
         db.SessionRequests.Add(entity);
         await db.SaveChangesAsync(ct);
         return new CreateSessionRequestResponse(entity.Reference, lang.IsEnglish
-            ? "You're on the list. We'll message you on WhatsApp before anyone else when the next round opens."
-            : "تمام، إنت على القايمة. هنبعتلك على واتساب قبل أي حد أول ما الدفعة الجاية تفتح.");
+            ? "You're on the list. We'll message you on WhatsApp before anyone else when the next session opens."
+            : "تمام، إنت على القايمة. هنبعتلك على واتساب قبل أي حد أول ما الحصة الجاية تفتح.");
     }
 
     public async Task<IReadOnlyList<SessionRequestAdminDto>> ListAsync(string? status, CancellationToken ct)
