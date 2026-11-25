@@ -231,12 +231,17 @@ export class AdminSessions {
     try { this.bookings.set(await this.api.sessionBookings(s.id)); } catch (e) { this.error.set(errorMessage(e)); }
   }
 
+  /** Booking awaiting a second click: native confirm() dialogs are silently blocked in some embedded browsers. */
+  protected readonly confirmLink = signal<string | null>(null);
+
   protected async sendLink(b: SessionBookingA) {
-    if (!confirm(tr('sessionsAdmin.reissueConfirm', { ref: b.reference }))) return;
+    if (this.confirmLink() !== b.id) { this.confirmLink.set(b.id); return; }
+    this.confirmLink.set(null);
     try {
       const r = await this.api.reissueLink(b.id);
       const url = `${window.location.origin}/b/${r.accessToken}`;
       this.link.set({ ...r, url, full: `${r.message}\n${url}` });
+      setTimeout(() => document.querySelector('.link-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 

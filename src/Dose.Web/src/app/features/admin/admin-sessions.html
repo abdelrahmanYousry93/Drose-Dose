@@ -169,7 +169,8 @@
               <span class="small">{{ b.studentName ?? '—' }} · <span dir="ltr">{{ b.contactPhone ?? '' }}</span>
                 @if (b.guardianPhone) { · {{ 'admin.guardian' | t }} <span dir="ltr">{{ b.guardianPhone }}</span> }</span>
               @if (b.contactPhone) {
-                <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="sendLink(b)">{{ 'sessionsAdmin.sendLink' | t }}</button>
+                <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="sendLink(b)">{{ (confirmLink() === b.id ? 'sessionsAdmin.sendLinkSure' : 'sessionsAdmin.sendLink') | t }}</button>
+                @if (confirmLink() === b.id) { <p class="small">{{ 'sessionsAdmin.reissueConfirm' | t: { ref: b.reference } }}</p> }
               }
             </div>
           }

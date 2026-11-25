@@ -1100,6 +1100,7 @@ export const en: typeof ar = {
     "saved": "Session saved ✓",
     "savedPublished": "Session saved and published to students ✓",
     "sendLink": "Send booking link",
+    "sendLinkSure": "✅ Click again to get the link",
     "showPast": "Show past",
     "time": "Time (Cairo time)",
     "title": "Session title (shown to students)",

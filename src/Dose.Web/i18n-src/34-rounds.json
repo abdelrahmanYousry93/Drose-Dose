@@ -34,5 +34,9 @@
  "details.seats": [
   "المقاعد",
   "Seats"
+ ],
+ "sessionsAdmin.sendLinkSure": [
+  "✅ دوس تاني علشان يطلع اللينك",
+  "✅ Click again to get the link"
  ]
 }
