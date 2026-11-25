@@ -33,9 +33,9 @@ import { TeacherCard } from '../../shared/teacher-card';
         @if (offer(); as o) {
           @if (o.kind === 'Percent' && o.value >= 100 && (o.remaining ?? 1) > 0) {
             <div class="offer">
-              <div class="big">🎁 {{ (o.total ? 'offer.freeFirst' : 'offer.free') | t: { n: o.total ?? 0 } }}</div>
+              <div class="big">🎁 {{ (o.total ? (o.total <= 10 ? 'offer.freeFirstFew' : 'offer.freeFirst') : 'offer.free') | t: { n: o.total ?? 0 } }}</div>
               @if (o.remaining != null && o.total && o.remaining <= o.total / 2) { <div class="left">🔥 <b>{{ o.remaining }}</b> {{ 'offer.left' | t }}</div> }
-              <div class="how">{{ 'offer.how' | t }} <span class="code" dir="ltr">{{ o.code }}</span> · {{ 'offer.after' | t: { price: money(s.pricePerStudent, s.currency) } }}</div>
+              <div class="how">{{ 'offer.how' | t }} <span class="code" dir="ltr">{{ o.code }}</span>@if (!o.total || o.total < s.capacity) { · {{ 'offer.after' | t: { price: money(s.pricePerStudent, s.currency) } }} }</div>
               @if (d()!.isOpenForBooking) {
                 <button class="dose-btn dose-btn--primary btn-block big-book" (click)="book()" [disabled]="booking()">{{ (booking() ? 'details.booking' : 'offer.bookFree') | t }}</button>
                 <div class="steps">{{ 'offer.steps' | t }}</div>
@@ -59,12 +59,14 @@ import { TeacherCard } from '../../shared/teacher-card';
               @if (s.confirmedCount >= 5) {
                 <li><span>{{ 'details.booked' | t }}</span><span>{{ 'details.bookedOf' | t: { n: s.confirmedCount, cap: s.capacity } }}</span></li>
               }
-              <li><span>{{ 'details.seatsLeft' | t }}</span><span>{{ s.remainingSeats }}</span></li>
+              <!-- Honest scarcity: the real number once half are taken, until then just the cap. -->
+              @if (s.confirmedCount * 2 >= s.capacity) { <li><span>{{ 'details.seatsLeft' | t }}</span><span>🔥 {{ s.remainingSeats }}</span></li> }
+              @else { <li><span>{{ 'details.seats' | t }}</span><span>{{ 'session.seatsOnly' | t: { cap: s.capacity } }}</span></li> }
             }
             <li><span>{{ 'details.deadline' | t }}</span><span>{{ dateTime(s.bookingDeadlineUtc) }}</span></li>
-            <li><span>{{ 'details.price' | t }}</span><span class="price">{{ money(s.pricePerStudent, s.currency) }}</span></li>
+            <li><span>{{ 'details.price' | t }}</span>@if (free()) { <span class="price">{{ 'offer.freeInstead' | t: { price: money(s.pricePerStudent, s.currency) } }}</span> } @else { <span class="price">{{ money(s.pricePerStudent, s.currency) }}</span> }</li>
           </ul>
-          @if (d()!.scopeDetails) { <p class="muted small" dir="auto">{{ d()!.scopeDetails }}</p> }
+          @if (d()!.scopeDetails) { <p class="learn" dir="rtl">{{ d()!.scopeDetails }}</p> }
         </div>
 
         @if (d()!.groupTerms; as g) {
@@ -134,6 +136,7 @@ import { TeacherCard } from '../../shared/teacher-card';
       .sticky-book { display: block; position: fixed; inset-inline: 0; bottom: 0; z-index: 30; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(255 255 255 / .96); box-shadow: 0 -6px 20px rgb(11 31 107 / .12); }
       :host { display: block; padding-bottom: 76px; }
     }
+    .learn { background: var(--dose-primary-50); border-radius: 12px; padding: 12px 14px; line-height: 1.8; font-weight: 600; margin-top: 10px; }
     .wait { background: var(--dose-primary-50); border-radius: var(--dose-radius); padding: 16px; display: grid; gap: 8px; text-align: center; }
     .wait h3 { margin: 0; } .wait form { display: grid; gap: 8px; } .wait input { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--dose-border, #d6dbe8); font: inherit; } .wait .ok { font-weight: 800; color: #1d7a47; }
     .offer.gone { background: #f3f4f7; color: var(--dose-text-muted); box-shadow: none; }

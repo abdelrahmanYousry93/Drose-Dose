@@ -1,9 +1,38 @@
 {
- "offer.freeFirst": ["ببلاش لأول {n} طالب", "Free for the first {n} students"],
- "offer.free": ["الجلسة دي ببلاش بالكود", "This session is free with the code"],
- "offer.left": ["مكان مجاني فاضل", "free places left"],
- "offer.how": ["احجز والكود هيتطبق لوحده:", "Book and the code is applied for you:"],
- "offer.after": ["بعدهم {price}", "then {price}"],
- "offer.discount": ["خصم {v} على الجلسة دي بالكود", "{v} off this session with the code"],
- "offer.gone": ["الـ {n} مكان المجانيين خلصوا — لسه تقدر تحجز بالسعر العادي.", "The {n} free places are gone — you can still book at the regular price."]
+ "offer.freeFirst": [
+  "ببلاش لأول {n} طالب",
+  "Free for the first {n} students"
+ ],
+ "offer.free": [
+  "الجلسة دي ببلاش بالكود",
+  "This session is free with the code"
+ ],
+ "offer.left": [
+  "مكان مجاني فاضل",
+  "free places left"
+ ],
+ "offer.how": [
+  "احجز والكود هيتطبق لوحده:",
+  "Book and the code is applied for you:"
+ ],
+ "offer.after": [
+  "بعدهم {price}",
+  "then {price}"
+ ],
+ "offer.discount": [
+  "خصم {v} على الجلسة دي بالكود",
+  "{v} off this session with the code"
+ ],
+ "offer.gone": [
+  "الـ {n} مكان المجانيين خلصوا — لسه تقدر تحجز بالسعر العادي.",
+  "The {n} free places are gone — you can still book at the regular price."
+ ],
+ "offer.freeFirstFew": [
+  "ببلاش لأول {n} طلاب بس",
+  "Free for the first {n} students only"
+ ],
+ "offer.freeInstead": [
+  "ببلاش (بدل {price})",
+  "Free (instead of {price})"
+ ]
 }

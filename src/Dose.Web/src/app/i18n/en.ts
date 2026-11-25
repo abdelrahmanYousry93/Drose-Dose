@@ -263,6 +263,7 @@ export const en: typeof ar = {
     "pay4": "The session link appears on your private booking page before it starts.",
     "payCancel": "Payment & cancellation",
     "price": "Price per student",
+    "seats": "Seats",
     "seatsLeft": "Seats left",
     "when": "When"
   },
@@ -646,6 +647,8 @@ export const en: typeof ar = {
     "discount": "{v} off this session with the code",
     "free": "This session is free with the code",
     "freeFirst": "Free for the first {n} students",
+    "freeFirstFew": "Free for the first {n} students only",
+    "freeInstead": "Free (instead of {price})",
     "gone": "The {n} free places are gone — you can still book at the regular price.",
     "how": "Book and the code is applied for you:",
     "left": "free places left",

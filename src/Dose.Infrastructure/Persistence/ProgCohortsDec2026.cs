@@ -67,6 +67,26 @@ public static class ProgCohortsDec2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Page fixes (25 Nov): a title without Latin in parentheses (it broke right-to-left), and what the student will
+    /// leave with spelled out on the page. Runs once.
+    /// </summary>
+    public static async Task PageTextAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
+    {
+        const string marker = "ProgCohort/1/page-text";
+        if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == marker, ct)) return;
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == Round1Id, ct);
+        if (s is null) return;
+        s.ScopeTitleAr = "تطبيقات الويب: الموقع بيشتغل إزاي؟";
+        s.ScopeTitleEn = "Web applications: how a website works";
+        s.ScopeDetailsAr = "هتخرج من الحصة فاهم: يعني إيه Client و Server · رحلة الـ Request والـ Response · الـ HTTP ويعني إيه GET و POST · الـ API بتربط الموقع بالسيرفر إزاي. "
+            + "الشرح على الكود قدامك، وفي آخر الحصة سؤال امتحان تحلّه. أونلاين على موقع دروس Dose من الموبايل أو اللابتوب، والميكروفون مقفول إلا لما تحب تسأل.";
+        s.ScopeDetailsEn = "You'll leave understanding: Client and Server · the Request/Response trip · HTTP, GET and POST · how an API links a site to its server. "
+            + "Explained on real code, with an exam question at the end. Online on the Dose site from phone or laptop; your mic stays off unless you want to ask.";
+        db.AuditLogs.Add(new AuditLog { Actor = "owner", Entity = "Campaign", EntityId = marker, Action = "page text", AtUtc = nowUtc });
+        await db.SaveChangesAsync(ct);
+    }
+
     static DateTime CairoToUtc(DateTime local)
     {
         try { return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo")); }

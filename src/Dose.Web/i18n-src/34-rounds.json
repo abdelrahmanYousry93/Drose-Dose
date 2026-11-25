@@ -30,5 +30,9 @@
  "wait.join": [
   "احجزلي مكان في الحصة الجاية",
   "Save me a spot in the next session"
+ ],
+ "details.seats": [
+  "المقاعد",
+  "Seats"
  ]
 }
