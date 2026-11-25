@@ -91,7 +91,7 @@ export interface Dashboard {
   groupsNearDecision: DashSession[]; periodDays: number; periodConfirmedBookings: number; periodCollected: number;
   periodRefunded: number; currency: string; pendingMessages: number;
 }
-export interface UserA { id: string; email: string; roles: string[]; isDisabled: boolean; teacherId: string | null; teacherNameAr: string | null }
+export interface UserA { id: string; email: string; roles: string[]; isDisabled: boolean; teacherId: string | null; teacherNameAr: string | null; areas: string[] }
 export interface AvailabilityA {
   id: string; teacherId: string; teacherNameAr: string; startUtc: string; endUtc: string; note: string | null; status: string;
   reviewNote: string | null; createdAtUtc: string;
@@ -185,10 +185,11 @@ export class AdminApi {
   // Dashboard, users, availability
   dashboard(days = 30) { return this.get<Dashboard>('/dashboard', { days: String(days) }); }
   users() { return this.get<UserA[]>('/users'); }
-  createUser(email: string, password: string, role: string, teacherId: string | null) {
-    return this.post<{ id: string }>('/users', { email, password, role, teacherId });
+  createUser(email: string, password: string, role: string, teacherId: string | null, areas: string[] | null = null) {
+    return this.post<{ id: string }>('/users', { email, password, role, teacherId, areas });
   }
   resetPassword(id: string, password: string) { return this.post<void>(`/users/${id}/password`, { password }); }
+  setAreas(id: string, areas: string[]) { return this.post<void>(`/users/${id}/areas`, { areas }); }
   setDisabled(id: string, disabled: boolean) { return this.post<void>(`/users/${id}/disabled`, { disabled }); }
   linkTeacher(id: string, teacherId: string | null) { return this.post<void>(`/users/${id}/teacher`, { teacherId }); }
   availability(status: string | null) { return this.get<AvailabilityA[]>('/availability', { status }); }

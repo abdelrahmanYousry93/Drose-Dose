@@ -38,5 +38,29 @@
  "sessionsAdmin.sendLinkSure": [
   "✅ دوس تاني علشان يطلع اللينك",
   "✅ Click again to get the link"
+ ],
+ "users.roleStaff": [
+  "فريق العمل (صلاحيات محددة)",
+  "Staff (chosen pages)"
+ ],
+ "users.areas": [
+  "الصفحات اللي يقدر يفتحها",
+  "Pages this account can open"
+ ],
+ "users.areasSaved": [
+  "الصلاحيات اتحفظت، وبتشتغل على طول.",
+  "Permissions saved; they apply right away."
+ ],
+ "users.savePassword": [
+  "احفظ كلمة السر",
+  "Save password"
+ ],
+ "users.cancel": [
+  "إلغاء",
+  "Cancel"
+ ],
+ "users.disableSure": [
+  "⚠️ دوس تاني علشان توقف الحساب",
+  "⚠️ Click again to disable"
  ]
 }

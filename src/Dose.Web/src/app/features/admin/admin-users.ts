@@ -4,6 +4,7 @@ import { AdminApi, AvailabilityA, TeacherA, UserA } from '../../core/admin-api';
 import { errorMessage, fmtDate, fmtDateTime, fmtTime } from '../../core/format';
 import { TranslatePipe, translate as tr } from '../../core/i18n';
 import { optName } from './entity-editor';
+import { ADMIN_AREAS } from './admin';
 
 /** Admin and teacher accounts. Students never have accounts. */
 @Component({
@@ -23,7 +24,7 @@ import { optName } from './entity-editor';
           <label class="field"><span>{{ 'users.tempPassword' | t }}</span><input name="password" type="text" [(ngModel)]="password" dir="ltr" autocomplete="new-password" />
             <span class="hint">{{ 'users.passwordHint' | t }}</span></label>
           <label class="field"><span>{{ 'users.role' | t }}</span>
-            <select name="role" [(ngModel)]="role"><option value="Teacher">{{ 'users.roleTeacher' | t }}</option><option value="Admin">{{ 'users.roleAdmin' | t }}</option></select></label>
+            <select name="role" [(ngModel)]="role"><option value="Teacher">{{ 'users.roleTeacher' | t }}</option><option value="Staff">{{ 'users.roleStaff' | t }}</option><option value="Admin">{{ 'users.roleAdmin' | t }}</option></select></label>
           @if (role === 'Teacher') {
             <label class="field"><span>{{ 'users.teacherProfile' | t }}</span>
               <select name="teacher" [(ngModel)]="teacherId">
@@ -32,6 +33,13 @@ import { optName } from './entity-editor';
               </select></label>
           }
         </div>
+        @if (role === 'Staff') {
+          <fieldset class="areas"><legend>{{ 'users.areas' | t }}</legend>
+            @for (a of allAreas; track a) {
+              <label><input type="checkbox" [checked]="newAreas.has(a)" (change)="flip(newAreas, a)" /> {{ areaName(a) }}</label>
+            }
+          </fieldset>
+        }
         <button class="dose-btn dose-btn--primary" type="submit">{{ 'users.create' | t }}</button>
       </form>
 
@@ -39,7 +47,7 @@ import { optName } from './entity-editor';
         <article class="dose-card item" [class.off]="u.isDisabled">
           <div class="row">
             <strong dir="ltr">{{ u.email }}</strong>
-            @for (r of u.roles; track r) { <span class="badge">{{ (r === 'Admin' ? 'users.roleAdmin' : 'users.roleTeacher') | t }}</span> }
+            @for (r of u.roles; track r) { <span class="badge">{{ (r === 'Admin' ? 'users.roleAdmin' : r === 'Staff' ? 'users.roleStaff' : 'users.roleTeacher') | t }}</span> }
             @if (u.isDisabled) { <span class="badge badge--gray">{{ 'editor.inactive' | t }}</span> }
           </div>
           @if (u.roles.includes('Teacher')) {
@@ -50,9 +58,23 @@ import { optName } from './entity-editor';
               </select>
             </label>
           }
+          @if (u.roles.includes('Staff')) {
+            <fieldset class="areas"><legend>{{ 'users.areas' | t }}</legend>
+              @for (a of allAreas; track a) {
+                <label><input type="checkbox" [checked]="u.areas.includes(a)" (change)="toggleArea(u, a)" /> {{ areaName(a) }}</label>
+              }
+            </fieldset>
+          }
+          @if (resetFor() === u.id) {
+            <div class="inline">
+              <input type="text" dir="ltr" autocomplete="new-password" [(ngModel)]="newPass" [attr.aria-label]="'users.newPassword' | t" [placeholder]="'users.tempPassword' | t" />
+              <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="reset(u)">{{ 'users.savePassword' | t }}</button>
+              <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="resetFor.set(null)">{{ 'users.cancel' | t }}</button>
+            </div>
+          }
           <div class="actions">
-            <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="reset(u)">{{ 'users.newPassword' | t }}</button>
-            <button type="button" class="dose-btn small-btn" [class.danger]="!u.isDisabled" (click)="toggle(u)">{{ (u.isDisabled ? 'users.enable' : 'users.disable') | t }}</button>
+            <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="resetFor.set(u.id); newPass = ''">{{ 'users.newPassword' | t }}</button>
+            <button type="button" class="dose-btn small-btn" [class.danger]="!u.isDisabled" (click)="toggle(u)">{{ (disableFor() === u.id ? 'users.disableSure' : u.isDisabled ? 'users.enable' : 'users.disable') | t }}</button>
           </div>
         </article>
       }
@@ -71,6 +93,10 @@ import { optName } from './entity-editor';
     .actions { display: flex; gap: 8px; }
     .small-btn { min-height: 38px; padding: 0 12px; font-size: 0.88rem; }
     .danger { background: #fdecea; color: #a52714; }
+    .areas { border: 1px solid var(--dose-border); border-radius: 8px; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    .areas legend { font-size: 0.9rem; color: var(--dose-navy); padding: 0 4px; }
+    .areas label { display: flex; gap: 6px; align-items: center; font-size: 0.9rem; }
+    .inline input { min-height: 38px; padding: 0 8px; border: 1px solid var(--dose-border); border-radius: 8px; font: inherit; }
   `,
 })
 export class AdminUsers {
@@ -84,8 +110,20 @@ export class AdminUsers {
   protected password = '';
   protected role = 'Teacher';
   protected teacherId: string | null = null;
+  protected readonly allAreas = [...ADMIN_AREAS];
+  protected newAreas = new Set<string>(ADMIN_AREAS);
+  protected newPass = '';
+  protected readonly resetFor = signal<string | null>(null);
+  protected readonly disableFor = signal<string | null>(null);
 
   constructor() { void this.load(); }
+
+  protected areaName(a: string) { return tr('adminNav.' + a.replace(/-([a-z])/g, (_m, c: string) => c.toUpperCase())); }
+  protected flip(set: Set<string>, a: string) { if (set.has(a)) set.delete(a); else set.add(a); }
+  protected toggleArea(u: UserA, a: string) {
+    const next = u.areas.includes(a) ? u.areas.filter((x) => x !== a) : [...u.areas, a];
+    void this.run(() => this.api.setAreas(u.id, next), tr('users.areasSaved'));
+  }
 
   protected freeTeachers() {
     const linked = new Set(this.users().map((u) => u.teacherId).filter(Boolean));
@@ -108,18 +146,23 @@ export class AdminUsers {
 
   protected create() {
     return this.run(async () => {
-      await this.api.createUser(this.email, this.password, this.role, this.role === 'Teacher' ? this.teacherId : null);
-      this.email = ''; this.password = ''; this.teacherId = null;
+      await this.api.createUser(this.email, this.password, this.role, this.role === 'Teacher' ? this.teacherId : null,
+        this.role === 'Staff' ? [...this.newAreas] : null);
+      this.email = ''; this.password = ''; this.teacherId = null; this.newAreas = new Set(ADMIN_AREAS);
     }, tr('users.created'));
   }
 
+  // Inline steps instead of prompt()/confirm(): those dialogs are silently blocked in some embedded browsers.
   protected reset(u: UserA) {
-    const pass = prompt(tr('users.resetPrompt', { email: u.email }));
-    if (pass) void this.run(() => this.api.resetPassword(u.id, pass), tr('users.passwordChanged'));
+    const pass = this.newPass.trim();
+    if (!pass) return;
+    this.resetFor.set(null);
+    void this.run(() => this.api.resetPassword(u.id, pass), tr('users.passwordChanged'));
   }
 
   protected toggle(u: UserA) {
-    if (!u.isDisabled && !confirm(tr('users.disableConfirm', { email: u.email }))) return;
+    if (!u.isDisabled && this.disableFor() !== u.id) { this.disableFor.set(u.id); return; }
+    this.disableFor.set(null);
     void this.run(() => this.api.setDisabled(u.id, !u.isDisabled), tr(u.isDisabled ? 'users.enabled' : 'users.disabled'));
   }
 

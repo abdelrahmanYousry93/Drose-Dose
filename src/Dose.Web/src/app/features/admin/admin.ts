@@ -8,13 +8,29 @@ import { TranslatePipe, translate } from '../../core/i18n';
 /** Sends to login and remembers the admin page asked for (e.g. a message opened from a Telegram alert). */
 const toLogin = (router: Router, url: string) => router.createUrlTree(['/login'], { queryParams: url.startsWith('/admin/') ? { next: url } : {} });
 
-/** Route guard: admin area requires an authenticated Admin (checked server-side on every call too). */
-export const adminGuard: CanActivateFn = async (_route, state) => {
+/** Admin-panel pages, in nav order (keys match the routes and the server's StaffAccess areas). */
+export const ADMIN_AREAS = ['dashboard', 'funnel', 'students', 'partners', 'payments', 'follow-ups', 'messages', 'requests', 'promos',
+  'sessions', 'pricing', 'teachers', 'catalog', 'payment-methods', 'availability', 'settings'] as const;
+
+/** Pages this account may open: all for an Admin, the owner-chosen ones for Staff, null for anyone else. */
+export async function allowedAreas(api: Api): Promise<string[] | null> {
+  const me = await api.me();
+  if (me.roles.includes('Admin')) return [...ADMIN_AREAS, 'users'];
+  if (me.roles.includes('Staff')) return me.areas ?? [];
+  return null;
+}
+
+/** Route guard: admin area requires an Admin, or Staff for the pages opened to them (checked server-side on every call too). */
+export const adminGuard: CanActivateFn = async (route, state) => {
   const api = inject(Api);
   const router = inject(Router);
   try {
-    const me = await api.me();
-    return me.roles.includes('Admin') ? true : toLogin(router, state.url);
+    const areas = await allowedAreas(api);
+    if (!areas) return toLogin(router, state.url);
+    const page = state.url.split('?')[0].split('/')[2] ?? '';
+    if (!page || areas.includes(page)) return true;
+    const first = ADMIN_AREAS.find((a) => areas.includes(a));
+    return first ? router.createUrlTree(['/admin', first]) : toLogin(router, state.url);
   } catch {
     return toLogin(router, state.url);
   }
@@ -54,8 +70,9 @@ export class AdminLogin {
       await this.api.login(this.email, this.password);
       const me = await this.api.me();
       const next = new URLSearchParams(location.search).get('next');
-      const back = (me.roles.includes('Admin') && next?.startsWith('/admin/')) || next?.startsWith('/room/host/') ? next : null;
-      await this.router.navigateByUrl(back ?? (me.roles.includes('Admin') ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/'));
+      const panel = me.roles.includes('Admin') || me.roles.includes('Staff');
+      const back = (panel && next?.startsWith('/admin/')) || next?.startsWith('/room/host/') ? next : null;
+      await this.router.navigateByUrl(back ?? (panel ? '/admin' : me.roles.includes('Teacher') ? '/teacher' : '/'));
     } catch (e) {
       this.error.set(e instanceof ApiError && e.status === 401 ? translate('login.invalid') : errorMessage(e));
     } finally {
@@ -69,23 +86,23 @@ export class AdminLogin {
   imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   template: `
     <nav class="admin-nav">
-      <a routerLink="/admin/dashboard" routerLinkActive="on">{{ 'adminNav.dashboard' | t }}</a>
-      <a routerLink="/admin/funnel" routerLinkActive="on">{{ 'adminNav.funnel' | t }}</a>
-      <a routerLink="/admin/students" routerLinkActive="on">{{ 'adminNav.students' | t }}</a>
-      <a routerLink="/admin/partners" routerLinkActive="on">{{ 'adminNav.partners' | t }}</a>
-      <a routerLink="/admin/payments" routerLinkActive="on">{{ 'adminNav.payments' | t }}</a>
-      <a routerLink="/admin/follow-ups" routerLinkActive="on">{{ 'adminNav.followUps' | t }}</a>
-      <a routerLink="/admin/messages" routerLinkActive="on">{{ 'adminNav.messages' | t }}</a>
-      <a routerLink="/admin/requests" routerLinkActive="on">{{ 'adminNav.requests' | t }}</a>
-      <a routerLink="/admin/promos" routerLinkActive="on">{{ 'adminNav.promos' | t }}</a>
-      <a routerLink="/admin/sessions" routerLinkActive="on">{{ 'adminNav.sessions' | t }}</a>
-      <a routerLink="/admin/pricing" routerLinkActive="on">{{ 'adminNav.pricing' | t }}</a>
-      <a routerLink="/admin/teachers" routerLinkActive="on">{{ 'adminNav.teachers' | t }}</a>
-      <a routerLink="/admin/catalog" routerLinkActive="on">{{ 'adminNav.catalog' | t }}</a>
-      <a routerLink="/admin/payment-methods" routerLinkActive="on">{{ 'adminNav.paymentMethods' | t }}</a>
-      <a routerLink="/admin/availability" routerLinkActive="on">{{ 'adminNav.availability' | t }}</a>
-      <a routerLink="/admin/users" routerLinkActive="on">{{ 'adminNav.users' | t }}</a>
-      <a routerLink="/admin/settings" routerLinkActive="on">{{ 'adminNav.settings' | t }}</a>
+      @if (can('dashboard')) { <a routerLink="/admin/dashboard" routerLinkActive="on">{{ 'adminNav.dashboard' | t }}</a> }
+      @if (can('funnel')) { <a routerLink="/admin/funnel" routerLinkActive="on">{{ 'adminNav.funnel' | t }}</a> }
+      @if (can('students')) { <a routerLink="/admin/students" routerLinkActive="on">{{ 'adminNav.students' | t }}</a> }
+      @if (can('partners')) { <a routerLink="/admin/partners" routerLinkActive="on">{{ 'adminNav.partners' | t }}</a> }
+      @if (can('payments')) { <a routerLink="/admin/payments" routerLinkActive="on">{{ 'adminNav.payments' | t }}</a> }
+      @if (can('follow-ups')) { <a routerLink="/admin/follow-ups" routerLinkActive="on">{{ 'adminNav.followUps' | t }}</a> }
+      @if (can('messages')) { <a routerLink="/admin/messages" routerLinkActive="on">{{ 'adminNav.messages' | t }}</a> }
+      @if (can('requests')) { <a routerLink="/admin/requests" routerLinkActive="on">{{ 'adminNav.requests' | t }}</a> }
+      @if (can('promos')) { <a routerLink="/admin/promos" routerLinkActive="on">{{ 'adminNav.promos' | t }}</a> }
+      @if (can('sessions')) { <a routerLink="/admin/sessions" routerLinkActive="on">{{ 'adminNav.sessions' | t }}</a> }
+      @if (can('pricing')) { <a routerLink="/admin/pricing" routerLinkActive="on">{{ 'adminNav.pricing' | t }}</a> }
+      @if (can('teachers')) { <a routerLink="/admin/teachers" routerLinkActive="on">{{ 'adminNav.teachers' | t }}</a> }
+      @if (can('catalog')) { <a routerLink="/admin/catalog" routerLinkActive="on">{{ 'adminNav.catalog' | t }}</a> }
+      @if (can('payment-methods')) { <a routerLink="/admin/payment-methods" routerLinkActive="on">{{ 'adminNav.paymentMethods' | t }}</a> }
+      @if (can('availability')) { <a routerLink="/admin/availability" routerLinkActive="on">{{ 'adminNav.availability' | t }}</a> }
+      @if (can('users')) { <a routerLink="/admin/users" routerLinkActive="on">{{ 'adminNav.users' | t }}</a> }
+      @if (can('settings')) { <a routerLink="/admin/settings" routerLinkActive="on">{{ 'adminNav.settings' | t }}</a> }
       <button type="button" (click)="logout()">{{ 'adminNav.logout' | t }}</button>
     </nav>
     <router-outlet />
@@ -99,6 +116,9 @@ export class AdminLogin {
 export class AdminShell {
   private readonly api = inject(Api);
   private readonly router = inject(Router);
+  private readonly areas = signal<string[]>([]);
+  constructor() { allowedAreas(this.api).then((a) => this.areas.set(a ?? [])).catch(() => undefined); }
+  protected can(area: string) { return this.areas().includes(area); }
   protected async logout() {
     await this.api.logout().catch(() => undefined);
     await this.router.navigateByUrl('/login');

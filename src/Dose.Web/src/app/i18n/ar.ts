@@ -1264,10 +1264,14 @@ export const ar = {
     "teacherSessions": "جلساتي"
   },
   "users": {
+    "areas": "الصفحات اللي يقدر يفتحها",
+    "areasSaved": "الصلاحيات اتحفظت، وبتشتغل على طول.",
+    "cancel": "إلغاء",
     "create": "إنشاء الحساب",
     "created": "اتعمل الحساب ✓ — ابعت الإيميل وكلمة السر للشخص.",
     "disable": "إيقاف",
     "disableConfirm": "إيقاف {email}؟ مش هيقدر يدخل تاني لحد ما تفعّله.",
+    "disableSure": "⚠️ دوس تاني علشان توقف الحساب",
     "disabled": "اتوقف ✓",
     "enable": "تفعيل",
     "enabled": "اتفعّل ✓",
@@ -1281,7 +1285,9 @@ export const ar = {
     "resetPrompt": "كلمة سر جديدة لـ {email} (10 حروف على الأقل):",
     "role": "الدور",
     "roleAdmin": "أدمن",
+    "roleStaff": "فريق العمل (صلاحيات محددة)",
     "roleTeacher": "مدرس",
+    "savePassword": "احفظ كلمة السر",
     "teacherProfile": "ملف المدرس",
     "tempPassword": "كلمة سر مؤقتة"
   },

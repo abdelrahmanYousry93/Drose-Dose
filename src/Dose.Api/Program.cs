@@ -7,6 +7,8 @@ using Dose.Application.Bookings;
 using Dose.Application.Sessions;
 using Dose.Infrastructure.Persistence;
 using Hangfire;
+using System.Security.Claims;
+using Dose.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -76,7 +78,7 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
 });
 builder.Services.AddAuthorizationBuilder()
-    .AddPolicy(Endpoints.AdminPolicy, p => p.RequireRole(DevelopmentSeeder.AdminRole))
+    .AddPolicy(Endpoints.AdminPolicy, p => p.RequireRole(DevelopmentSeeder.AdminRole, DevelopmentSeeder.StaffRole))
     .AddPolicy(Endpoints.TeacherPolicy, p => p.RequireRole(DevelopmentSeeder.TeacherRole));
 // Disabled accounts and password resets take effect within a minute.
 builder.Services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
@@ -119,6 +121,24 @@ app.UseStatusCodePages();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+// Staff accounts reach /api/admin only for the pages the owner opened to them (StaffAccess).
+app.Use(async (ctx, next) =>
+{
+    var path = ctx.Request.Path.Value ?? "";
+    if (path.StartsWith("/api/admin/", StringComparison.OrdinalIgnoreCase) && StaffAccess.IsStaffOnly(ctx.User))
+    {
+        var first = path["/api/admin/".Length..].Split('/', 2)[0].ToLowerInvariant();
+        var uid = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+        var areas = await ctx.RequestServices.GetRequiredService<UserAdminService>().AreasAsync(uid, ctx.RequestAborted);
+        if (!StaffAccess.Allows(areas, ctx.Request.Method, first))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await ctx.Response.WriteAsJsonAsync(new { title = "الصفحة دي مش مفتوحة لحسابك. كلم الأدمن." });
+            return;
+        }
+    }
+    await next();
+});
 
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 

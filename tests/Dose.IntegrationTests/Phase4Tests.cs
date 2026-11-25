@@ -206,6 +206,21 @@ public sealed class Phase4Tests(DatabaseFixture fx)
         var user = await users.FindByIdAsync(teacherUser);
         Assert.True(await users.CheckPasswordAsync(user!, "Another_Pass_456"));
 
+        // Staff: all pages by default, the owner narrows them; unknown pages and account management are never stored.
+        var staff = await svc.CreateAsync(new CreateUserRequest("staff@dose.test", "Strong_Pass_123", "Staff", null), Admin, default);
+        Assert.Equal(StaffAccess.Areas.Length, (await svc.AreasAsync(staff, default)).Count);
+        await svc.SetAreasAsync(staff, ["sessions", "funnel", "users", "nope"], Admin, default);
+        Assert.Equal(["funnel", "sessions"], (await svc.AreasAsync(staff, default)).Order().ToArray());
+        Assert.Equal(["funnel", "sessions"], (await svc.ListAsync(default)).Single(u => u.Id == staff).Areas.Order().ToArray());
+        string[] mine = ["sessions", "funnel"];
+        Assert.True(StaffAccess.Allows(mine, "POST", "bookings"));        // send booking links (sessions page)
+        Assert.True(StaffAccess.Allows(mine, "GET", "catalog"));          // dropdown lists
+        Assert.False(StaffAccess.Allows(mine, "POST", "catalog"));
+        Assert.False(StaffAccess.Allows(mine, "GET", "pricing"));
+        Assert.False(StaffAccess.Allows(mine, "GET", "users"));
+        Assert.False(StaffAccess.Allows(StaffAccess.Areas, "POST", "users"));
+        await Assert.ThrowsAsync<DomainException>(() => svc.SetAreasAsync(teacherUser, ["sessions"], Admin, default));
+
         // Disabling every other admin leaves this one as the last: it can't be disabled.
         foreach (var other in (await users.GetUsersInRoleAsync("Admin")).Where(u => u.Id != adminId))
             await svc.SetDisabledAsync(other.Id, true, adminId, Admin, default);

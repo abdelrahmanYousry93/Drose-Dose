@@ -1266,10 +1266,14 @@ export const en: typeof ar = {
     "teacherSessions": "My sessions"
   },
   "users": {
+    "areas": "Pages this account can open",
+    "areasSaved": "Permissions saved; they apply right away.",
+    "cancel": "Cancel",
     "create": "Create account",
     "created": "Account created ✓ — send the email and password to the person.",
     "disable": "Disable",
     "disableConfirm": "Disable {email}? They won't be able to sign in until re-enabled.",
+    "disableSure": "⚠️ Click again to disable",
     "disabled": "Disabled ✓",
     "enable": "Enable",
     "enabled": "Enabled ✓",
@@ -1283,7 +1287,9 @@ export const en: typeof ar = {
     "resetPrompt": "New password for {email} (at least 10 characters):",
     "role": "Role",
     "roleAdmin": "Admin",
+    "roleStaff": "Staff (chosen pages)",
     "roleTeacher": "Teacher",
+    "savePassword": "Save password",
     "teacherProfile": "Teacher profile",
     "tempPassword": "Temporary password"
   },

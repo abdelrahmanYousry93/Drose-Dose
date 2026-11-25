@@ -16,11 +16,13 @@ public static class DevelopmentSeeder
 {
     public const string AdminRole = "Admin";
     public const string TeacherRole = "Teacher";
+    /// <summary>Team member using the admin panel with owner-chosen page permissions (see StaffAccess).</summary>
+    public const string StaffRole = "Staff";
 
     public static async Task SeedRolesAndAdminAsync(
         RoleManager<IdentityRole> roles, UserManager<IdentityUser> users, string? adminEmail, string? adminPassword)
     {
-        foreach (var r in new[] { AdminRole, TeacherRole })
+        foreach (var r in new[] { AdminRole, TeacherRole, StaffRole })
             if (!await roles.RoleExistsAsync(r)) await roles.CreateAsync(new IdentityRole(r));
 
         if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword)) return;

@@ -26,6 +26,11 @@ public static class Phase4Endpoints
             await s.ResetPasswordAsync(id, r.Password, Actor(u), ct);
             return Results.NoContent();
         });
+        admin.MapPost("/users/{id}/areas", async (string id, SetAreasRequest r, UserAdminService s, ClaimsPrincipal u, CancellationToken ct) =>
+        {
+            await s.SetAreasAsync(id, r.Areas ?? [], Actor(u), ct);
+            return Results.NoContent();
+        });
         admin.MapPost("/users/{id}/disabled", async (string id, SetDisabledRequest r, UserAdminService s, ClaimsPrincipal u, CancellationToken ct) =>
         {
             await s.SetDisabledAsync(id, r.Disabled, UserId(u), Actor(u), ct);

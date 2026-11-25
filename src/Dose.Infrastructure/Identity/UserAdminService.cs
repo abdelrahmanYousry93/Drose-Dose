@@ -16,7 +16,7 @@ namespace Dose.Infrastructure.Identity;
 /// </summary>
 public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbContext db, IClock clock)
 {
-    public static readonly string[] Roles = [DevelopmentSeeder.AdminRole, DevelopmentSeeder.TeacherRole];
+    public static readonly string[] Roles = [DevelopmentSeeder.AdminRole, DevelopmentSeeder.TeacherRole, DevelopmentSeeder.StaffRole];
 
     public async Task<IReadOnlyList<UserAdminDto>> ListAsync(CancellationToken ct)
     {
@@ -24,12 +24,14 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
         var roleRows = await (from ur in db.UserRoles join r in db.Roles on ur.RoleId equals r.Id select new { ur.UserId, r.Name })
             .ToListAsync(ct);
         var teachers = await db.Teachers.AsNoTracking().Where(t => t.UserId != null).ToDictionaryAsync(t => t.UserId!, ct);
+        var areas = (await db.UserClaims.AsNoTracking().Where(c => c.ClaimType == StaffAccess.ClaimType).Select(c => new { c.UserId, c.ClaimValue }).ToListAsync(ct))
+            .ToLookup(c => c.UserId, c => c.ClaimValue!);
         var now = DateTimeOffset.UtcNow;
         return all.Select(u =>
         {
             teachers.TryGetValue(u.Id, out var t);
             return new UserAdminDto(u.Id, u.Email ?? u.UserName ?? "", roleRows.Where(r => r.UserId == u.Id).Select(r => r.Name!).ToList(),
-                u.LockoutEnd > now.AddYears(10), t?.Id, t?.DisplayNameAr);
+                u.LockoutEnd > now.AddYears(10), t?.Id, t?.DisplayNameAr, areas[u.Id].ToList());
         }).ToList();
     }
 
@@ -37,7 +39,7 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
     {
         var email = (req.Email ?? "").Trim().ToLowerInvariant();
         if (!System.Net.Mail.MailAddress.TryCreate(email, out _)) throw new DomainException(AdminErrors.Invalid, "الإيميل مش صحيح.", "The email address is not valid.");
-        if (!Roles.Contains(req.Role)) throw new DomainException(AdminErrors.Invalid, "اختار الدور: أدمن أو مدرس.", "Choose a role: admin or teacher.");
+        if (!Roles.Contains(req.Role)) throw new DomainException(AdminErrors.Invalid, "اختار الدور: أدمن أو مدرس أو فريق العمل.", "Choose a role: admin, teacher or staff.");
         if (await users.FindByEmailAsync(email) is not null) throw new DomainException(AdminErrors.Conflict, "الإيميل ده عنده حساب بالفعل.", "This email already has an account.");
         Domain.Teachers.Teacher? teacher = null;
         if (req.Role == DevelopmentSeeder.TeacherRole)
@@ -51,7 +53,10 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
         Check(await users.CreateAsync(user, req.Password ?? ""));
         Check(await users.AddToRoleAsync(user, req.Role));
         if (teacher is not null) teacher.UserId = user.Id;
-        Audit(actor, user.Id, "Create", new { email, req.Role, req.TeacherId });
+        if (req.Role == DevelopmentSeeder.StaffRole)
+            foreach (var a in CleanAreas(req.Areas ?? StaffAccess.Areas))
+                Check(await users.AddClaimAsync(user, new System.Security.Claims.Claim(StaffAccess.ClaimType, a)));
+        Audit(actor, user.Id, "Create", new { email, req.Role, req.TeacherId, req.Areas });
         await db.SaveChangesAsync(ct);
         return user.Id;
     }
@@ -99,6 +104,28 @@ public sealed class UserAdminService(UserManager<IdentityUser> users, DoseDbCont
         Audit(actor, userId, "LinkTeacher", new { teacherId });
         await db.SaveChangesAsync(ct);
     }
+
+    /// <summary>Sets which admin pages a staff account can open (takes effect on its next call).</summary>
+    public async Task SetAreasAsync(string userId, IReadOnlyList<string> areas, string actor, CancellationToken ct)
+    {
+        var user = await FindAsync(userId);
+        if (!await users.IsInRoleAsync(user, DevelopmentSeeder.StaffRole))
+            throw new DomainException(AdminErrors.Invalid, "الحساب ده مش حساب فريق عمل.", "This is not a staff account.");
+        var wanted = CleanAreas(areas);
+        var current = (await users.GetClaimsAsync(user)).Where(c => c.Type == StaffAccess.ClaimType).ToList();
+        var remove = current.Where(c => !wanted.Contains(c.Value)).ToList();
+        if (remove.Count > 0) Check(await users.RemoveClaimsAsync(user, remove));
+        var add = wanted.Where(a => current.All(c => c.Value != a)).Select(a => new System.Security.Claims.Claim(StaffAccess.ClaimType, a)).ToList();
+        if (add.Count > 0) Check(await users.AddClaimsAsync(user, add));
+        Audit(actor, userId, "SetAreas", new { areas = wanted });
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>The pages a signed-in staff account may open, read fresh from the database.</summary>
+    public async Task<List<string>> AreasAsync(string userId, CancellationToken ct) =>
+        await db.UserClaims.AsNoTracking().Where(c => c.UserId == userId && c.ClaimType == StaffAccess.ClaimType).Select(c => c.ClaimValue!).ToListAsync(ct);
+
+    static List<string> CleanAreas(IEnumerable<string> areas) => areas.Where(StaffAccess.Areas.Contains).Distinct().ToList();
 
     private async Task<IdentityUser> FindAsync(string userId) =>
         await users.FindByIdAsync(userId) ?? throw new DomainException(AdminErrors.NotFound, "الحساب مش موجود.", "Account not found.");

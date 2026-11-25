@@ -84,8 +84,9 @@ public sealed record AdminDashboardDto(
     int PeriodDays, int PeriodConfirmedBookings, decimal PeriodCollected, decimal PeriodRefunded, string Currency, int PendingMessages = 0);
 
 // ---------- Users ----------
-public sealed record UserAdminDto(string Id, string Email, IReadOnlyList<string> Roles, bool IsDisabled, Guid? TeacherId, string? TeacherNameAr);
-public sealed record CreateUserRequest(string Email, string Password, string Role, Guid? TeacherId);
+public sealed record UserAdminDto(string Id, string Email, IReadOnlyList<string> Roles, bool IsDisabled, Guid? TeacherId, string? TeacherNameAr, IReadOnlyList<string> Areas);
+public sealed record CreateUserRequest(string Email, string Password, string Role, Guid? TeacherId, IReadOnlyList<string>? Areas = null);
+public sealed record SetAreasRequest(IReadOnlyList<string> Areas);
 public sealed record ResetPasswordRequest(string Password);
 public sealed record SetDisabledRequest(bool Disabled);
 public sealed record LinkTeacherRequest(Guid? TeacherId);

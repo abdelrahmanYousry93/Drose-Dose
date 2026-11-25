@@ -7,6 +7,7 @@ using Dose.Application.Sessions;
 using Dose.Contracts;
 using Dose.Domain.Bookings;
 using Dose.Domain.Sessions;
+using Dose.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -154,8 +155,12 @@ public static class Endpoints
             await signIn.SignOutAsync();
             return Results.NoContent();
         });
-        auth.MapGet("/me", (ClaimsPrincipal user) => user.Identity?.IsAuthenticated == true
-            ? Results.Ok(new { email = user.Identity.Name, roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value) })
+        auth.MapGet("/me", async (ClaimsPrincipal user, UserAdminService users, CancellationToken ct) => user.Identity?.IsAuthenticated == true
+            ? Results.Ok(new
+            {
+                email = user.Identity.Name, roles = user.FindAll(ClaimTypes.Role).Select(c => c.Value),
+                areas = StaffAccess.IsStaffOnly(user) ? await users.AreasAsync(user.FindFirstValue(ClaimTypes.NameIdentifier) ?? "", ct) : null,
+            })
             : Results.Unauthorized());
 
         // ---------- Admin ----------

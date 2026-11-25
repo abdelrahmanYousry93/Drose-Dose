@@ -191,7 +191,7 @@ export class Api {
   // Auth & admin
   login(email: string, password: string) { return this.post<void>('/auth/login', { email, password }); }
   logout() { return this.post<void>('/auth/logout', {}); }
-  me() { return this.get<{ email: string; roles: string[] }>('/auth/me'); }
+  me() { return this.get<{ email: string; roles: string[]; areas?: string[] | null }>('/auth/me'); }
   proofs(status: string | null) { return this.get<PaymentProofAdmin[]>('/admin/payment-proofs', { status }); }
   proofFileUrl(id: string) { return `${this.base}/admin/payment-proofs/${id}/file`; }
   approve(id: string) { return this.post<void>(`/admin/payment-proofs/${id}/approve`, {}); }
