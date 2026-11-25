@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g14-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>ليلة الامتحان… خرافة ولا حقيقة؟</div><div class='h1' style='font-size:96px'>السهر <span class='yellow'>للصبح</span><br/>هيلحّقني؟</div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:120px'><span class='accent'>خرافة</span> ❌</div><div class='lead muted' style='margin-top:20px'>النوم هو اللي بيثبّت<br/>اللي ذاكرته في دماغك</div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='h1' style='font-size:76px;margin-top:30px'>خلّص الجديد<br/><span class='accent'>قبلها بيوم</span></div><div class='lead muted' style='margin-top:20px'>ليلة الامتحان<br/>للمراجعة بس</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٢</div><div class='h1' style='font-size:76px;margin-top:30px'>راجع الملخص<br/><span class='yellow'>ونام بدري</span></div><div class='lead' style='margin-top:20px'>وإنت فايق… هتفتكر أكتر</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه 📌 لليلة الامتحان<br/>وابعته لصاحبك السهران</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
