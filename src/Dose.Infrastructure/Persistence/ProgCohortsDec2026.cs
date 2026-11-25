@@ -101,6 +101,23 @@ public static class ProgCohortsDec2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Owner (25 Nov): secondary grades are split by system («— ثانوية عامة» / «— بكالوريا»); programming is a
+    /// baccalaureate subject, so its sessions and requests move to «الصف الثاني الثانوي — بكالوريا». Runs once.
+    /// </summary>
+    public static async Task BaccalaureateGradeAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
+    {
+        const string marker = "Catalog/bacc-split/programming";
+        if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == marker, ct)) return;
+        var bacc2 = await db.Grades.FirstOrDefaultAsync(g => g.NameAr == "الصف الثاني الثانوي — بكالوريا", ct);
+        var prog = await db.Subjects.FirstOrDefaultAsync(x => x.NameAr == ProgReviewNov2026.SubjectAr, ct);
+        if (bacc2 is null || prog is null) return; // the split hasn't been made in this database
+        await db.Sessions.Where(x => x.SubjectId == prog.Id && x.GradeId != bacc2.Id).ExecuteUpdateAsync(u => u.SetProperty(x => x.GradeId, bacc2.Id), ct);
+        await db.SessionRequests.Where(x => x.SubjectId == prog.Id && x.GradeId != bacc2.Id).ExecuteUpdateAsync(u => u.SetProperty(x => x.GradeId, bacc2.Id), ct);
+        db.AuditLogs.Add(new AuditLog { Actor = "owner", Entity = "Campaign", EntityId = marker, Action = "programming to bacc grade", AtUtc = nowUtc });
+        await db.SaveChangesAsync(ct);
+    }
+
     static DateTime CairoToUtc(DateTime local)
     {
         try { return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo")); }
