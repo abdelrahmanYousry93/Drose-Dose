@@ -66,7 +66,7 @@ public sealed class SessionQueries(IDoseDbContext db, IClock clock, IRequestLang
         var q = WithDetails().Where(s => s.Status == SessionStatus.Published && !s.IsClosed && s.BookingDeadlineUtc > now && s.StartUtc > now);
         if (f.GradeId is { } g) q = q.Where(s => s.GradeId == g);
         if (f.SubjectId is { } sub) q = q.Where(s => s.SubjectId == sub);
-        if (f.StudyTrackId is { } t) q = q.Where(s => s.StudyTrackId == t);
+        if (f.StudyTrackId is { } t) q = q.Where(s => s.StudyTrackId == t || s.StudyTrack!.NameAr == Dose.Domain.Catalog.StudyTrack.BothNameAr);
         if (f.ServiceTypeId is { } st) q = q.Where(s => s.ServiceTypeId == st);
         if (f.Mode is { } m) q = q.Where(s => s.Mode == m);
 

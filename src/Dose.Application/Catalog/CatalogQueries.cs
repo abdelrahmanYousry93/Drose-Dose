@@ -18,7 +18,7 @@ public sealed class CatalogQueries(IDoseDbContext db, IRequestLanguage lang)
     }
 
     public async Task<IReadOnlyList<LookupDto>> StudyTracksAsync(CancellationToken ct) =>
-        (await db.StudyTracks.AsNoTracking().Where(t => t.IsActive).OrderBy(t => t.SortOrder).ToListAsync(ct))
+        (await db.StudyTracks.AsNoTracking().Where(t => t.IsActive && t.NameAr != Dose.Domain.Catalog.StudyTrack.BothNameAr).OrderBy(t => t.SortOrder).ToListAsync(ct))
             .Select(t => new LookupDto(t.Id, lang.Pick(t.NameAr, t.NameEn))).ToList();
 
     public async Task<IReadOnlyList<LookupDto>> SubjectsAsync(Guid? gradeId, CancellationToken ct)

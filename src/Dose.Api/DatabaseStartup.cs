@@ -104,6 +104,7 @@ public sealed class DatabaseStartup(
             await ProgCohortsDec2026.EnsureAsync(db, DateTime.UtcNow, ct);
             await ProgCohortsDec2026.TenSeatsAsync(db, DateTime.UtcNow, ct);
             await ProgCohortsDec2026.PageTextAsync(db, DateTime.UtcNow, ct);
+            await ProgCohortsDec2026.BothTracksAsync(db, DateTime.UtcNow, ct);
         }
     }
 

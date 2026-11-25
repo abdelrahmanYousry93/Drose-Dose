@@ -16,6 +16,12 @@ public sealed class EducationalStage : Entity
 /// <summary>Language/track such as عربي or لغات. Admin-managed.</summary>
 public sealed class StudyTrack : Entity
 {
+    /// <summary>
+    /// A session explained for both Arabic-medium and languages students (e.g. programming, Arabic explanation with the
+    /// English terms). It shows under either track in the student filters and isn't offered as a filter of its own.
+    /// </summary>
+    public const string BothNameAr = "عربي ولغات";
+
     public required string NameAr { get; set; }
     /// <summary>Optional English name; Arabic is used when empty.</summary>
     public string? NameEn { get; set; }

@@ -87,6 +87,20 @@ public static class ProgCohortsDec2026
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>Owner (25 Nov): programming is for Arabic-medium and languages students alike, so the session shows «عربي ولغات».</summary>
+    public static async Task BothTracksAsync(DoseDbContext db, DateTime nowUtc, CancellationToken ct = default)
+    {
+        const string marker = "ProgCohort/1/both-tracks";
+        if (await db.AuditLogs.AnyAsync(a => a.Entity == "Campaign" && a.EntityId == marker, ct)) return;
+        var s = await db.Sessions.FirstOrDefaultAsync(x => x.Id == Round1Id, ct);
+        if (s is null) return;
+        var both = await db.StudyTracks.FirstOrDefaultAsync(t => t.NameAr == Dose.Domain.Catalog.StudyTrack.BothNameAr, ct);
+        if (both is null) db.StudyTracks.Add(both = new Dose.Domain.Catalog.StudyTrack { NameAr = Dose.Domain.Catalog.StudyTrack.BothNameAr, NameEn = "Arabic & Languages", SortOrder = 99 });
+        s.StudyTrackId = both.Id;
+        db.AuditLogs.Add(new AuditLog { Actor = "owner", Entity = "Campaign", EntityId = marker, Action = "both tracks", AtUtc = nowUtc });
+        await db.SaveChangesAsync(ct);
+    }
+
     static DateTime CairoToUtc(DateTime local)
     {
         try { return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo")); }
