@@ -179,6 +179,7 @@ export class AdminApi {
   publish(id: string) { return this.post<void>(`/sessions/${id}/publish`, {}); }
   cancel(id: string, reason: string) { return this.post<{ refundsPending: number }>(`/sessions/${id}/cancel`, { reason }); }
   sessionBookings(id: string) { return this.get<SessionBookingA[]>(`/sessions/${id}/bookings`); }
+  reopenBooking(bookingId: string) { return this.post<ReissueLink>(`/bookings/${bookingId}/reopen`, {}); }
   reissueLink(bookingId: string) { return this.post<ReissueLink>(`/bookings/${bookingId}/reissue-link`, {}); }
   decide(sessionId: string) { return this.post<void>(`/sessions/${sessionId}/decide`, {}); }
 

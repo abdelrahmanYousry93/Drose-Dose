@@ -79,6 +79,8 @@ public static class AdminEndpoints
         sessions.MapPost("/{id:guid}/cancel", async (Guid id, CancelRequest d, AdminSessionService s, ClaimsPrincipal u, CancellationToken ct) =>
             Results.Ok(new { refundsPending = await s.CancelAsync(id, d.Reason, Actor(u), ct) }));
         sessions.MapGet("/{id:guid}/bookings", (Guid id, AdminSessionService s, CancellationToken ct) => s.BookingsAsync(id, ct));
+        admin.MapPost("/bookings/{id:guid}/reopen", (Guid id, AdminSessionService s, ClaimsPrincipal u, CancellationToken ct) =>
+            s.ReopenBookingAsync(id, Actor(u), ct));
         admin.MapPost("/bookings/{id:guid}/reissue-link", (Guid id, AdminSessionService s, ClaimsPrincipal u, CancellationToken ct) =>
             s.ReissueLinkAsync(id, Actor(u), ct));
     }

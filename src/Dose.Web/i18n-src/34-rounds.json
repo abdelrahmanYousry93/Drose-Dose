@@ -62,5 +62,9 @@
  "users.disableSure": [
   "⚠️ دوس تاني علشان توقف الحساب",
   "⚠️ Click again to disable"
+ ],
+ "sessionsAdmin.reopen": [
+  "↩️ رجّع الحجز بمهلة جديدة",
+  "↩️ Reopen with a new deadline"
  ]
 }

@@ -1092,6 +1092,7 @@ export const ar = {
     "publish": "نشر",
     "published": "اتنشرت ✓",
     "reissueConfirm": "هيتعمل لينك جديد لحجز {ref} واللينك القديم هيبطل. تكمّل؟",
+    "reopen": "↩️ رجّع الحجز بمهلة جديدة",
     "roomHint": "💊 اكتب dose علشان الجلسة تبقى في غرفة دروس Dose بدل جوجل ميت.",
     "saveDraft": "حفظ كمسودة",
     "savePublish": "حفظ ونشر",

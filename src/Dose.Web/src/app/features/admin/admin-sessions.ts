@@ -245,6 +245,18 @@ export class AdminSessions {
     } catch (e) { this.error.set(errorMessage(e)); }
   }
 
+  /** Expired booking in a private session: give the student a fresh deadline on the same session. */
+  protected async reopen(s: SessionA, b: SessionBookingA) {
+    try {
+      const r = await this.api.reopenBooking(b.id);
+      const url = `${window.location.origin}/b/${r.accessToken}`;
+      this.link.set({ ...r, url, full: `${r.message}\n${url}` });
+      await this.load();
+      await this.showBookings(s);
+      setTimeout(() => document.querySelector('.link-box')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+    } catch (e) { this.error.set(errorMessage(e)); }
+  }
+
   protected chatUrl(phone: string | null) { return phone ? `https://wa.me/${phone.replace(/\D/g, '')}` : null; }
 
   protected async copy(text: string) {

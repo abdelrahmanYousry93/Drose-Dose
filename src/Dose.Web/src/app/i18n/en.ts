@@ -1094,6 +1094,7 @@ export const en: typeof ar = {
     "publish": "Publish",
     "published": "Published ✓",
     "reissueConfirm": "A new link will be created for booking {ref} and the old one will stop working. Continue?",
+    "reopen": "↩️ Reopen with a new deadline",
     "roomHint": "💊 Type dose to hold the session in the Dose room instead of Google Meet.",
     "saveDraft": "Save as draft",
     "savePublish": "Save and publish",

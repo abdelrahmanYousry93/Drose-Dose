@@ -167,6 +167,43 @@ public sealed class AdminSessionService(IDoseDbContext db, IClock clock, Setting
             $"{greeting}، ده لينك حجزك في Dose (رقم الحجز {b.Reference}). من اللينك ده تتابع الحجز وتدخل الجلسة في ميعادها:");
     }
 
+    /// <summary>
+    /// Gives a student whose private booking ran out of time (and whose session was freed because of it) another
+    /// chance on the same session: the booking goes back to waiting for payment (or for details, if none were
+    /// entered) with a fresh deadline, keeping its price and code, and the session is live again.
+    /// </summary>
+    public async Task<ReissueLinkResponse> ReopenBookingAsync(Guid bookingId, string actor, CancellationToken ct)
+    {
+        var b = AdminGuard.Found(await db.Bookings.FirstOrDefaultAsync(x => x.Id == bookingId, ct), Fields.Booking);
+        var session = AdminGuard.Found(await db.Sessions.FirstOrDefaultAsync(x => x.Id == b.SessionId, ct), Fields.Session);
+        var now = clock.UtcNow;
+        if (b.Status != BookingStatus.Expired)
+            throw new DomainException(AdminErrors.Invalid, "الحجز ده مش منتهي المهلة.", "Only an expired booking can be reopened.");
+        if (!session.IsClosed || session.StartUtc <= now)
+            throw new DomainException(AdminErrors.Invalid, "ينفع نرجّع الحجز في الجلسات الخاصة اللي لسه ميعادها مجاش بس.",
+                "Only bookings in upcoming private sessions can be reopened.");
+        if (await ActiveBookings(session.Id).AnyAsync(ct))
+            throw new DomainException(AdminErrors.Conflict, "الجلسة فيها حجز تاني شغال.", "The session already has an active booking.");
+
+        var deadline = session.BookingDeadlineUtc > now ? session.BookingDeadlineUtc : session.StartUtc;
+        if (b.StudentId is null)
+        {
+            b.Status = BookingStatus.PendingHold;
+            var until = now.AddHours(await settings.GetIntAsync(SettingKeys.OfferHoldHours, ct));
+            b.HoldExpiresAtUtc = until < deadline ? until : deadline;
+        }
+        else
+        {
+            b.Status = BookingStatus.PendingPayment;
+            var until = now.AddMinutes((await settings.GetBookingSettingsAsync(ct)).PaymentProofDeadlineMinutes);
+            b.PaymentDueAtUtc = until < deadline ? until : deadline;
+        }
+        if (session.Status == SessionStatus.Cancelled) session.Status = SessionStatus.Published;
+        db.Audit(clock, actor, nameof(Booking), b.Id, "Reopen", new { b.Reference, Status = b.Status.ToString() });
+        await db.SaveChangesAsync(ct);
+        return await ReissueLinkAsync(bookingId, actor, ct);
+    }
+
     // ---------- helpers ----------
 
     private IQueryable<Session> Query() => db.Sessions.AsNoTracking()

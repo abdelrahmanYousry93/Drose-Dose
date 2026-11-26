@@ -172,6 +172,9 @@
                 <button type="button" class="dose-btn dose-btn--ghost small-btn" (click)="sendLink(b)">{{ (confirmLink() === b.id ? 'sessionsAdmin.sendLinkSure' : 'sessionsAdmin.sendLink') | t }}</button>
                 @if (confirmLink() === b.id) { <p class="small">{{ 'sessionsAdmin.reissueConfirm' | t: { ref: b.reference } }}</p> }
               }
+              @if (b.status === 'Expired' && s.isClosed) {
+                <button type="button" class="dose-btn dose-btn--primary small-btn" (click)="reopen(s, b)">{{ 'sessionsAdmin.reopen' | t }}</button>
+              }
             </div>
           }
           @if (link(); as l) {
