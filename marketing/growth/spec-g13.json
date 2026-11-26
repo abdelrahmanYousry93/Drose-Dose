@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g15-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>ورقة الامتحان قدامك…</div><div class='h1' style='font-size:96px'>وفجأة <span class='yellow'>نسيت</span><br/>كل اللي ذاكرته 😶</div>" },
+        { "bg": "light", "body": "<div class='h1' style='font-size:104px'>اهدى… <span class='accent'>ده طبيعي</span></div><div class='lead muted' style='margin-top:20px'>مخك بس محتاج<br/>يسخّن الأول</div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='h1' style='font-size:76px;margin-top:30px'>ابدأ بالسؤال<br/><span class='accent'>اللي متأكد منه</span></div><div class='lead muted' style='margin-top:20px'>مش لازم بالترتيب</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٢</div><div class='h1' style='font-size:76px;margin-top:30px'>اكتب القوانين<br/><span class='yellow'>في المسودة</span></div><div class='lead' style='margin-top:20px'>أول ما تفتكرها…<br/>قبل ما تهرب منك</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه 📌 قبل الامتحان<br/>وابعته لصاحبك اللي بيتوتر</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
