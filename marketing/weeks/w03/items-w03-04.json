@@ -1,0 +1,67 @@
+{
+ "week": "w03",
+ "order": 4,
+ "day": "الاثنين",
+ "date": "30 نوفمبر",
+ "time": "8 م",
+ "publishAt": "2026-11-30T20:00:00+02:00",
+ "platforms": [
+  "فيسبوك",
+  "إنستجرام"
+ ],
+ "format": "كاروسيل (7 صور)",
+ "audience": "prep",
+ "title": "كاروسيل: «تالتة إعدادي؟ ابدأ مراجعة الترم من دلوقتي» — 5 خطوات",
+ "brief": "خطة الشهر: كاروسيل لتالتة إعدادي قبل الامتحانات. الرسالة 3. نصايح مذاكرة عامة (مفيهاش معلومة علمية تحتاج مراجعة مدرس). الدعوة: احفظ + ابعتها لصاحبك + تابع. مافيهاش «احجز»: الموقع مفيهوش جلسات قابلة للحجز بعد جلسة البرمجة يوم السبت 28 نوفمبر.",
+ "caption": "تالتة إعدادي؟ امتحانات الترم جاية، والمراجعة بتبدأ من دلوقتي مش من آخر أسبوع 📌\nاكتب دروس كل مادة ← لوّنها 🟢🟡🔴 ← ابدأ بالأحمر ← امتحان كامل كل أسبوع ← كراسة الغلطات.\nاحفظ الخطة وابعتها لصاحبك اللي في تالتة إعدادي 💙\n\n#ثانوية_عامة #تالتة_اعدادي #مذاكرة #Dose #امتحانات_نص_السنة",
+ "howTo": "أوتوماتيك كألبوم على فيسبوك وإنستجرام (الـ7 صور بالترتيب) بعد موافقتك.",
+ "media": [
+  "/m/w03/dose-w03-carousel-1.jpg",
+  "/m/w03/dose-w03-carousel-2.jpg",
+  "/m/w03/dose-w03-carousel-3.jpg",
+  "/m/w03/dose-w03-carousel-4.jpg",
+  "/m/w03/dose-w03-carousel-5.jpg",
+  "/m/w03/dose-w03-carousel-6.jpg",
+  "/m/w03/dose-w03-carousel-7.jpg"
+ ],
+ "assets": [
+  {
+   "url": "/_blob/d9bc4842fae691117e203617380c3fca",
+   "name": "dose-w03-carousel-1.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/4a3e7894775825d1ebfa2929ef73a4af",
+   "name": "dose-w03-carousel-2.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/3087e65b67e28b9c5f7a94b554f632df",
+   "name": "dose-w03-carousel-3.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/b3f3373e1292949867d8152bc15427a7",
+   "name": "dose-w03-carousel-4.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/a679feb87fe5c413f5c8ccddf54afba1",
+   "name": "dose-w03-carousel-5.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/43da9f7c0471b40ba0d682a431fa9036",
+   "name": "dose-w03-carousel-6.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/e0fda1a8aabcd98d30b83a216f224626",
+   "name": "dose-w03-carousel-7.png",
+   "kind": "image"
+  }
+ ],
+ "role": "designer",
+ "status": "review",
+ "updatedAt": "2026-11-26T15:00:00Z"
+}

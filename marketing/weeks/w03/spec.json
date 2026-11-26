@@ -1,0 +1,121 @@
+{
+ "pieces": [
+  {
+   "file": "dose-w03-reel.mp4", "reel": true, "secondsPerScene": 3,
+   "scenes": [
+    { "bg": "navy", "body": "<div class='h1' style='font-size:108px'>أول مرة تحضر<br/><span class='yellow'>شرح أونلاين</span>؟</div><div class='lead'>دي الجلسة بتمشي إزاي 👇</div>" },
+    { "bg": "light", "body": "<div class='num' style='margin:0 auto'>1</div><div class='h1' style='font-size:96px'>تختار الدرس<br/><span class='accent'>اللي واقف معاك</span></div><div class='lead muted'>مش المادة كلها</div>" },
+    { "bg": "light", "body": "<div class='num' style='margin:0 auto'>2</div><div class='h1' style='font-size:96px'>تأكيد على<br/><span class='accent'>واتساب</span></div><div class='lead muted'>وتذكير قبل الجلسة</div>" },
+    { "bg": "light", "body": "<div class='num' style='margin:0 auto'>3</div><div class='h1' style='font-size:96px'>تدخل من<br/><span class='accent'>موبايلك</span></div><div class='lead muted'>من غير مواصلات ولا سنتر</div>" },
+    { "bg": "blue", "body": "<div class='num' style='margin:0 auto'>4</div><div class='h1' style='font-size:96px'>تسأل لحد<br/>ما <span class='yellow'>تفهم</span></div><div class='lead'>الجلسة كلها على الجزئية دي</div>" },
+    { "bg": "light", "logo": "center", "body": "<div class='h2'>جرعتك المركزة من الفهم</div><div><span class='pill'>تابع دروس Dose</span></div>" }
+   ]
+  },
+  {
+   "file": "dose-w03-story-poll.png", "size": "story", "bg": "navy", "logo": "top",
+   "body": "<div class='h1' style='text-align:center;font-size:88px'>بتفهم أكتر من<br/><span class='yellow'>فيديو مسجّل</span><br/>ولا <span class='yellow'>مدرس تسأله</span>؟</div><div class='lead' style='text-align:center'>صوّت 👇</div>",
+   "sticker": "مكان ملصق الاستطلاع"
+  },
+  {
+   "file": "dose-w03-d29.png", "size": "post", "bg": "yellow", "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>قبل مراجعة<br/>نص السنة…</div><div class='h2' style='font-size:58px'>إيه الدرس اللي<br/>عاوز تقفله الأول؟</div><div class='lead'>اكتب المادة والدرس في الكومنتات 👇</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w03-d29-link.png", "size": "link", "bg": "yellow", "tag": "both",
+   "body": "<div class='h1' style='font-size:72px'>قبل مراجعة نص السنة: إيه الدرس اللي عاوز تقفله الأول؟</div><div class='lead' style='font-size:36px'>اكتب المادة والدرس في الكومنتات 👇</div>"
+  },
+  {
+   "file": "dose-w03-carousel-1.png", "size": "post", "bg": "blue", "tag": "prep",
+   "body": "<div class='lead'>تالتة إعدادي؟</div><div class='h1' style='font-size:100px'>ابدأ مراجعة<br/><span class='yellow'>الترم</span> من دلوقتي</div><div class='lead'>خطة في 5 خطوات</div>",
+   "footer": "اسحب ←"
+  },
+  {
+   "file": "dose-w03-carousel-2.png", "size": "post", "bg": "light", "counter": "1 / 5",
+   "body": "<div class='num'>1</div><div class='h1'>اكتب دروس<br/>كل مادة</div><div class='lead muted'>ورقة واحدة لكل مادة —<br/>كل الدروس اللي في الترم</div>"
+  },
+  {
+   "file": "dose-w03-carousel-3.png", "size": "post", "bg": "light", "counter": "2 / 5",
+   "body": "<div class='num'>2</div><div class='h1'>لوّن كل درس</div><div class='checks'><div>🟢 فاهمه</div><div>🟡 نص نص</div><div>🔴 واقف معايا</div></div>"
+  },
+  {
+   "file": "dose-w03-carousel-4.png", "size": "post", "bg": "light", "counter": "3 / 5",
+   "body": "<div class='num'>3</div><div class='h1'>ابدأ <span class='accent'>بالأحمر</span></div><div class='lead muted'>في أول المذاكرة وانت لسه مركّز —<br/>مش في آخر اليوم</div>"
+  },
+  {
+   "file": "dose-w03-carousel-5.png", "size": "post", "bg": "light", "counter": "4 / 5",
+   "body": "<div class='num'>4</div><div class='h1'>امتحان كامل<br/>كل أسبوع</div><div class='lead muted'>بالوقت، من امتحانات السنين اللي فاتت —<br/>وصحّحه بنفسك</div>"
+  },
+  {
+   "file": "dose-w03-carousel-6.png", "size": "post", "bg": "light", "counter": "5 / 5",
+   "body": "<div class='num'>5</div><div class='h1'>كراسة<br/><span class='accent'>الغلطات</span></div><div class='lead muted'>كل غلطة تكتبها وتكتب صحّها —<br/>وتقراها قبل الامتحان</div>"
+  },
+  {
+   "file": "dose-w03-carousel-7.png", "size": "post", "bg": "navy", "logo": "center",
+   "body": "<div class='h1' style='font-size:84px'>الدرس الأحمر<br/><span class='yellow'>مش لازم يوقفك</span></div><div class='lead'>احفظ الخطة وابعتها لصاحبك 🔖</div><div><span class='pill'>تابع دروس Dose</span></div>"
+  },
+  {
+   "file": "dose-w03-story-question.png", "size": "story", "bg": "blue", "logo": "top",
+   "body": "<div class='h1' style='text-align:center;font-size:92px'>أنهي درس<br/><span class='yellow'>واقف معاك</span>؟</div><div class='lead' style='text-align:center'>اكتب الصف والمادة والدرس —<br/>هنجهّز له ملخص</div>",
+   "sticker": "مكان ملصق الأسئلة"
+  },
+  {
+   "file": "dose-w03-d01.png", "size": "post", "bg": "light", "tag": "both",
+   "body": "<div class='h1' style='font-size:88px'>المراجعة<br/><span class='accent'>أسئلة</span> مش قراية</div><div class='lead muted'>قفل الكتاب واسأل نفسك:</div><div class='checks'><div>إيه أهم 3 أفكار في الدرس؟</div><div>أقدر أحل مسألة من غير ما أبص؟</div><div>اللي نسيته ارجعله بس</div></div><div class='lead muted'>احفظ البوست 🔖</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w03-d01-link.png", "size": "link", "bg": "light", "tag": "both",
+   "body": "<div class='h1' style='font-size:78px'>المراجعة <span class='accent'>أسئلة</span> مش قراية</div><div class='lead muted' style='font-size:36px'>قفل الكتاب واسأل نفسك — واللي نسيته ارجعله بس</div>"
+  },
+  {
+   "file": "dose-w03-parents.png", "size": "post", "bg": "light", "tag": "parents",
+   "body": "<div class='h2' style='font-size:60px'>إزاي تعرف ابنك<br/><span class='accent'>واقف في أنهي درس</span>؟</div><div class='box' style='display:grid;gap:14px'><div class='lead'>١. «اشرحلي آخر درس خدته»</div><div class='lead'>٢. «إيه أصعب مسألة في الواجب؟»</div><div class='lead'>٣. «لو هتعيد درس واحد، هتعيد إيه؟»</div></div><div class='lead muted'>الإجابة بتقولك الدرس — مش المادة كلها</div>",
+   "footer": "دروس Dose — ادفع على قد اللي محتاجه"
+  },
+  {
+   "file": "dose-w03-parents-link.png", "size": "link", "bg": "light", "tag": "parents",
+   "body": "<div class='h1' style='font-size:70px'>إزاي تعرف ابنك <span class='accent'>واقف في أنهي درس</span>؟</div><div class='lead muted' style='font-size:34px'>3 أسئلة تسألهاله الليلة</div>"
+  },
+  {
+   "file": "dose-w03-d03.png", "size": "post", "bg": "navy", "tag": "both",
+   "body": "<div class='h1' style='font-size:84px'>المراجعة مع<br/><span class='yellow'>صحابك</span> أسهل</div><div class='checks'><div>كل واحد ياخد درس</div><div>يشرحه للباقيين في 10 دقايق</div><div>والباقيين يسألوه</div></div><div class='lead'>منشن صاحبك اللي هتراجعوا سوا 👇</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w03-d03-link.png", "size": "link", "bg": "navy", "tag": "both",
+   "body": "<div class='h1' style='font-size:76px'>المراجعة مع <span class='yellow'>صحابك</span> أسهل</div><div class='lead' style='font-size:34px'>كل واحد يشرح درس للباقيين في 10 دقايق</div>"
+  },
+  {
+   "file": "dose-w03-story-quiz.png", "size": "story", "bg": "yellow", "logo": "top", "tagText": "تالتة إعدادي",
+   "body": "<div class='h2' style='text-align:center'>سؤال سريع ⏱️</div><div class='h1' style='text-align:center;font-size:120px'>٥س − ٥ = ١٥</div><div class='h2' style='text-align:center'>س = ؟</div>",
+   "sticker": "مكان ملصق الكويز"
+  },
+  {
+   "file": "dose-w03-story-quiz-answer.png", "size": "story", "bg": "light", "logo": "top",
+   "body": "<div class='h2' style='text-align:center'>الحل ✅</div><div class='h1' style='text-align:center;font-size:88px'>٥س = ١٥ + ٥ = ٢٠</div><div class='h1' style='text-align:center;font-size:120px'>س = <span class='accent'>٤</span></div><div class='lead muted' style='text-align:center'>نقلنا الـ ٥ للناحية التانية بإشارة عكسها</div>"
+  },
+  {
+   "file": "dose-w03-d04.png", "size": "post", "bg": "blue", "tag": "both",
+   "body": "<div class='h1' style='font-size:96px'>الدرس اللي<br/>واقف معاك</div><div class='h1' style='font-size:96px'><span class='yellow'>مش لازم<br/>يوقفك</span></div><div class='lead'>اكتب الدرس ده في الكومنت 👇<br/>وأكتر درس يتكتب هنعمله ملخص</div>",
+   "footer": "جرعتك المركزة من الفهم"
+  },
+  {
+   "file": "dose-w03-d04-link.png", "size": "link", "bg": "blue", "tag": "both",
+   "body": "<div class='h1' style='font-size:80px'>الدرس اللي واقف معاك <span class='yellow'>مش لازم يوقفك</span></div><div class='lead' style='font-size:34px'>اكتبه في الكومنت — وأكتر درس يتكتب هنعمله ملخص</div>"
+  },
+  {
+   "file": "dose-w03-sheet-1.png", "size": "post", "bg": "navy", "tag": "sec", "counter": "1 / 3",
+   "body": "<div class='lead'>ورقة ليلة الامتحان 📌</div><div class='h1' style='font-size:112px'>قوانين<br/><span class='yellow'>نيوتن</span> التلاتة</div><div class='lead'>في صفحة واحدة</div><div><span class='pill'>احفظها واسحب ←</span></div>"
+  },
+  {
+   "file": "dose-w03-sheet-2.png", "size": "post", "bg": "light", "tag": "sec", "counter": "2 / 3",
+   "body": "<div class='box' style='display:grid;gap:6px;padding:26px 36px'><div class='h2' style='font-size:46px'><span class='accent'>الأول</span> — القصور الذاتي</div><div class='lead' style='font-size:34px'>الجسم يفضل ساكن أو ماشي بسرعة ثابتة في خط مستقيم، طول ما محصلة القوى عليه = صفر</div></div><div class='box' style='display:grid;gap:6px;padding:26px 36px'><div class='h2' style='font-size:46px'><span class='accent'>التاني</span> — القوة والعجلة</div><div class='lead' style='font-size:34px'>محصلة القوى = الكتلة × العجلة</div><div class='lead ltr' style='font-size:40px;font-weight:800;text-align:center'>ΣF = m a</div></div><div class='box' style='display:grid;gap:6px;padding:26px 36px'><div class='h2' style='font-size:46px'><span class='accent'>التالت</span> — الفعل ورد الفعل</div><div class='lead' style='font-size:34px'>لكل فعل رد فعل مساوي له في المقدار ومضاد له في الاتجاه — وبيأثروا على جسمين مختلفين</div></div>"
+  },
+  {
+   "file": "dose-w03-sheet-3.png", "size": "post", "bg": "light", "tag": "sec", "counter": "3 / 3",
+   "body": "<div class='h1' style='font-size:80px'>3 غلطات<br/><span class='accent'>بتضيّع درجات</span></div><div class='checks' style='font-size:38px'><div>الفعل ورد الفعل مابيلغوش بعض — كل واحد على جسم</div><div>الكتلة بالكيلوجرام والعجلة بـ <span class='ltr'>m/s²</span> قبل ما تعوّض</div><div>سرعة ثابتة يعني محصلة القوى = صفر — مش إن مفيش قوى خالص</div></div><div class='lead muted'>احفظ الورقة وابعتها لصاحبك 💙</div>",
+   "footer": "تابع دروس Dose — جرعتك المركزة من الفهم"
+  }
+ ]
+}

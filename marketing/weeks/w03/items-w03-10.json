@@ -1,0 +1,32 @@
+{
+ "week": "w03",
+ "order": 10,
+ "day": "الخميس",
+ "date": "3 ديسمبر",
+ "time": "9 م",
+ "platforms": [
+  "ستوري إنستجرام",
+  "ستوري فيسبوك"
+ ],
+ "format": "ستوري (2)",
+ "audience": "prep",
+ "title": "ستوري كويز تالتة إعدادي: ٥س − ٥ = ١٥ + الحل",
+ "brief": "سؤال بسيط مفيهوش خلاف (س = ٤، اتراجع: ٥×٤ − ٥ = ١٥). ستوري الحل بعدها بساعة أو تاني يوم الصبح.",
+ "caption": "",
+ "howTo": "الستوري الأولى الخميس 9 م مع ملصق Quiz: ٢ / ٤ / ٥ — علّم ٤ صح. ستوري الحل بعدها بساعة.",
+ "assets": [
+  {
+   "url": "/_blob/6afa8ee7198c52d95149db405ec8be20",
+   "name": "dose-w03-story-quiz.png",
+   "kind": "image"
+  },
+  {
+   "url": "/_blob/20de8462ec29fece9278a520f9bee250",
+   "name": "dose-w03-story-quiz-answer.png",
+   "kind": "image"
+  }
+ ],
+ "role": "designer",
+ "status": "review",
+ "updatedAt": "2026-11-26T15:00:00Z"
+}
