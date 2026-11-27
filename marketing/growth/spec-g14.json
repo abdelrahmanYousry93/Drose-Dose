@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g16-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>ذاكرت الدرس كويس…</div><div class='h1' style='font-size:96px'>وبعد أسبوع<br/><span class='yellow'>اتمسح</span> من دماغك؟ 🫠</div>" },
+        { "bg": "light", "body": "<div class='lead muted'>جرّب قاعدة</div><div class='h1' style='font-size:130px'><span class='accent'>١ - ٣ - ٧</span></div><div class='lead muted' style='margin-top:20px'>نفس الدرس… ٣ مراجعات قصيرة</div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='h1' style='font-size:76px;margin-top:30px'>بعد <span class='accent'>يوم واحد</span><br/>راجعه بسرعة</div><div class='lead muted' style='margin-top:20px'>ربع ساعة كفاية</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٣</div><div class='h1' style='font-size:76px;margin-top:30px'>بعد <span class='yellow'>٣ أيام</span><br/>وبعد <span class='yellow'>٧ أيام</span></div><div class='lead' style='margin-top:20px'>حل عليه من غير ما تبص<br/>في الكتاب</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه 📌 لمراجعة نص السنة<br/>وابعته لصاحبك اللي بينسى</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
