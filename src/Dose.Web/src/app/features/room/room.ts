@@ -154,7 +154,8 @@ interface ChatLine { from: string; text: string; host: boolean; at: number }
     .empty{color:#9fb0e0;padding:20px;text-align:center}
     .fs{position:absolute;top:10px;inset-inline-end:10px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;font-size:1.1rem;cursor:pointer;z-index:2}
     .fs small{font-size:.75rem}
-    .stage:fullscreen{width:100vw;height:100vh} .stage:fullscreen video{max-height:100vh;height:100vh}
+    .stage:fullscreen{width:100vw;height:100vh;display:block} .stage:fullscreen video{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:contain}
+    .stage:-webkit-full-screen{width:100vw;height:100vh;display:block} .stage:-webkit-full-screen video{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:contain}
     .side{border-inline-start:1px solid #1d2856;display:flex;flex-direction:column;min-height:0}
     .tabs{display:flex} .tabs button{flex:1;background:none;border:0;color:#9fb0e0;padding:10px;font:inherit;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
     .tabs button.on{color:#fff;border-color:#FFC30A} .tabs i{font-style:normal;background:#e5484d;color:#fff;border-radius:99px;padding:0 7px;margin-inline-start:4px}
@@ -315,7 +316,8 @@ export class RoomPage implements OnDestroy {
       if (this.roleOf(p) !== 'host') continue;
       const screen = p.getTrackPublication(Track.Source.ScreenShare);
       const cam = p.getTrackPublication(Track.Source.Camera);
-      const pick = (screen?.videoTrack && !screen.isMuted ? screen.videoTrack : null) ?? (cam?.videoTrack && !cam.isMuted && p !== room.localParticipant ? cam.videoTrack : null);
+      // The teacher sees their own camera big too (e.g. writing on paper), not only the students.
+      const pick = (screen?.videoTrack && !screen.isMuted ? screen.videoTrack : null) ?? (cam?.videoTrack && !cam.isMuted ? cam.videoTrack : null);
       if (pick && (!best || p.getTrackPublication(Track.Source.ScreenShare)?.videoTrack === pick)) best = pick;
     }
     if (best !== this.stageTrack) {
