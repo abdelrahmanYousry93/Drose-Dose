@@ -1,0 +1,12 @@
+{
+  "pieces": [
+    { "file": "dose-g17-reel.mp4", "reel": true, "secondsPerScene": 2.8,
+      "scenes": [
+        { "bg": "navy", "body": "<div class='lead' style='opacity:.8'>قول كده بدل كده 👇</div><div class='h1' style='font-size:92px'>بطّل تقول:<br/><span class='yellow'>هذاكر كتير<br/>النهارده</span></div>" },
+        { "bg": "light", "body": "<div class='num'>١</div><div class='lead muted' style='margin-top:30px'>بدل: هذاكر فيزيا النهارده</div><div class='h1' style='font-size:76px;margin-top:10px'>قول: هحل <span class='accent'>١٠ مسائل</span><br/>من ٥ لـ ٦</div>" },
+        { "bg": "blue", "body": "<div class='num' style='background:#FFC30A;color:#0B1F6B'>٢</div><div class='lead' style='margin-top:30px'>بدل: هراجع المنهج كله</div><div class='h1' style='font-size:76px;margin-top:10px'>قول: هراجع <span class='yellow'>درسين</span><br/>وأحل عليهم</div>" },
+        { "bg": "light", "body": "<div class='h2'>الهدف الصغير الواضح<br/><span class='accent'>بيتعمل</span>…</div><div class='h2 muted' style='margin-top:20px'>والهدف الكبير المطاط<br/>بيتأجل لبكرة 😅</div>" },
+        { "bg": "light", "logo": "center", "body": "<div class='h2'>احفظه 📌 لمراجعة نص السنة<br/>وابعته لصاحبك اللي بيأجّل</div><div class='lead muted'>وتابع دروس Dose</div>" }
+      ] }
+  ]
+}
